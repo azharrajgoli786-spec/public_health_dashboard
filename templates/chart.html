@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Health Chart</title>
+    <link rel="stylesheet" href="/static/styles.css?v=3">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Compare reported cases across Indian states.">
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <nav aria-label="Primary">
+        <a href="/"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg> Home</a>
+        <a href="/states"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> States</a>
+        <a href="/live_search"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg> Search</a>
+        <a class="active" href="/chart" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 17v-5M12 17V7M17 17v-8"/></svg> Chart</a>
+        <a href="/about"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg> About</a>
+    </nav>
+
+    <div class="container" id="main">
+        <div class="card">
+            <h2 style="text-align: center;">State-wise Disease Cases</h2>
+            <p style="text-align: center; margin-bottom: 1rem;">
+                Ranked highest to lowest. With {{ health_data|length }} states, use the table for exact values — the chart is a visual aid.
+            </p>
+
+            <div class="chart-container" style="height:560px;">
+                <canvas id="casesChart" data-health-data='{{ health_data | tojson }}' role="img" aria-label="Horizontal bar chart of reported cases by state, sorted descending"></canvas>
+            </div>
+
+            <script>
+                const healthData = JSON.parse(document.getElementById('casesChart').dataset.healthData);
+                const entries = Object.values(healthData).sort((a, b) => b.cases - a.cases);
+                const stateLabels = entries.map(info => info.display);
+                const stateCases = entries.map(info => info.cases);
+
+                if (typeof Chart === 'undefined') {
+                    document.querySelector('.chart-container').innerHTML = '<p class="chart-error">The chart library could not load. The data table below still has all values.</p>';
+                } else {
+                    new Chart(document.getElementById('casesChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: stateLabels,
+                            datasets: [{
+                                label: 'Reported Cases',
+                                data: stateCases,
+                                backgroundColor: 'rgba(8, 145, 178, 0.7)',
+                                borderColor: 'rgba(8, 145, 178, 1)',
+                                borderWidth: 1,
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            indexAxis: 'y',
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { display: true } },
+                            scales: { x: { beginAtZero: true } }
+                        }
+                    });
+                }
+            </script>
+
+            <h3>All states ranked</h3>
+            <table class="data-table">
+                <caption class="sr-only">Reported cases by state, sorted descending</caption>
+                <thead><tr><th scope="col">Rank</th><th scope="col">State</th><th scope="col">Cases</th><th scope="col">Diseases</th></tr></thead>
+                <tbody>
+                    {% for info in health_data.values()|sort(attribute='cases', reverse=True) %}
+                    <tr><td>{{ loop.index }}</td><td>{{ info.display }}</td><td><strong>{{ info.cases }}</strong></td><td>{{ info.diseases }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="chart-summary">
+                <h4>Key Insights</h4>
+                <ul>
+                    <li>Hover or keyboard-focus bars to see exact case numbers; the table lists every value.</li>
+                    <li>Compare disease burden across states to spot outliers.</li>
+                    <li>Identify regions needing additional healthcare resources.</li>
+                    <li>Use search to drill down into district-level data.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <p><strong>Public Health Dashboard</strong> <span class="accent">•</span> Transparent disease tracking for India</p>
+        <p>Developed by <strong>Mohammadazharuddin Rajgoli</strong></p>
+    </footer>
+</body>
+
+</html>

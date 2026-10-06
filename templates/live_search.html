@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Live Search - Health Dashboard</title>
+    <link rel="stylesheet" href="/static/styles.css?v=3">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Search disease data by Indian state.">
+</head>
+
+<body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <nav aria-label="Primary">
+        <a href="/"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg> Home</a>
+        <a href="/states"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> States</a>
+        <a class="active" href="/live_search" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg> Search</a>
+        <a href="/chart"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 17v-5M12 17V7M17 17v-8"/></svg> Chart</a>
+        <a href="/about"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg> About</a>
+    </nav>
+
+    <div class="container" id="main">
+        <div class="card">
+            <h2 style="text-align: center;">Search Health Data by State</h2>
+            <p style="text-align: center; margin-bottom: 2rem;">Find disease information for any Indian state</p>
+
+            <form method="POST" id="searchForm" style="text-align: center; margin-bottom: 1rem;" role="search" aria-label="State search">
+                <label class="sr-only" for="searchInput">State name</label>
+                <input type="text" id="searchInput" autocomplete="off" name="search" list="stateList" placeholder="Enter state name (e.g., Karnataka)" class="search-input" value="{{ query if query else '' }}" required aria-describedby="searchHint">
+                <datalist id="stateList">
+                    {% for key, info in health_data.items() if health_data is defined %}
+                    <option value="{{ info.display }}"></option>
+                    {% endfor %}
+                </datalist>
+                <div id="searchHint" class="sr-only">Type at least 2 letters. Partial names like Kar or Uttar also match.</div>
+                <div><button type="submit" class="button" style="margin-left: 0;">Search</button></div>
+            </form>
+
+            <div class="suggestion-list" style="justify-content: center;">
+                <span style="color: var(--muted-foreground); font-weight: 600;">Quick Search:</span>
+                <button type="button" class="suggestion-button" onclick="fillAndSubmit('Karnataka')">Karnataka</button>
+                <button type="button" class="suggestion-button" onclick="fillAndSubmit('Maharashtra')">Maharashtra</button>
+                <button type="button" class="suggestion-button" onclick="fillAndSubmit('Delhi')">Delhi</button>
+                <button type="button" class="suggestion-button" onclick="fillAndSubmit('Kerala')">Kerala</button>
+                <button type="button" class="suggestion-button" onclick="fillAndSubmit('Uttar Pradesh')">Uttar Pradesh</button>
+            </div>
+
+            <div id="liveRegion" class="sr-only" aria-live="polite"></div>
+
+            {% if results %}
+            <p style="margin-top:2rem;">{{ results|length }} result{{ 's' if results|length != 1 }} for <strong>"{{ query }}"</strong></p>
+            {% for key, display, result in results %}
+            <section class="result-card" aria-label="Result for {{ display }}">
+                <h3 style="margin-top: 0;">{{ display }}</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                    <div>
+                        <span style="font-size: 0.85rem; font-weight: 700;">DISEASES</span>
+                        <p style="margin: 0.25rem 0 0 0; font-weight: 600;">{{ result.diseases }}</p>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.85rem; font-weight: 700;">TOTAL CASES</span>
+                        <p style="margin: 0.25rem 0 0 0; font-size: 1.75rem; font-weight: 700;">{{ result.cases }}</p>
+                    </div>
+                </div>
+
+                <h4>Disease-wise Breakdown</h4>
+                <p style="font-size:0.85rem;">Includes legacy surveillance (COVID-19, Influenza, Tuberculosis) in addition to CSV cases.</p>
+                <table class="data-table">
+                    <thead><tr><th scope="col">Disease</th><th scope="col">Cases</th></tr></thead>
+                    <tbody>
+                        {% for disease, c in result.disease_breakdown.items() %}
+                        <tr><td>{{ disease }}</td><td><strong>{{ c }}</strong></td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <h4>District-wise Breakdown</h4>
+                <div class="chart-container" style="height:320px;">
+                    <canvas id="districtChart-{{ loop.index }}" data-districts='{{ result.districts | tojson }}' role="img" aria-label="Bar chart of district cases for {{ display }}"></canvas>
+                </div>
+                <details>
+                    <summary>View {{ display }} district data as table</summary>
+                    <table class="data-table">
+                        <thead><tr><th scope="col">District</th><th scope="col">Cases</th></tr></thead>
+                        <tbody>
+                            {% for d, c in result.districts.items() %}
+                            <tr><td>{{ d }}</td><td>{{ c }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </details>
+            </section>
+            {% endfor %}
+
+            <script>
+                document.querySelectorAll('canvas[data-districts]').forEach((el) => {
+                    let districtData = {};
+                    try { districtData = JSON.parse(el.dataset.districts); }
+                    catch (e) { el.parentElement.innerHTML = '<p class="chart-error">Could not parse district data.</p>'; return; }
+                    if (typeof Chart === 'undefined') {
+                        el.parentElement.innerHTML = '<p class="chart-error">The chart library could not load. The data table below still has all values.</p>';
+                        return;
+                    }
+                    new Chart(el, {
+                        type: 'bar',
+                        data: {
+                            labels: Object.keys(districtData),
+                            datasets: [{
+                                label: 'Reported Cases',
+                                data: Object.values(districtData),
+                                backgroundColor: 'rgba(8, 145, 178, 0.7)',
+                                borderColor: 'rgba(8, 145, 178, 1)',
+                                borderWidth: 2, borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: { legend: { display: true } },
+                            scales: { y: { beginAtZero: true } }
+                        }
+                    });
+                });
+                document.getElementById('liveRegion').textContent = '{{ results|length }} results found.';
+            </script>
+
+            {% elif query %}
+            <div class="no-result" role="alert">
+                <p>No data found for "<strong>{{ query }}</strong>"</p>
+                <p style="font-size: 0.95rem; margin-top: 0.5rem;">
+                    Try searching for Karnataka, Maharashtra, Delhi, Kerala, or Uttar Pradesh instead.
+                </p>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <script>
+        function fillAndSubmit(val) {
+            const input = document.getElementById('searchInput');
+            input.value = val;
+            input.focus();
+            setTimeout(() => document.getElementById('searchForm').submit(), 120);
+        }
+    </script>
+
+    <footer class="site-footer">
+        <p><strong>Public Health Dashboard</strong> <span class="accent">•</span> Transparent disease tracking for India</p>
+        <p>Developed by <strong>Mohammadazharuddin Rajgoli</strong></p>
+    </footer>
+</body>
+
+</html>
