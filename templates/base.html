@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Public Health Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{% block meta %}Disease surveillance and health information for India.{% endblock %}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a class="brand" href="/" aria-label="Public Health Dashboard home">
+                <span class="brand-mark" aria-hidden="true">+</span>
+                <span>Public Health Dashboard<small>India &bull; Surveillance &amp; Info</small></span>
+            </a>
+            <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">&#9776;</button>
+            <nav aria-label="Primary">
+                <ul class="nav-links" id="primaryNav">
+                    <li><a href="/" class="{% if active=='home' %}active{% endif %}" {% if active=='home' %}aria-current="page"{% endif %}>Home</a></li>
+                    <li><a href="/states" class="{% if active=='states' %}active{% endif %}" {% if active=='states' %}aria-current="page"{% endif %}>States</a></li>
+                    <li><a href="/diseases" class="{% if active=='diseases' %}active{% endif %}" {% if active=='diseases' %}aria-current="page"{% endif %}>Diseases</a></li>
+                    <li><a href="/analytics" class="{% if active=='analytics' %}active{% endif %}" {% if active=='analytics' %}aria-current="page"{% endif %}>Analytics</a></li>
+                    <li><a href="/live_search" class="{% if active=='search' %}active{% endif %}" {% if active=='search' %}aria-current="page"{% endif %}>Search</a></li>
+                    <li><a href="/about" class="{% if active=='about' %}active{% endif %}" {% if active=='about' %}aria-current="page"{% endif %}>About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container" id="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer" aria-label="Footer">
+        <div class="footer-inner">
+            <div>
+                <h3>Public Health Dashboard</h3>
+                <p>State-level disease surveillance with district drill-downs, plus plain-language disease information for India.</p>
+                <p>Data source: <strong>{{ site.source_label }}</strong> &mdash; {{ site.source_detail }}</p>
+            </div>
+            <div>
+                <h3>Data freshness</h3>
+                <ul>
+                    <li>Surveillance data updated: <strong>{{ site.surveillance_updated or 'Date not available' }}</strong></li>
+                    <li>Health library updated: <strong>{{ site.library_updated or 'Date not available' }}</strong></li>
+                    <li>Case counts come from the project dataset only; the disease library is educational and carries no case counts.</li>
+                </ul>
+            </div>
+            <div>
+                <h3>Explore</h3>
+                <ul>
+                    <li><a href="/states">States table</a></li>
+                    <li><a href="/diseases">Diseases library</a></li>
+                    <li><a href="/analytics">Analytics</a></li>
+                    <li><a href="/about">About this project</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="disclaimer" role="note" aria-label="Medical disclaimer">
+            <p><strong>Medical disclaimer:</strong> Disease pages are general educational information based on WHO, MoHFW, and NCDC public guidance. They do not replace consultation with a qualified healthcare professional. No prescription medicines or dosages are listed. In an emergency call <strong>108 / 102</strong> or go to the nearest emergency department.</p>
+        </div>
+        <div class="footer-bottom">
+            <span>Developed by <strong>Mohammadazharuddin Rajgoli</strong></span>
+            <span>Transparent disease tracking for India</span>
+        </div>
+    </footer>
+    <script>
+    (function () {
+        var btn = document.getElementById('navToggle');
+        var nav = document.getElementById('primaryNav');
+        if (!btn || !nav) return;
+        btn.addEventListener('click', function () {
+            var open = nav.classList.toggle('open');
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        });
+    })();
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

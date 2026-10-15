@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Page not found (404){% endblock %}
+{% block meta %}The requested page could not be found.{% endblock %}
+{% block content %}
+<section class="page-head" aria-labelledby="pageTitle">
+    <span class="eyebrow">Error 404</span>
+    <h1 id="pageTitle">Page not found</h1>
+    <p class="lead">The page you asked for does not exist or was moved.</p>
+</section>
+<div class="card">
+    <div style="display:flex; flex-wrap:wrap; gap:0.6rem;">
+        <a class="button" href="/">Go to home</a>
+        <a class="button secondary" href="/states">Browse states</a>
+        <a class="button secondary" href="/diseases">Open disease library</a>
+    </div>
+</div>
+{% endblock %}

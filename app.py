@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, abort
 import csv
+import datetime
 import os
 import re
+import diseases_data
 
 app = Flask(__name__)
 
@@ -203,6 +205,35 @@ def load_health_data():
 health_data = load_health_data()
 
 
+def _file_date_label(path):
+    """Honest last-updated label from a file's modification time.
+
+    Returns a YYYY-MM-DD string, or None when the file is missing,
+    so templates can show 'Date not available' instead of a guess.
+    """
+    try:
+        ts = os.path.getmtime(path)
+    except OSError:
+        return None
+    return datetime.datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
+
+
+def site_info():
+    return {
+        "source_label": DATA_SOURCE["label"],
+        "source_detail": DATA_SOURCE["detail"],
+        "surveillance_updated": _file_date_label(CSV_PATH),
+        "library_updated": _file_date_label(
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "diseases_data.py")
+        ),
+    }
+
+
+@app.context_processor
+def inject_site():
+    return {"site": site_info()}
+
+
 def get_stats():
     total_states = len(health_data)
     total_districts = sum(len(v["districts"]) for v in health_data.values())
@@ -225,12 +256,13 @@ def get_stats():
 
 @app.route("/")
 def home():
-    return render_template("index.html", stats=get_stats())
+    return render_template("index.html", active="home", stats=get_stats(),
+                           library_count=len(diseases_data.DISEASES))
 
 
 @app.route("/states")
 def states():
-    return render_template("states.html", health_data=health_data, source=DATA_SOURCE)
+    return render_template("states.html", active="states", health_data=health_data, source=DATA_SOURCE)
 
 
 @app.route("/live_search", methods=["GET", "POST"])
@@ -253,22 +285,81 @@ def live_search():
             for key, info in health_data.items():
                 if nq in key or key in nq:
                     results.append((key, info["display"], info))
-    return render_template("live_search.html", query=query, results=results, health_data=health_data)
+    return render_template("live_search.html", active="search", query=query, results=results, health_data=health_data)
 
 
 @app.route("/chart")
 def chart():
-    return render_template("chart.html", health_data=health_data)
+    return render_template("chart.html", active="analytics", health_data=health_data,
+                           surveillance_diseases=_surveillance_disease_list())
+
+
+@app.route("/analytics")
+def analytics():
+    """Analytics alias: same view as /chart, kept under the nav label."""
+    return render_template("chart.html", active="analytics", health_data=health_data,
+                           surveillance_diseases=_surveillance_disease_list())
+
+
+def _surveillance_disease_list():
+    names = set()
+    for v in health_data.values():
+        for d in (v.get("disease_breakdown") or {}):
+            names.add(d)
+    return sorted(names)
 
 
 @app.route("/about")
 def about():
-    return render_template("about.html")
+    return render_template("about.html", active="about")
+
+
+@app.route("/diseases")
+def diseases():
+    query = request.args.get("q", request.args.get("search", "")).strip()
+    category = request.args.get("category", "").strip()
+    letter = request.args.get("letter", "").strip().upper()
+    results = diseases_data.search_diseases(query=query, category=category)
+    if letter and len(letter) == 1:
+        results = [d for d in results if d["name"].upper().startswith(letter)]
+    for d in results:
+        d["_transmission"] = diseases_data.transmission_badge(d)
+        d["_vaccine"] = diseases_data.has_vaccine_note(d)
+    return render_template(
+        "diseases.html",
+        active="diseases",
+        diseases=results,
+        categories=diseases_data.CATEGORIES,
+        category_counts=diseases_data.category_counts(),
+        query=query,
+        active_category=category,
+        active_letter=letter,
+        letters=diseases_data.alpha_index(),
+        total_count=len(diseases_data.DISEASES),
+    )
+
+
+@app.route("/diseases/<slug>")
+def disease_detail(slug):
+    disease = diseases_data.get_disease(slug)
+    if not disease:
+        abort(404)
+    # Related: same category, excluding self, up to 3
+    related = [d for d in diseases_data.DISEASES if d["category"] == disease["category"] and d["slug"] != slug][:3]
+    # Previous / Next in library order
+    order = diseases_data.DISEASES
+    idx = next((i for i, d in enumerate(order) if d["slug"] == slug), None)
+    prev_d = order[idx - 1] if idx is not None and idx > 0 else None
+    next_d = order[idx + 1] if idx is not None and idx < len(order) - 1 else None
+    disease["_transmission"] = diseases_data.transmission_badge(disease)
+    disease["_vaccine"] = diseases_data.has_vaccine_note(disease)
+    return render_template("disease_detail.html", active="diseases", disease=disease,
+                           related=related, prev_d=prev_d, next_d=next_d)
 
 
 @app.errorhandler(404)
 def not_found(e):
-    return render_template("about.html"), 404
+    return render_template("404.html", active=""), 404
 
 
 if __name__ == "__main__":

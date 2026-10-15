@@ -1,72 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}Public Health Dashboard — India{% endblock %}
+{% block meta %}Dashboard overview of disease surveillance across Indian states and districts, plus disease information.{% endblock %}
+{% block content %}
+<section class="page-head" aria-labelledby="pageTitle">
+    <span class="eyebrow">India &bull; Surveillance &amp; Information</span>
+    <h1 id="pageTitle">Public Health Dashboard</h1>
+    <p class="lead">State-level disease surveillance with district drill-downs, analytics, and plain-language disease information. Values below are calculated from the current project dataset.</p>
+</section>
 
-<head>
-    <title>Public Health Dashboard</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Transparent disease tracking across Indian states and districts.">
-</head>
-
-<body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <nav aria-label="Primary">
-        <a class="active" href="/" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg> Home</a>
-        <a href="/states"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> States</a>
-        <a href="/live_search"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg> Search</a>
-        <a href="/chart"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 17v-5M12 17V7M17 17v-8"/></svg> Chart</a>
-        <a href="/about"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg> About</a>
-    </nav>
-    <div class="container" id="main">
-        <div class="header">
-            <span class="hero-badge"><span class="dot"></span> Live • India's Health Data Portal</span>
-            <h1>Public Health Dashboard</h1>
-            <p>Real-time disease monitoring with ranked states, district drill-downs, and transparent open data.</p>
+<section aria-label="Key indicators">
+    <div class="kpis">
+        <div class="kpi">
+            <div class="kpi-label">States &amp; UTs tracked</div>
+            <div class="kpi-value">{{ stats.total_states }}</div>
+            <p class="kpi-note">From dataset states list</p>
         </div>
-
-        <div class="card" style="text-align: center;">
-            <h2>Welcome to India's Health Data Portal</h2>
-            <p style="font-size: 1.1rem; line-height: 1.8;">
-                Track disease outbreaks across all Indian states with real-time analytics. Our mission is to provide
-                <b>transparent, accessible, and reliable</b> health information to empower communities and support public health decisions.
-            </p>
-
-            <div class="stats-grid" style="text-align:left;">
-                <div class="stat-box">
-                    <h3>{{ stats.total_states }}</h3>
-                    <p>States Tracked</p>
-                    <span class="trend">All UTs included</span>
-                </div>
-                <div class="stat-box">
-                    <h3>{{ stats.total_districts }}</h3>
-                    <p>Districts Covered</p>
-                    <span class="trend">District drill-down</span>
-                </div>
-                <div class="stat-box">
-                    <h3>{{ stats.total_diseases }}</h3>
-                    <p>Major Diseases</p>
-                    <span class="trend">Dengue • Malaria • Typhoid</span>
-                </div>
-                <div class="stat-box">
-                    <h3>{{ stats.total_cases }}</h3>
-                    <p>Cases Reported</p>
-                    <span class="trend">CSV-verified total</span>
-                </div>
-            </div>
-
-            <h3 style="text-align: center; margin-top: 2rem;">Quick Access</h3>
-            <p style="text-align:center; font-size:0.85rem;">Data source: <strong>{{ stats.source_label }}</strong> — {{ stats.source_detail }}</p>
-            <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 1rem;">
-                <a href="/live_search"><button class="button" type="button">Search by State</button></a>
-                <a href="/states"><button class="button secondary" type="button">View All States</button></a>
-                <a href="/chart"><button class="button secondary" type="button">Compare Data</button></a>
-            </div>
+        <div class="kpi teal">
+            <div class="kpi-label">Districts covered</div>
+            <div class="kpi-value">{{ stats.total_districts }}</div>
+            <p class="kpi-note">Districts with reported rows</p>
+        </div>
+        <div class="kpi">
+            <div class="kpi-label">Diseases in surveillance</div>
+            <div class="kpi-value">{{ stats.total_diseases }}</div>
+            <p class="kpi-note">Distinct names in dataset</p>
+        </div>
+        <div class="kpi teal">
+            <div class="kpi-label">Reported cases</div>
+            <div class="kpi-value">{{ stats.total_cases }}</div>
+            <p class="kpi-note">Sum across all states</p>
         </div>
     </div>
-    <footer class="site-footer">
-        <p><strong>Public Health Dashboard</strong> <span class="accent">•</span> Transparent disease tracking for India</p>
-        <p>Developed by <strong>Mohammadazharuddin Rajgoli</strong></p>
-    </footer>
-</body>
+</section>
 
-</html>
+<div class="card">
+    <h2>Data source</h2>
+    <p class="muted"><strong>{{ stats.source_label }}</strong> &mdash; {{ stats.source_detail }}. Surveillance data updated: <strong>{{ site.surveillance_updated or 'Date not available' }}</strong>.</p>
+    <div style="display:flex; flex-wrap:wrap; gap:0.6rem; margin-top:0.75rem;">
+        <a class="button" href="/states">Browse states table</a>
+        <a class="button secondary" href="/diseases">Open disease library</a>
+        <a class="button secondary" href="/analytics">View analytics</a>
+        <a class="button secondary" href="/live_search">Search a state</a>
+    </div>
+</div>
+
+<div class="card">
+    <h2>What you can do here</h2>
+    <ul style="padding-left:1.25rem; line-height:1.9; color:#334155;">
+        <li><strong>States</strong> &mdash; searchable, sortable table of every state with district-level detail.</li>
+        <li><strong>Diseases</strong> &mdash; {{ library_count }} plain-language guides: causes, symptoms, prevention, care, and when to seek help.</li>
+        <li><strong>Analytics</strong> &mdash; ranked charts with filters for comparing states and diseases.</li>
+    </ul>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}{{ disease.name }} — Diseases Information{% endblock %}
+{% block meta %}{{ disease.short }}{% endblock %}
+{% block content %}
+<section class="page-head teal" aria-labelledby="pageTitle">
+    <span class="eyebrow">{{ disease.category }}</span>
+    <h1 id="pageTitle">{{ disease.name }}</h1>
+    <p class="lead">{{ disease.short }}</p>
+    <div class="meta" style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.6rem;">
+        <span class="badge {% if disease._transmission == 'Non-contagious' %}teal{% elif disease._transmission == 'Vector-borne' %}blue{% else %}neutral{% endif %}">{{ disease._transmission }}</span>
+        {% if disease._vaccine %}<span class="badge blue">Vaccine exists &mdash; ask doctor</span>{% endif %}
+    </div>
+</section>
+
+<nav class="pager" aria-label="Disease navigation">
+    <div>
+        <a class="button secondary" href="/diseases">&larr; All diseases</a>
+        <a class="button secondary" href="/">Home</a>
+    </div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        {% if prev_d %}<a class="button secondary" href="/diseases/{{ prev_d.slug }}" rel="prev">&larr; {{ prev_d.name }}</a>{% endif %}
+        {% if next_d %}<a class="button secondary" href="/diseases/{{ next_d.slug }}" rel="next">{{ next_d.name }} &rarr;</a>{% endif %}
+    </div>
+</nav>
+
+<article>
+    <section class="detail" aria-labelledby="s-overview"><h2 id="s-overview">1. Overview</h2><p>{{ disease.overview }}</p></section>
+
+    <section class="detail" aria-labelledby="s-causes"><h2 id="s-causes">2. Causes</h2>
+        <ul>{% for x in disease.causes %}<li>{{ x }}</li>{% endfor %}</ul>
+    </section>
+
+    <section class="detail" aria-labelledby="s-spread"><h2 id="s-spread">3. How it spreads</h2><p>{{ disease.spreads }}</p></section>
+
+    <section class="detail" aria-labelledby="s-symptoms"><h2 id="s-symptoms">4. Common symptoms</h2>
+        <ul>{% for x in disease.symptoms %}<li>{{ x }}</li>{% endfor %}</ul>
+    </section>
+
+    <section class="detail" aria-labelledby="s-prevention"><h2 id="s-prevention">5. Prevention</h2>
+        <ul>{% for x in disease.prevention %}<li>{{ x }}</li>{% endfor %}</ul>
+    </section>
+
+    <section class="detail" aria-labelledby="s-treatment"><h2 id="s-treatment">6. Treatment and care</h2>
+        <p>{{ disease.treatment }}</p>
+        <p class="muted"><strong>Note:</strong> treatment depends on the exact condition and professional evaluation. No prescription medicines, antibiotics, or dosages are listed here. Do not self-medicate.</p>
+    </section>
+
+    <section class="detail" aria-labelledby="s-visit"><h2 id="s-visit">7. When to visit a doctor</h2>
+        <ul>{% for x in disease.when_to_visit %}<li>{{ x }}</li>{% endfor %}</ul>
+    </section>
+
+    <section class="emergency" role="alert" aria-labelledby="s-emergency"><h2 id="s-emergency">8. Emergency warning signs &mdash; seek immediate care</h2>
+        <ul>{% for x in disease.emergency %}<li>{{ x }}</li>{% endfor %}</ul>
+        <p><strong>In an emergency in India, call 108 / 102 (ambulance) or go to the nearest emergency department immediately.</strong></p>
+    </section>
+
+    <section class="detail" aria-labelledby="s-risk"><h2 id="s-risk">9. High-risk groups (need extra care)</h2>
+        <ul>{% for x in disease.high_risk %}<li>{{ x }}</li>{% endfor %}</ul>
+    </section>
+</article>
+
+{% if related %}
+<section aria-labelledby="relHead">
+    <h2 id="relHead">Related conditions ({{ disease.category }})</h2>
+    <div class="dgrid">
+        {% for r in related %}
+        <article class="dcard" aria-label="{{ r.name }}">
+            <span class="catline">{{ r.category }}</span>
+            <h3><a href="/diseases/{{ r.slug }}">{{ r.name }}</a></h3>
+            <p class="desc">{{ r.short }}</p>
+            <div class="foot"><a href="/diseases/{{ r.slug }}" class="button secondary">View details</a></div>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<nav class="pager" aria-label="Disease navigation bottom">
+    <a class="button secondary" href="/diseases">&larr; Back to diseases</a>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        {% if prev_d %}<a class="button secondary" href="/diseases/{{ prev_d.slug }}" rel="prev">&larr; {{ prev_d.name }}</a>{% endif %}
+        {% if next_d %}<a class="button secondary" href="/diseases/{{ next_d.slug }}" rel="next">{{ next_d.name }} &rarr;</a>{% endif %}
+    </div>
+</nav>
+
+<div class="notice">
+    <strong>Medical disclaimer.</strong> This page is educational only and does not replace consultation with a qualified healthcare professional, based on WHO, MoHFW, and NCDC public guidance.
+</div>
+{% endblock %}

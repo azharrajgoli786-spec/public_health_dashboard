@@ -1,95 +1,229 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}Analytics — Cases Compared Across States{% endblock %}
+{% block meta %}Ranked charts comparing reported disease cases across Indian states, with disease and display filters.{% endblock %}
+{% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>{% endblock %}
+{% block content %}
+<section class="page-head" aria-labelledby="pageTitle">
+    <span class="eyebrow">Analytics &bull; {{ health_data|length }} states &amp; UTs</span>
+    <h1 id="pageTitle">Analytics — cases compared across states</h1>
+    <p class="lead">Ranked highest to lowest from the project dataset. Filter by disease or limit the number of states shown; the table below always matches the chart. Blue = total cases, teal = single-disease view.</p>
+</section>
 
-<head>
-    <title>Health Chart</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Compare reported cases across Indian states.">
-</head>
-
-<body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <nav aria-label="Primary">
-        <a href="/"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg> Home</a>
-        <a href="/states"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> States</a>
-        <a href="/live_search"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg> Search</a>
-        <a class="active" href="/chart" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 17v-5M12 17V7M17 17v-8"/></svg> Chart</a>
-        <a href="/about"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg> About</a>
-    </nav>
-
-    <div class="container" id="main">
-        <div class="card">
-            <h2 style="text-align: center;">State-wise Disease Cases</h2>
-            <p style="text-align: center; margin-bottom: 1rem;">
-                Ranked highest to lowest. With {{ health_data|length }} states, use the table for exact values — the chart is a visual aid.
-            </p>
-
-            <div class="chart-container" style="height:560px;">
-                <canvas id="casesChart" data-health-data='{{ health_data | tojson }}' role="img" aria-label="Horizontal bar chart of reported cases by state, sorted descending"></canvas>
-            </div>
-
-            <script>
-                const healthData = JSON.parse(document.getElementById('casesChart').dataset.healthData);
-                const entries = Object.values(healthData).sort((a, b) => b.cases - a.cases);
-                const stateLabels = entries.map(info => info.display);
-                const stateCases = entries.map(info => info.cases);
-
-                if (typeof Chart === 'undefined') {
-                    document.querySelector('.chart-container').innerHTML = '<p class="chart-error">The chart library could not load. The data table below still has all values.</p>';
-                } else {
-                    new Chart(document.getElementById('casesChart'), {
-                        type: 'bar',
-                        data: {
-                            labels: stateLabels,
-                            datasets: [{
-                                label: 'Reported Cases',
-                                data: stateCases,
-                                backgroundColor: 'rgba(8, 145, 178, 0.7)',
-                                borderColor: 'rgba(8, 145, 178, 1)',
-                                borderWidth: 1,
-                                borderRadius: 6
-                            }]
-                        },
-                        options: {
-                            indexAxis: 'y',
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: { legend: { display: true } },
-                            scales: { x: { beginAtZero: true } }
-                        }
-                    });
-                }
-            </script>
-
-            <h3>All states ranked</h3>
-            <table class="data-table">
-                <caption class="sr-only">Reported cases by state, sorted descending</caption>
-                <thead><tr><th scope="col">Rank</th><th scope="col">State</th><th scope="col">Cases</th><th scope="col">Diseases</th></tr></thead>
-                <tbody>
-                    {% for info in health_data.values()|sort(attribute='cases', reverse=True) %}
-                    <tr><td>{{ loop.index }}</td><td>{{ info.display }}</td><td><strong>{{ info.cases }}</strong></td><td>{{ info.diseases }}</td></tr>
+<div class="card">
+    <form id="chartFilters" onsubmit="return false;" aria-label="Chart filters">
+        <div class="filters">
+            <div class="field">
+                <label class="field-label" for="fDisease">Disease</label>
+                <select class="input" id="fDisease">
+                    <option value="">All diseases (total cases)</option>
+                    {% for d in surveillance_diseases %}
+                    <option value="{{ d }}">{{ d }}</option>
                     {% endfor %}
-                </tbody>
-            </table>
-
-            <div class="chart-summary">
-                <h4>Key Insights</h4>
-                <ul>
-                    <li>Hover or keyboard-focus bars to see exact case numbers; the table lists every value.</li>
-                    <li>Compare disease burden across states to spot outliers.</li>
-                    <li>Identify regions needing additional healthcare resources.</li>
-                    <li>Use search to drill down into district-level data.</li>
-                </ul>
+                </select>
+            </div>
+            <div class="field">
+                <label class="field-label" for="fTop">States shown</label>
+                <select class="input" id="fTop">
+                    <option value="10">Top 10</option>
+                    <option value="15" selected>Top 15</option>
+                    <option value="30">Top 30</option>
+                    <option value="0">All states</option>
+                </select>
+            </div>
+            <div class="field">
+                <label class="field-label" for="fSort">Order</label>
+                <select class="input" id="fSort">
+                    <option value="desc">Highest first</option>
+                    <option value="asc">Lowest first</option>
+                </select>
+            </div>
+            <div class="field" style="align-self:end;">
+                <button type="button" class="button secondary" id="fReset">Reset filters</button>
             </div>
         </div>
+    </form>
+
+    <div class="chart-box">
+        <div class="chart-wrap" id="chartWrap">
+            <canvas id="casesChart" role="img" aria-label="Horizontal bar chart of reported cases by state"></canvas>
+        </div>
+        <p class="legend-note" id="chartNote"></p>
+    </div>
+    <div class="empty" id="chartEmpty" hidden>
+        <p><strong>No data for this selection.</strong></p>
+        <p id="chartEmptyWhy">No state in the dataset reports this disease.</p>
+        <p><button type="button" class="button secondary" id="emptyReset">Show all diseases</button></p>
+    </div>
+    <div class="empty" id="chartLibFail" hidden>
+        <p><strong>The chart could not be drawn.</strong></p>
+        <p id="chartLibWhy">The chart library could not load. The ranked table below still lists every value.</p>
     </div>
 
-    <footer class="site-footer">
-        <p><strong>Public Health Dashboard</strong> <span class="accent">•</span> Transparent disease tracking for India</p>
-        <p>Developed by <strong>Mohammadazharuddin Rajgoli</strong></p>
-    </footer>
-</body>
+    <h2>Ranked table</h2>
+    <p class="muted" id="tableCount" role="status" aria-live="polite"></p>
+    <div class="table-wrap">
+        <table class="data" id="rankTable">
+            <caption>Reported cases by state for the current filter, ranked.</caption>
+            <thead><tr><th scope="col">Rank</th><th scope="col">State</th><th scope="col" class="num">Cases</th><th scope="col">Diseases reported</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
-</html>
+    <div class="notice">
+        <strong>How to read this:</strong> values are dataset case counts (CSV rows plus legacy surveillance estimates where applicable). They show reporting volume, not disease severity or population-adjusted burden.
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script id="health-data" type="application/json">{{ health_data | tojson }}</script>
+<script>
+(function () {
+    var raw = {};
+    try { raw = JSON.parse(document.getElementById('health-data').textContent); }
+    catch (e) { raw = {}; }
+    var entries = Object.keys(raw).map(function (k) { return raw[k]; });
+    var fDisease = document.getElementById('fDisease');
+    var fTop = document.getElementById('fTop');
+    var fSort = document.getElementById('fSort');
+    var note = document.getElementById('chartNote');
+    var emptyBox = document.getElementById('chartEmpty');
+    var emptyWhy = document.getElementById('chartEmptyWhy');
+    var libFail = document.getElementById('chartLibFail');
+    var libWhy = document.getElementById('chartLibWhy');
+    var tableCount = document.getElementById('tableCount');
+    var tbody = document.querySelector('#rankTable tbody');
+    var chart = null;
+
+    function valueFor(e, disease) {
+        if (!disease) return e.cases;
+        var bd = e.disease_breakdown || {};
+        return bd[disease] || 0;
+    }
+    function currentRows() {
+        var d = fDisease.value;
+        var rows = entries.map(function (e) {
+            return { display: e.display, cases: valueFor(e, d), diseases: e.diseases };
+        }).filter(function (r) { return !d || r.cases > 0; });
+        rows.sort(function (a, b) {
+            return fSort.value === 'asc' ? a.cases - b.cases : b.cases - a.cases;
+        });
+        var top = parseInt(fTop.value, 10) || 0;
+        if (top > 0) rows = rows.slice(0, top);
+        return { rows: rows, disease: d };
+    }
+    function renderTable(rows, disease) {
+        tbody.innerHTML = '';
+        rows.forEach(function (r, i) {
+            var tr = document.createElement('tr');
+            var tdR = document.createElement('td'); tdR.textContent = i + 1;
+            var th = document.createElement('th'); th.scope = 'row'; th.textContent = r.display;
+            var tdC = document.createElement('td'); tdC.className = 'num';
+            var strong = document.createElement('strong'); strong.textContent = r.cases; tdC.appendChild(strong);
+            var tdD = document.createElement('td'); tdD.textContent = disease ? disease : r.diseases;
+            tr.appendChild(tdR); tr.appendChild(th); tr.appendChild(tdC); tr.appendChild(tdD);
+            tbody.appendChild(tr);
+        });
+        tableCount.textContent = rows.length + ' states shown' + (disease ? ' for ' + disease : ' (total cases)') + '.';
+    }
+    // Data-label plugin: draw values at the end of each bar (no extra dependency).
+    function dataLabels() {
+        var id = 'inlineDataLabels';
+        try {
+            if (!window.Chart || !window.Chart.registry || typeof window.Chart.registry.getPlugin !== 'function') return;
+            if (window.Chart.registry.getPlugin(id)) return;
+            window.Chart.register({
+                id: id,
+                afterDatasetsDraw: function (c) {
+                    var ctx = c.ctx;
+                    ctx.save();
+                    ctx.font = '600 11px Inter, sans-serif';
+                    ctx.fillStyle = '#0F172A';
+                    c.data.datasets.forEach(function (ds, di) {
+                        var meta = c.getDatasetMeta(di);
+                        meta.data.forEach(function (bar, i) {
+                            var v = ds.data[i];
+                            if (v === null || v === undefined) return;
+                            ctx.fillText(String(v), bar.x + 6, bar.y + 4);
+                        });
+                    });
+                    ctx.restore();
+                }
+            });
+        } catch (e) { /* labels are decorative; never break the chart */ }
+    }
+    function showLibFail(msg) {
+        var canvas = document.getElementById('casesChart');
+        canvas.closest('.chart-box').hidden = true;
+        emptyBox.hidden = true;
+        if (libWhy && msg) libWhy.textContent = msg + ' The ranked table below still lists every value.';
+        libFail.hidden = false;
+    }
+    function renderChart(rows, disease) {
+        var canvas = document.getElementById('casesChart');
+        var box = canvas.closest('.chart-box');
+        var wrap = document.getElementById('chartWrap');
+        if (typeof window.Chart === 'undefined') {
+            showLibFail('The chart library (CDN) could not load. Check your internet connection.');
+            return;
+        }
+        dataLabels();
+        if (rows.length === 0) {
+            box.hidden = true; emptyBox.hidden = false;
+            emptyWhy.textContent = disease
+                ? 'No state in the dataset reports "' + disease + '". Try another disease or reset.'
+                : 'No states available for the current filters.';
+            return;
+        }
+        box.hidden = false; emptyBox.hidden = true; libFail.hidden = true;
+        // Size the wrapper BEFORE creating the chart: with
+        // maintainAspectRatio:false Chart.js fills its parent, and an
+        // unsized parent renders as a zero-height (empty) box.
+        wrap.style.height = Math.max(280, rows.length * 34) + 'px';
+        var color = disease ? 'rgba(14,116,144,0.75)' : 'rgba(30,64,175,0.75)';
+        var border = disease ? 'rgba(14,116,144,1)' : 'rgba(30,64,175,1)';
+        if (chart) chart.destroy();
+        try {
+            chart = new window.Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: rows.map(function (r) { return r.display; }),
+                datasets: [{
+                    label: disease ? disease + ' cases' : 'Reported cases (total)',
+                    data: rows.map(function (r) { return r.cases; }),
+                    backgroundColor: color, borderColor: border,
+                    borderWidth: 1, borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                layout: { padding: { right: 48 } },
+                plugins: { legend: { display: true } },
+                scales: { x: { beginAtZero: true, title: { display: true, text: 'Reported cases' } } }
+            }
+            });
+        } catch (err) {
+            showLibFail('Chart error: ' + (err && err.message ? err.message : err));
+            return;
+        }
+        note.textContent = disease
+            ? 'Showing per-state "' + disease + '" cases (' + rows.length + ' states report it).'
+            : 'Showing total reported cases per state (top ' + rows.length + ').';
+    }
+    function apply() {
+        var res = currentRows();
+        renderTable(res.rows, res.disease);
+        renderChart(res.rows, res.disease);
+    }
+    function reset() {
+        fDisease.value = ''; fTop.value = '15'; fSort.value = 'desc';
+        apply();
+    }
+    [fDisease, fTop, fSort].forEach(function (el) {
+        el.addEventListener('change', apply);
+    });
+    document.getElementById('fReset').addEventListener('click', reset);
+    document.getElementById('emptyReset').addEventListener('click', reset);
+    apply();
+})();
+</script>
+{% endblock %}

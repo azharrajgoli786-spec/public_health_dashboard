@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}Diseases Information &amp; Prevention{% endblock %}
+{% block meta %}Plain-language disease information for India: causes, symptoms, prevention, care, and when to seek medical help.{% endblock %}
+{% block content %}
+<section class="page-head teal" aria-labelledby="pageTitle">
+    <span class="eyebrow">Health library &bull; {{ total_count }} conditions</span>
+    <h1 id="pageTitle">Diseases Information &amp; Prevention</h1>
+    <p class="lead">Simple, reliable guidance on common diseases in India. Open any card for causes, symptoms, prevention, care, and when to see a doctor. Badges describe transmission type only &mdash; they are not severity grades.</p>
+</section>
+
+<div class="card">
+    <form method="GET" action="/diseases" role="search" aria-label="Search diseases">
+        <div class="toolbar" style="grid-template-columns: 2fr 1fr;">
+            <div class="field">
+                <label class="field-label" for="dq">Search diseases</label>
+                <input type="search" id="dq" name="q" class="input" placeholder="Name or symptom keyword, e.g. dengue, cough, joints" value="{{ query }}" autocomplete="off">
+            </div>
+            <div class="field" style="align-self:end; display:flex; gap:0.5rem;">
+                <button type="submit" class="button">Search</button>
+                <a href="/diseases" class="button secondary">Clear</a>
+            </div>
+        </div>
+        {% if active_category %}<input type="hidden" name="category" value="{{ active_category }}">{% endif %}
+    </form>
+
+    <h2 style="margin-top:1rem;">Filter by category</h2>
+    <div class="chips" role="group" aria-label="Category filters">
+        <a href="/diseases{% if query %}?q={{ query }}{% endif %}" class="chip{% if not active_category %} on{% endif %}">All ({{ total_count }})</a>
+        {% for cat in categories %}
+        <a href="/diseases?category={{ cat }}{% if query %}&amp;q={{ query }}{% endif %}{% if active_letter %}&amp;letter={{ active_letter }}{% endif %}" class="chip{% if cat == active_category %} on{% endif %}">{{ cat }} ({{ category_counts[cat] }})</a>
+        {% endfor %}
+    </div>
+
+    <h2>A&ndash;Z index</h2>
+    <div class="az" role="group" aria-label="Alphabetical index">
+        {% if active_letter %}<a href="/diseases?{% if query %}q={{ query }}&amp;{% endif %}{% if active_category %}category={{ active_category }}{% endif %}">All</a>{% else %}<span class="cur" aria-current="true">All</span>{% endif %}
+        {% for L in letters %}
+            {% if L == active_letter %}<span class="cur" aria-current="true">{{ L }}</span>
+            {% else %}<a href="/diseases?letter={{ L }}{% if query %}&amp;q={{ query }}{% endif %}{% if active_category %}&amp;category={{ active_category }}{% endif %}">{{ L }}</a>{% endif %}
+        {% endfor %}
+    </div>
+
+    <p class="muted" style="margin-top:1rem;" role="status">
+        {% if query or active_category or active_letter %}
+            {{ diseases|length }} result{{ 's' if diseases|length != 1 else '' }}
+            {% if query %} for <strong>&ldquo;{{ query }}&rdquo;</strong>{% endif %}
+            {% if active_category %} in <strong>{{ active_category }}</strong>{% endif %}
+            {% if active_letter %} starting with <strong>{{ active_letter }}</strong>{% endif %}
+            &bull; <a href="/diseases">Show all {{ total_count }}</a>
+        {% else %}
+            Showing all <strong>{{ diseases|length }}</strong> conditions.
+        {% endif %}
+    </p>
+
+    {% if diseases %}
+    <div class="dgrid">
+        {% for d in diseases %}
+        <article class="dcard" aria-labelledby="d-{{ d.slug }}">
+            <span class="catline">
+                {% if d.category == 'Infectious Diseases' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+                {% elif d.category == 'Vector-Borne Diseases' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M2 12h20"/><path d="M12 2v20"/><circle cx="12" cy="12" r="3"/></svg>
+                {% elif d.category == 'Waterborne Diseases' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3c3 4 6 7 6 11a6 6 0 0 1-12 0c0-4 3-7 6-11z"/></svg>
+                {% elif d.category == 'Respiratory Diseases' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 14c2-1 2-5 4-5s2 4 4 4 2-4 4-4"/><path d="M3 18h18"/></svg>
+                {% elif d.category == 'Nutritional Diseases' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v18"/><path d="M5 8h14"/><path d="M7 8c0 5 2 9 5 11 3-2 5-6 5-11"/></svg>
+                {% elif d.category == 'Lifestyle Diseases' %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12h4l2-6 4 12 2-6h4"/></svg>
+                {% else %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v18"/><path d="M7 8h10"/></svg>{% endif %}
+                {{ d.category }}
+            </span>
+            <h3 id="d-{{ d.slug }}"><a href="/diseases/{{ d.slug }}">{{ d.name }}</a></h3>
+            <p class="desc">{{ d.short }}</p>
+            <div class="meta">
+                <span class="badge {% if d._transmission == 'Non-contagious' %}teal{% elif d._transmission == 'Vector-borne' %}blue{% else %}neutral{% endif %}">{{ d._transmission }}</span>
+                {% if d._vaccine %}<span class="badge blue">Vaccine exists &mdash; ask doctor</span>{% endif %}
+                <span class="badge neutral">{{ d.high_risk|length }} high-risk groups noted</span>
+            </div>
+            <div class="foot">
+                <a href="/diseases/{{ d.slug }}" class="button secondary">View details</a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty" role="alert">
+        <p><strong>No diseases found{% if query %} for &ldquo;{{ query }}&rdquo;{% endif %}.</strong></p>
+        <p>Try another spelling, a symptom keyword (fever, cough, joints), or <a href="/diseases">browse all {{ total_count }}</a>.</p>
+    </div>
+    {% endif %}
+
+    <div class="notice" style="margin-top:1.5rem;">
+        <strong>Educational information only.</strong> This library does not replace a doctor&rsquo;s advice, and no prescription medicines or dosages are listed. Sources: WHO, MoHFW, and NCDC public guidance. Library updated: <strong>{{ site.library_updated or 'Date not available' }}</strong>.
+    </div>
+</div>
+{% endblock %}

@@ -1,76 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% block title %}About — Public Health Dashboard{% endblock %}
+{% block meta %}About the public health dashboard: mission, data coverage, features, and data sources.{% endblock %}
+{% block content %}
+<section class="page-head" aria-labelledby="pageTitle">
+    <span class="eyebrow">About this project</span>
+    <h1 id="pageTitle">About this project</h1>
+    <p class="lead">Clear, accessible, and reliable health information: surveillance numbers where they exist, and plain-language disease guidance for everyone.</p>
+</section>
 
-<head>
-    <title>About Project</title>
-    <link rel="stylesheet" href="/static/styles.css?v=3">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="About the public health dashboard mission and features.">
-</head>
+<div class="card">
+    <h2>Our mission</h2>
+    <p>Provide <strong>clear, accessible, and reliable</strong> health information for the public — verified dataset numbers presented simply, plus educational disease pages based on WHO, MoHFW, and NCDC public guidance.</p>
+</div>
 
-<body>
-    <a class="skip-link" href="#main">Skip to content</a>
-    <nav aria-label="Primary">
-        <a href="/"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg> Home</a>
-        <a href="/states"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg> States</a>
-        <a href="/live_search"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg> Search</a>
-        <a href="/chart"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 17v-5M12 17V7M17 17v-8"/></svg> Chart</a>
-        <a class="active" href="/about" aria-current="page"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg> About</a>
-    </nav>
+<div class="card">
+    <h2>What we track</h2>
+    <p>State and district surveillance from the project dataset (<strong>{{ site.source_label }}</strong> &mdash; {{ site.source_detail }}), updated <strong>{{ site.surveillance_updated or 'date not available' }}</strong>. The disease library ({{ library_count }} conditions, updated {{ site.library_updated or 'date not available' }}) is educational and carries no case counts.</p>
+</div>
 
-    <div class="container" id="main">
-        <div class="card">
-            <h2 style="text-align: center;">About This Project</h2>
-
-            <div style="margin: 2rem 0;">
-                <h3>Our Mission</h3>
-                <p>
-                    This project is designed to provide <b>clear, accessible, and reliable</b> health information for the public. We collect disease data from different regions, verify it for accuracy, and present it in an easy-to-understand format.
-                </p>
-            </div>
-
-            <div style="margin: 2rem 0;">
-                <h3>What We Track</h3>
-                <p>
-                    Our dashboard monitors disease outbreaks across Indian states and districts, tracking Dengue, Malaria, Typhoid, Cholera, and Chickenpox with transparent case reporting.
-                </p>
-            </div>
-
-            <div style="margin: 2rem 0;">
-                <h3>Features</h3>
-                <ul style="line-height: 2;">
-                    <li>Disease tracking across states</li>
-                    <li>District-level case statistics</li>
-                    <li>Search with autocomplete and partial matching</li>
-                    <li>Ranked charts plus accessible data tables</li>
-                    <li>Mobile-responsive, keyboard-accessible design</li>
-                    <li>Transparent, open-source health data</li>
-                </ul>
-            </div>
-
-            <div style="margin: 2rem 0;">
-                <h3>Why It Matters</h3>
-                <p>
-                    Transparent health data empowers communities, supports early outbreak detection, and helps medical teams respond faster — contributing to a more <b>aware, informed, and healthier</b> society.
-                </p>
-            </div>
-
-            <div class="chart-summary">
-                <h3 style="margin-top: 0;">Get Started</h3>
-                <p>Explore health data with our tools:</p>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;">
-                    <a href="/live_search"><button class="button" type="button">Search by State</button></a>
-                    <a href="/states"><button class="button secondary" type="button">View All States</button></a>
-                    <a href="/chart"><button class="button secondary" type="button">Compare Data</button></a>
-                </div>
-            </div>
-        </div>
+<div class="card">
+    <h2>Features</h2>
+    <ul style="padding-left:1.25rem; line-height:1.9; color:#334155;">
+        <li>Dashboard overview with KPIs calculated from the live dataset</li>
+        <li>Searchable, sortable states table with district drill-down</li>
+        <li>Disease library with category filters, A&ndash;Z index, and detail pages</li>
+        <li>Analytics charts with disease and top-N filters plus ranked tables</li>
+        <li>Responsive, keyboard-accessible design with honest empty states</li>
+    </ul>
+    <div style="display:flex; flex-wrap:wrap; gap:0.6rem; margin-top:0.75rem;">
+        <a class="button" href="/states">Browse states</a>
+        <a class="button secondary" href="/diseases">Open disease library</a>
+        <a class="button secondary" href="/analytics">View analytics</a>
     </div>
+</div>
 
-    <footer class="site-footer">
-        <p><strong>Public Health Dashboard</strong> <span class="accent">•</span> Transparent disease tracking for India</p>
-        <p>Developed by <strong>Mohammadazharuddin Rajgoli</strong></p>
-    </footer>
-</body>
-
-</html>
+<div class="card">
+    <h2>Why it matters</h2>
+    <p>Transparent health data supports early outbreak awareness and faster response &mdash; contributing to a more <strong>aware, informed, and healthier</strong> society.</p>
+</div>
+{% endblock %}
