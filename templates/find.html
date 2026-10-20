@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Find data{% if disease %} — {{ disease }}{% endif %}{% if place %} in {{ place }}{% endif %}{% endblock %}
+{% block meta %}Search disease surveillance cases and health guides by disease and location across India.{% endblock %}
+{% block content %}
+<section class="page-head" aria-labelledby="pageTitle">
+    <span class="eyebrow">Finder &bull; {% if disease %}{{ disease }}{% else %}All diseases{% endif %}{% if place %} &bull; {{ place }}{% endif %}</span>
+    <h1 id="pageTitle">{% if disease %}{{ disease }}{% else %}All diseases{% endif %}{% if place %} in {{ place }}{% endif %}</h1>
+    <p class="lead">{% if guide %}Health guide and dataset rows for this condition.{% else %}Surveillance rows from the current project dataset.{% endif %}</p>
+</section>
+
+<div class="card">
+    <form class="finder-form finder-form-light" action="/find" method="get" role="search" aria-label="Refine search">
+        <div class="finder-field">
+            <label for="fDisease">Disease or symptom</label>
+            <input class="finder-input" type="text" id="fDisease" name="disease" list="diseaseOptions" value="{{ disease }}" placeholder="e.g. Dengue" autocomplete="off">
+            <datalist id="diseaseOptions">
+                {% for d in disease_names %}<option value="{{ d }}"></option>{% endfor %}
+            </datalist>
+        </div>
+        <div class="finder-field">
+            <label for="fPlace">State or district</label>
+            <input class="finder-input" type="text" id="fPlace" name="place" list="placeOptions" value="{{ place }}" placeholder="e.g. Karnataka" autocomplete="off">
+            <datalist id="placeOptions">
+                {% for s in state_names %}<option value="{{ s }}"></option>{% endfor %}
+            </datalist>
+        </div>
+        <div class="finder-field">
+            <label for="fView">Show</label>
+            <select class="finder-input" id="fView" name="view">
+                <option value="cases" {% if view != 'guide' %}selected{% endif %}>Cases &amp; trends</option>
+                <option value="guide" {% if view == 'guide' %}selected{% endif %}>Health guide</option>
+            </select>
+        </div>
+        <div class="finder-submit">
+            <button type="submit" class="button">Search</button>
+        </div>
+    </form>
+</div>
+
+{% if guide %}
+<div class="card guide-card">
+    <span class="catline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v18"/><path d="M5 8h14"/><path d="M7 8c0 5 2 9 5 11 3-2 5-6 5-11"/></svg>
+        {{ guide.category }}
+    </span>
+    <h2>{{ guide.name }}</h2>
+    <p>{{ guide.short }}</p>
+    <div class="meta" style="display:flex; flex-wrap:wrap; gap:0.35rem; margin:0.75rem 0;">
+        <span class="badge {% if guide._transmission == 'Non-contagious' %}teal{% elif guide._transmission == 'Vector-borne' %}blue{% else %}neutral{% endif %}">{{ guide._transmission }}</span>
+        {% if guide._vaccine %}<span class="badge blue">Vaccine exists &mdash; ask doctor</span>{% endif %}
+    </div>
+    <a class="button" href="/diseases/{{ guide.slug }}">Read the full guide</a>
+</div>
+{% elif disease %}
+<div class="notice">
+    <strong>No health guide for &ldquo;{{ disease }}&rdquo; yet.</strong> The library covers {{ library_count }} common conditions. <a href="/diseases">Browse the full disease library &rarr;</a>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>{% if disease %}Reported cases by state{% else %}All states{% endif %}</h2>
+    <p class="muted" role="status" aria-live="polite">
+        {% if total_matches %}
+            {{ total_matches }} state{{ 's' if total_matches != 1 }}{% if disease %} reporting {{ disease }}{% endif %}{% if place %} in or matching {{ place }}{% endif %}{% if rows|length < total_matches %} &middot; showing the top {{ rows|length }}{% endif %}.
+        {% else %}
+            No dataset rows match this search{% if disease %} for {{ disease }}{% endif %}{% if place %} in {{ place }}{% endif %}.
+        {% endif %}
+    </p>
+
+    {% if rows %}
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr><th scope="col">State</th><th scope="col" class="num">Cases</th><th scope="col" class="num">Districts</th><th scope="col">Diseases reported</th><th scope="col"><span class="sr-only">Details</span></th></tr></thead>
+            <tbody>
+                {% for r in rows %}
+                <tr>
+                    <th scope="row">{{ r.display }}</th>
+                    <td class="num">{{ r.cases }}</td>
+                    <td class="num">{{ r.districts|length }}</td>
+                    <td>{{ r.diseases }}</td>
+                    <td><a class="chip" href="/live_search?search={{ r.display|urlencode }}">Open</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty" role="alert">
+        <p><strong>Nothing matched.</strong></p>
+        <p>Try a different spelling, clear the location, or <a href="/states">browse the states table</a>.</p>
+    </div>
+    {% endif %}
+
+    <div class="notice">
+        <strong>How to read this:</strong> values are dataset case counts (CSV rows plus legacy surveillance estimates where applicable). They show reporting volume, not disease severity or population-adjusted burden.
+    </div>
+</div>
+{% endblock %}

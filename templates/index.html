@@ -1,55 +1,307 @@
 {% extends "base.html" %}
 {% block title %}Public Health Dashboard — India{% endblock %}
 {% block meta %}Dashboard overview of disease surveillance across Indian states and districts, plus disease information.{% endblock %}
+{% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>{% endblock %}
+{% block main_class %}home-main{% endblock %}
 {% block content %}
-<section class="page-head" aria-labelledby="pageTitle">
-    <span class="eyebrow">India &bull; Surveillance &amp; Information</span>
-    <h1 id="pageTitle">Public Health Dashboard</h1>
-    <p class="lead">State-level disease surveillance with district drill-downs, analytics, and plain-language disease information. Values below are calculated from the current project dataset.</p>
+
+<!-- ============ HERO ============ -->
+<section class="hero" aria-labelledby="pageTitle">
+    <div class="container hero-inner">
+        <div class="hero-copy">
+            <span class="hero-eyebrow">India &bull; Surveillance &amp; Health Information</span>
+            <h1 id="pageTitle">See India's public health picture, state by state</h1>
+            <p class="hero-lead">Search reported cases across {{ stats.total_states }} states and union territories, drill into district detail, and read plain-language guidance on the diseases that matter most.</p>
+            <div class="hero-cta">
+                <a class="button hero-primary" href="/analytics">Explore analytics</a>
+                <a class="button hero-ghost" href="/diseases">Browse disease library</a>
+            </div>
+        </div>
+        <aside class="hero-snapshot" aria-label="Latest data snapshot">
+            <h2>Latest snapshot</h2>
+            <ul>
+                <li>
+                    <span class="snap-label">Highest caseload</span>
+                    <span class="snap-value">{{ home_data.chart_states[0].display }}</span>
+                    <span class="snap-note">{{ home_data.chart_states[0].cases }} reported cases</span>
+                </li>
+                <li>
+                    <span class="snap-label">Most reported disease</span>
+                    <span class="snap-value">{{ home_data.chart_diseases[0][0] }}</span>
+                    <span class="snap-note">{{ home_data.chart_diseases[0][1] }} reported cases</span>
+                </li>
+                <li>
+                    <span class="snap-label">Coverage</span>
+                    <span class="snap-value">{{ stats.total_states }} states &amp; UTs</span>
+                    <span class="snap-note">{{ stats.total_districts }} districts reporting</span>
+                </li>
+                <li>
+                    <span class="snap-label">Data updated</span>
+                    <span class="snap-value">{{ site.surveillance_updated or 'Date unavailable' }}</span>
+                    <span class="snap-note">{{ stats.source_label }} dataset</span>
+                </li>
+            </ul>
+        </aside>
+    </div>
 </section>
 
-<section aria-label="Key indicators">
-    <div class="kpis">
-        <div class="kpi">
-            <div class="kpi-label">States &amp; UTs tracked</div>
-            <div class="kpi-value">{{ stats.total_states }}</div>
-            <p class="kpi-note">From dataset states list</p>
+<!-- ============ FINDER (overlaps hero, like the reference) ============ -->
+<section class="container">
+    <div class="finder">
+        <div class="finder-head">
+            <h2>Find your data</h2>
+            <p>Pick a disease and a place &mdash; get cases, districts, and the matching health guide.</p>
         </div>
-        <div class="kpi teal">
-            <div class="kpi-label">Districts covered</div>
-            <div class="kpi-value">{{ stats.total_districts }}</div>
-            <p class="kpi-note">Districts with reported rows</p>
-        </div>
-        <div class="kpi">
-            <div class="kpi-label">Diseases in surveillance</div>
-            <div class="kpi-value">{{ stats.total_diseases }}</div>
-            <p class="kpi-note">Distinct names in dataset</p>
-        </div>
-        <div class="kpi teal">
-            <div class="kpi-label">Reported cases</div>
-            <div class="kpi-value">{{ stats.total_cases }}</div>
-            <p class="kpi-note">Sum across all states</p>
+        <form class="finder-form" action="/find" method="get" role="search" aria-label="Find disease and location data">
+            <div class="finder-field">
+                <label for="fDisease">Disease or symptom</label>
+                <input class="finder-input" type="text" id="fDisease" name="disease" list="diseaseOptions" placeholder="e.g. Dengue, malaria, fever" autocomplete="off">
+                <datalist id="diseaseOptions">
+                    {% for d in home_data.surveillance_diseases %}<option value="{{ d }}"></option>{% endfor %}
+                    {% for d in home_data.library_names %}<option value="{{ d }}"></option>{% endfor %}
+                </datalist>
+            </div>
+            <div class="finder-field">
+                <label for="fPlace">State or district</label>
+                <input class="finder-input" type="text" id="fPlace" name="place" list="placeOptions" placeholder="e.g. Karnataka, Pune" autocomplete="off">
+                <datalist id="placeOptions">
+                    {% for s in home_data.state_names %}<option value="{{ s }}"></option>{% endfor %}
+                </datalist>
+            </div>
+            <div class="finder-field">
+                <label for="fView">Show</label>
+                <select class="finder-input" id="fView" name="view">
+                    <option value="cases">Cases &amp; trends</option>
+                    <option value="guide">Health guide</option>
+                </select>
+            </div>
+            <div class="finder-submit">
+                <button type="submit" class="button finder-button">Search</button>
+            </div>
+        </form>
+        <div class="finder-popular">
+            <span>Popular:</span>
+            <button type="button" class="finder-chip" data-disease="Dengue">Dengue</button>
+            <button type="button" class="finder-chip" data-disease="Malaria">Malaria</button>
+            <button type="button" class="finder-chip" data-disease="COVID-19">COVID-19</button>
+            <button type="button" class="finder-chip" data-disease="Cholera">Cholera</button>
+            <button type="button" class="finder-chip" data-place="Karnataka">Karnataka</button>
+            <button type="button" class="finder-chip" data-place="Maharashtra">Maharashtra</button>
+            <button type="button" class="finder-chip" data-place="Delhi">Delhi</button>
         </div>
     </div>
 </section>
 
-<div class="card">
-    <h2>Data source</h2>
-    <p class="muted"><strong>{{ stats.source_label }}</strong> &mdash; {{ stats.source_detail }}. Surveillance data updated: <strong>{{ site.surveillance_updated or 'Date not available' }}</strong>.</p>
-    <div style="display:flex; flex-wrap:wrap; gap:0.6rem; margin-top:0.75rem;">
-        <a class="button" href="/states">Browse states table</a>
-        <a class="button secondary" href="/diseases">Open disease library</a>
-        <a class="button secondary" href="/analytics">View analytics</a>
-        <a class="button secondary" href="/live_search">Search a state</a>
+<!-- ============ STAT CARDS ============ -->
+<section class="container" aria-label="Key indicators">
+    <div class="stats">
+        <article class="stat">
+            <span class="stat-icon blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+            </span>
+            <div class="stat-body">
+                <div class="stat-value">{{ stats.total_states }}</div>
+                <div class="stat-label">States &amp; UTs</div>
+                <p class="stat-note">From dataset states list</p>
+            </div>
+        </article>
+        <article class="stat">
+            <span class="stat-icon teal" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M3 15h18M9 4v16M15 4v16"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            </span>
+            <div class="stat-body">
+                <div class="stat-value">{{ stats.total_districts }}</div>
+                <div class="stat-label">Districts covered</div>
+                <p class="stat-note">With reported rows</p>
+            </div>
+        </article>
+        <article class="stat">
+            <span class="stat-icon violet" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8h14M7 8c0 5 2 9 5 11 3-2 5-6 5-11"/></svg>
+            </span>
+            <div class="stat-body">
+                <div class="stat-value">{{ stats.total_diseases }}</div>
+                <div class="stat-label">Diseases tracked</div>
+                <p class="stat-note">Distinct names in dataset</p>
+            </div>
+        </article>
+        <article class="stat">
+            <span class="stat-icon green" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>
+            </span>
+            <div class="stat-body">
+                <div class="stat-value">{{ stats.total_cases }}</div>
+                <div class="stat-label">Reported cases</div>
+                <p class="stat-note">Sum across all states</p>
+            </div>
+        </article>
     </div>
-</div>
+</section>
 
-<div class="card">
-    <h2>What you can do here</h2>
-    <ul style="padding-left:1.25rem; line-height:1.9; color:#334155;">
-        <li><strong>States</strong> &mdash; searchable, sortable table of every state with district-level detail.</li>
-        <li><strong>Diseases</strong> &mdash; {{ library_count }} plain-language guides: causes, symptoms, prevention, care, and when to seek help.</li>
-        <li><strong>Analytics</strong> &mdash; ranked charts with filters for comparing states and diseases.</li>
-    </ul>
-</div>
+<!-- ============ INDIA AT A GLANCE ============ -->
+<section class="container" aria-labelledby="glanceTitle">
+    <div class="section-head">
+        <h2 id="glanceTitle">India at a glance</h2>
+        <p>Where reported cases are highest, and which diseases dominate the dataset.</p>
+    </div>
+    <div class="glance">
+        <div class="card glance-chart">
+            <div class="glance-head">
+                <h3>Top states by reported cases</h3>
+                <a class="glance-link" href="/analytics">Full analytics &rarr;</a>
+            </div>
+            <div class="chart-wrap glance-wrap">
+                <canvas id="glanceChart" role="img" aria-label="Bar chart of reported cases in the top 8 states"></canvas>
+            </div>
+            <p class="legend-note" id="glanceNote">Top {{ home_data.chart_states|length }} states of {{ stats.total_states }}, by reported cases.</p>
+            <noscript><p class="muted">The chart needs JavaScript. The full ranked list is on the <a href="/analytics">analytics page</a>.</p></noscript>
+        </div>
+        <div class="card glance-list">
+            <div class="glance-head">
+                <h3>Most reported diseases</h3>
+                <a class="glance-link" href="/diseases">Library &rarr;</a>
+            </div>
+            <ul class="rank-list">
+                {% for name, count in home_data.chart_diseases %}
+                <li>
+                    <a href="/find?disease={{ name|urlencode }}">
+                        <span class="rank-name">{{ name }}</span>
+                        <span class="rank-bar"><span class="rank-fill" style="width: {{ (count / home_data.chart_diseases[0][1] * 100)|round(1) }}%"></span></span>
+                        <span class="rank-value">{{ count }}</span>
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            <p class="muted small-note">Dataset case counts only &mdash; reporting volume, not population-adjusted burden.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============ QUICK ACCESS ============ -->
+<section class="container" aria-labelledby="exploreTitle">
+    <div class="section-head">
+        <h2 id="exploreTitle">Explore the dashboard</h2>
+        <p>Three ways in: browse the raw numbers, read a condition guide, or compare rankings.</p>
+    </div>
+    <div class="quick">
+        <a class="quick-card" href="/states">
+            <span class="quick-icon blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M3 15h18M9 4v16M15 4v16"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            </span>
+            <h3>States</h3>
+            <p>Searchable, sortable table of every state with district-level detail and disease breakdowns.</p>
+            <span class="quick-cta">Open states table &rarr;</span>
+        </a>
+        <a class="quick-card" href="/diseases">
+            <span class="quick-icon teal" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"/><path d="M5 8h14"/><path d="M7 8c0 5 2 9 5 11 3-2 5-6 5-11"/></svg>
+            </span>
+            <h3>Diseases</h3>
+            <p>{{ library_count }} plain-language guides: causes, symptoms, prevention, care, and when to seek help.</p>
+            <span class="quick-cta">Open disease library &rarr;</span>
+        </a>
+        <a class="quick-card" href="/analytics">
+            <span class="quick-icon violet" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+            </span>
+            <h3>Analytics</h3>
+            <p>Ranked charts with disease and top-N filters for comparing states and diseases side by side.</p>
+            <span class="quick-cta">View analytics &rarr;</span>
+        </a>
+    </div>
+</section>
+
+<!-- ============ FRESHNESS (compact, not dominant) ============ -->
+<section class="container" aria-label="Data freshness">
+    <div class="freshness">
+        <div class="fresh-item">
+            <span class="dot" aria-hidden="true"></span>
+            <div>
+                <strong>Surveillance data updated {{ site.surveillance_updated or 'date not available' }}</strong>
+                <span>Source: {{ stats.source_label }} &mdash; {{ stats.source_detail }}</span>
+            </div>
+        </div>
+        <div class="fresh-item">
+            <span class="dot teal-dot" aria-hidden="true"></span>
+            <div>
+                <strong>Health library updated {{ site.library_updated or 'date not available' }}</strong>
+                <span>{{ library_count }} educational conditions, no case counts</span>
+            </div>
+        </div>
+        <a class="fresh-link" href="/about">Data notes &amp; disclaimer &rarr;</a>
+    </div>
+    <p class="fine-print">Case counts come from the project dataset only. The disease library is educational and does not replace advice from a qualified healthcare professional.</p>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script id="glance-data" type="application/json">{{ home_data.chart_states | tojson }}</script>
+<script>
+(function () {
+    // Popular chips fill the finder inputs.
+    document.querySelectorAll('.finder-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            if (chip.dataset.disease) {
+                var d = document.getElementById('fDisease');
+                d.value = chip.dataset.disease;
+                d.focus();
+            }
+            if (chip.dataset.place) {
+                var p = document.getElementById('fPlace');
+                p.value = chip.dataset.place;
+                p.focus();
+            }
+        });
+    });
+
+    // Small India visualisation: top states by reported cases.
+    var canvas = document.getElementById('glanceChart');
+    if (!canvas) return;
+    var rows = [];
+    try { rows = JSON.parse(document.getElementById('glance-data').textContent); }
+    catch (e) { rows = []; }
+    if (!rows.length || typeof window.Chart === 'undefined') {
+        var wrap = canvas.closest('.glance-chart');
+        canvas.hidden = true;
+        var note = document.getElementById('glanceNote');
+        if (note) note.textContent = 'Chart unavailable in this browser. The full ranked list is on the analytics page.';
+        return;
+    }
+    var max = rows[0].cases || 1;
+    try {
+        new window.Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: rows.map(function (r) { return r.display; }),
+                datasets: [{
+                    label: 'Reported cases',
+                    data: rows.map(function (r) { return r.cases; }),
+                    backgroundColor: rows.map(function (r) {
+                        return r.cases >= max * 0.6 ? 'rgba(14,116,144,0.85)' : 'rgba(30,64,175,0.7)';
+                    }),
+                    borderColor: 'rgba(15,23,42,0.12)',
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    barPercentage: 0.72
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, grid: { color: '#EEF2F7' }, ticks: { font: { size: 11 } } },
+                    y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } }
+                }
+            }
+        });
+    } catch (err) {
+        canvas.hidden = true;
+        var n = document.getElementById('glanceNote');
+        if (n) n.textContent = 'Chart unavailable in this browser. The full ranked list is on the analytics page.';
+    }
+})();
+</script>
 {% endblock %}

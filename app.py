@@ -254,10 +254,103 @@ def get_stats():
     }
 
 
+def _disease_totals():
+    """Cases per disease, summed across all states."""
+    totals = {}
+    for v in health_data.values():
+        for d, c in (v.get("disease_breakdown") or {}).items():
+            totals[d] = totals.get(d, 0) + c
+    return totals
+
+
+def get_home_data():
+    """Aggregates used by the home page hero, chart and pick lists."""
+    top_states = sorted(
+        (
+            {
+                "display": v["display"],
+                "cases": v["cases"],
+                "districts": len(v["districts"]),
+            }
+            for v in health_data.values()
+        ),
+        key=lambda r: r["cases"],
+        reverse=True,
+    )
+    totals = _disease_totals()
+    top_diseases = sorted(totals.items(), key=lambda kv: kv[1], reverse=True)
+    return {
+        "top_states": top_states,
+        "top_diseases": top_diseases,
+        "state_names": [v["display"] for v in health_data.values()],
+        "surveillance_diseases": sorted(totals.keys()),
+        "library_names": [d["name"] for d in diseases_data.DISEASES],
+        "chart_states": top_states[:8],
+        "chart_diseases": top_diseases[:6],
+    }
+
+
 @app.route("/")
 def home():
     return render_template("index.html", active="home", stats=get_stats(),
-                           library_count=len(diseases_data.DISEASES))
+                           library_count=len(diseases_data.DISEASES),
+                           home_data=get_home_data())
+
+
+@app.route("/find")
+def find():
+    """Hero finder: disease + place -> surveillance rows and health guide."""
+    disease = (request.args.get("disease") or "").strip()
+    place = (request.args.get("place") or "").strip()
+    view = (request.args.get("view") or "cases").strip()
+    nd = normalize(disease)
+    np_ = normalize(place)
+
+    # Health guide match (library diseases) for the requested disease.
+    guide = None
+    if nd:
+        for d in diseases_data.DISEASES:
+            if normalize(d["name"]) == nd:
+                guide = dict(d)
+                guide["_transmission"] = diseases_data.transmission_badge(guide)
+                guide["_vaccine"] = diseases_data.has_vaccine_note(guide)
+                break
+
+    # Surveillance rows for the requested disease (all diseases when blank).
+    rows = []
+    for v in health_data.values():
+        if np_ and np_ not in normalize(v["display"]) and not any(
+            np_ in normalize(d) for d in v["districts"]
+        ):
+            continue
+        bd = v.get("disease_breakdown") or {}
+        if nd:
+            cases = bd.get(disease, 0)
+            if cases <= 0:
+                continue
+        else:
+            cases = v["cases"]
+        rows.append({
+            "display": v["display"],
+            "cases": cases,
+            "districts": v["districts"],
+            "diseases": v["diseases"],
+        })
+    rows.sort(key=lambda r: r["cases"], reverse=True)
+
+    return render_template(
+        "find.html",
+        active="home",
+        disease=disease,
+        place=place,
+        view=view,
+        guide=guide,
+        rows=rows[:15],
+        total_matches=len(rows),
+        library_count=len(diseases_data.DISEASES),
+        state_names=[v["display"] for v in health_data.values()],
+        disease_names=sorted(set(_disease_totals().keys()) | {d["name"] for d in diseases_data.DISEASES}),
+    )
 
 
 @app.route("/states")

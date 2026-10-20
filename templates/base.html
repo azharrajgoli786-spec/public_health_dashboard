@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>{% block title %}Public Health Dashboard{% endblock %}</title>
-    <link rel="stylesheet" href="/static/styles.css?v=5">
+    <link rel="stylesheet" href="/static/styles.css?v=6">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{% block meta %}Disease surveillance and health information for India.{% endblock %}">
     {% block head %}{% endblock %}
@@ -30,7 +30,7 @@
         </div>
     </header>
 
-    <main class="container" id="main">
+    <main class="{% block main_class %}container{% endblock %}" id="main">
         {% block content %}{% endblock %}
     </main>
 

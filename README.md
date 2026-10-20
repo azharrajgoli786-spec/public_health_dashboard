@@ -11,6 +11,8 @@ A dashboard for analyzing and visualizing public health data.
 - JavaScript
 
 ## Features
+- Engaging home page: hero with live data snapshot, disease + location finder, stat cards, top-states chart, quick-access cards, and a data freshness strip
+- Disease and location finder (`/find`) returning dataset rows plus the matching health guide
 - Health data visualization
 - Data analysis
 - Interactive dashboard
