@@ -1,138 +1,387 @@
 {% extends "base.html" %}
 {% block title %}States — State &amp; District Health Data{% endblock %}
 {% block meta %}Searchable, sortable table of disease surveillance data by Indian state with district-level detail.{% endblock %}
+{% block main_class %}states-main{% endblock %}
 {% block content %}
-<section class="page-head" aria-labelledby="pageTitle">
-    <span class="eyebrow">Surveillance &bull; {{ health_data|length }} states &amp; UTs</span>
-    <h1 id="pageTitle">States — health data by state &amp; district</h1>
-    <p class="lead">Search, sort, and filter the table. Select a state row to expand district-level rows and the disease breakdown. Source: <strong>{{ source.label }}</strong> &mdash; {{ source.detail }}.</p>
+
+<!-- ============ PAGE HEADER ============ -->
+<section class="page-hero">
+    <div class="container page-hero-inner">
+        <div class="page-hero-copy">
+            <span class="eyebrow">States &amp; Union Territories</span>
+            <h1>Health data by state &amp; district</h1>
+            <p>Explore state-wise disease surveillance data with district-level details and reported cases. Data is calculated from the current project dataset.</p>
+        </div>
+        <div class="page-hero-art" aria-hidden="true">
+            <svg viewBox="0 0 126 120" role="presentation">
+                <defs>
+                    <pattern id="mapDots" width="4" height="4" patternUnits="userSpaceOnUse">
+                        <circle cx="1.4" cy="1.4" r="1.15" fill="#0E7490"/>
+                    </pattern>
+                    <linearGradient id="mapFade" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#0E7490" stop-opacity="0.30"/>
+                        <stop offset="100%" stop-color="#1E40AF" stop-opacity="0.12"/>
+                    </linearGradient>
+                </defs>
+                <path class="map-shape" d="M28,6 L39.2,4.4 L46.4,8.4 L49.6,15.6 L47.6,22 L53.6,29.2 L60.8,35.6 L68,37.2 L76.8,39.6 L84.8,36.8 L91.6,40.4 L100.4,35.2 L110.4,34.4 L121.6,32.8 L117.2,38 L120.8,45.2 L111.2,49.6 L105.6,55.6 L102.4,62 L93.2,58 L86.4,59.6 L80.8,60.4 L78,64 L70,70 L60,78 L53.2,82.4 L53.2,94 L48.8,102 L44.8,109.2 L42,113.6 L38,110 L34,102 L31.2,94 L26,82 L22.8,70 L22.4,64.4 L10.4,62 L7.6,56.8 L13.2,53.2 L4.8,51.2 L10.4,47.6 L12,41.2 L20,38 L28,30 L30,22 L28.8,14 Z"/>
+                <path class="map-fill" d="M28,6 L39.2,4.4 L46.4,8.4 L49.6,15.6 L47.6,22 L53.6,29.2 L60.8,35.6 L68,37.2 L76.8,39.6 L84.8,36.8 L91.6,40.4 L100.4,35.2 L110.4,34.4 L121.6,32.8 L117.2,38 L120.8,45.2 L111.2,49.6 L105.6,55.6 L102.4,62 L93.2,58 L86.4,59.6 L80.8,60.4 L78,64 L70,70 L60,78 L53.2,82.4 L53.2,94 L48.8,102 L44.8,109.2 L42,113.6 L38,110 L34,102 L31.2,94 L26,82 L22.8,70 L22.4,64.4 L10.4,62 L7.6,56.8 L13.2,53.2 L4.8,51.2 L10.4,47.6 L12,41.2 L20,38 L28,30 L30,22 L28.8,14 Z"/>
+                <path class="map-dots" d="M28,6 L39.2,4.4 L46.4,8.4 L49.6,15.6 L47.6,22 L53.6,29.2 L60.8,35.6 L68,37.2 L76.8,39.6 L84.8,36.8 L91.6,40.4 L100.4,35.2 L110.4,34.4 L121.6,32.8 L117.2,38 L120.8,45.2 L111.2,49.6 L105.6,55.6 L102.4,62 L93.2,58 L86.4,59.6 L80.8,60.4 L78,64 L70,70 L60,78 L53.2,82.4 L53.2,94 L48.8,102 L44.8,109.2 L42,113.6 L38,110 L34,102 L31.2,94 L26,82 L22.8,70 L22.4,64.4 L10.4,62 L7.6,56.8 L13.2,53.2 L4.8,51.2 L10.4,47.6 L12,41.2 L20,38 L28,30 L30,22 L28.8,14 Z"/>
+            </svg>
+        </div>
+    </div>
 </section>
 
-<div class="card">
-    <form id="stateFilters" onsubmit="return false;" aria-label="Filter states table">
-        <div class="toolbar">
+<section class="container">
+    <!-- ============ FILTERS ============ -->
+    <div class="card filter-card">
+        <div class="filter-grid">
             <div class="field">
-                <label class="field-label" for="stateQ">Search states</label>
-                <input class="input" type="search" id="stateQ" placeholder="Type a state name, e.g. Karnataka" autocomplete="off">
+                <label class="field-label" for="stateQ">Search state or UT</label>
+                <div class="input-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <input class="input" type="search" id="stateQ" placeholder="Type state or union territory..." autocomplete="off">
+                </div>
             </div>
             <div class="field">
-                <label class="field-label" for="minCases">Minimum cases</label>
-                <select class="input" id="minCases">
-                    <option value="0">All case counts</option>
-                    <option value="100">100+ cases</option>
-                    <option value="300">300+ cases</option>
-                    <option value="500">500+ cases</option>
+                <label class="field-label" for="regionFilter">Region</label>
+                <select class="input" id="regionFilter">
+                    <option value="">All regions</option>
+                    {% for r in regions %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
                 </select>
             </div>
             <div class="field">
                 <label class="field-label" for="sortBy">Sort by</label>
                 <select class="input" id="sortBy">
-                    <option value="cases-desc">Cases: highest first</option>
-                    <option value="cases-asc">Cases: lowest first</option>
-                    <option value="name-asc">State name A–Z</option>
-                    <option value="districts-desc">Most districts first</option>
+                    <option value="cases-desc">Reported cases (High to Low)</option>
+                    <option value="cases-asc">Reported cases (Low to High)</option>
+                    <option value="name-asc">State name (A–Z)</option>
+                    <option value="districts-desc">Districts (Most first)</option>
                 </select>
             </div>
+            <div class="field">
+                <label class="field-label" for="snapshotDate">Select date</label>
+                <div class="input-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+                    <input class="input" type="text" id="snapshotDate" value="{{ site.surveillance_updated_display or 'Date not available' }}" readonly title="Dataset snapshot date">
+                </div>
+            </div>
+            <div class="field">
+                <span class="field-label" id="viewLabel">View</span>
+                <div class="seg" role="group" aria-labelledby="viewLabel">
+                    <button type="button" class="seg-btn on" id="viewTable" aria-pressed="true">Table view</button>
+                    <button type="button" class="seg-btn" id="viewMap" aria-pressed="false">Map view</button>
+                </div>
+            </div>
+            <div class="field field-action">
+                <a class="button outline-teal" id="downloadCsv" href="/states.csv" download>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
+                    Download CSV
+                </a>
+            </div>
         </div>
-    </form>
-    <p class="muted" id="stateCount" role="status" aria-live="polite"></p>
+        <p class="filter-note">Showing the <strong>{{ site.surveillance_updated or 'dataset' }}</strong> dataset snapshot. The date is fixed to the dataset, so all figures below match that snapshot.</p>
+    </div>
 
-    <div class="table-wrap">
-        <table class="data" id="statesTable">
-            <caption>Reported cases by state. Activate a state name to expand district and disease detail.</caption>
-            <thead>
-                <tr>
-                    <th scope="col">State</th>
-                    <th scope="col" class="num">Cases</th>
-                    <th scope="col" class="num">Districts</th>
-                    <th scope="col">Diseases</th>
-                    <th scope="col"><span class="sr-only">Details</span></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for key, info in health_data.items() %}
-                <tr class="state-row" data-name="{{ info.display|lower }}" data-cases="{{ info.cases }}" data-districts="{{ info.districts|length }}">
-                    <th scope="row">{{ info.display }}</th>
-                    <td class="num">{{ info.cases }}</td>
-                    <td class="num">{{ info.districts|length }}</td>
-                    <td>{{ info.diseases }}</td>
-                    <td><button type="button" class="chip detail-toggle" aria-expanded="false" aria-label="Show district detail for {{ info.display }}">Details</button></td>
-                </tr>
-                <tr class="row-detail" hidden>
-                    <td colspan="5">
-                        <strong>Disease breakdown — {{ info.display }}</strong>
-                        <table class="mini-table">
-                            <thead><tr><th scope="col">Disease</th><th scope="col" style="text-align:right;">Cases</th></tr></thead>
-                            <tbody>
-                                {% for disease, c in info.disease_breakdown.items() %}
-                                <tr><td>{{ disease }}</td><td style="text-align:right;"><strong>{{ c }}</strong></td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        <strong>Districts — {{ info.display }}</strong>
-                        <table class="mini-table">
-                            <thead><tr><th scope="col">District</th><th scope="col" style="text-align:right;">Cases</th></tr></thead>
-                            <tbody>
-                                {% for district, c in info.districts.items() %}
-                                <tr><td>{{ district }}</td><td style="text-align:right;"><strong>{{ c }}</strong></td></tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </td>
-                </tr>
+    <!-- ============ STAT ROW ============ -->
+    <div class="stats stats-5" aria-label="Key indicators">
+        <article class="stat">
+            <span class="stat-icon green" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+            </span>
+            <div class="stat-body">
+                <div class="stat-value">{{ rows|length }}</div>
+                <div class="stat-label">States &amp; UTs</div>
+                <p class="stat-note">Tracked</p>
+            </div>
+        </article>
+        <article class="stat">
+            <span class="stat-icon blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M3 15h18M9 4v16M15 4v16"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            </span>
+            <div class="stat-body">
+                <div class="stat-value">{{ total_districts }}</div>
+                <div class="stat-label">Districts</div>
+                <p class="stat-note">Covered</p>
+            </div>
+        </article>
+        <article class="stat">
+            <span class="stat-icon amber" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18"/><path d="M5 8h14"/><path d="M7 8c0 5 2 9 5 11 3-2 5-6 5-11"/></svg>
+            </span>
+            <div class="stat-body">
+                <div class="stat-value">{{ stats.total_diseases }}</div>
+                <div class="stat-label">Diseases</div>
+                <p class="stat-note">In surveillance</p>
+            </div>
+        </article>
+        <article class="stat">
+            <span class="stat-icon rose" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15 20a5 5 0 0 1 6-4.6"/></svg>
+            </span>
+            <div class="stat-body">
+                <div class="stat-value">{{ stats.total_cases }}</div>
+                <div class="stat-label">Reported cases</div>
+                <p class="stat-note">Across India</p>
+            </div>
+        </article>
+        <article class="stat">
+            <span class="stat-icon violet" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+            </span>
+            <div class="stat-body">
+                <div class="stat-value stat-date">{{ site.surveillance_updated_display or '—' }}</div>
+                <div class="stat-label">Data last updated</div>
+                <p class="stat-note">Dataset snapshot</p>
+            </div>
+        </article>
+    </div>
+
+    <!-- ============ TABLE / MAP ============ -->
+    <div class="card table-card">
+        <div class="table-card-head">
+            <div>
+                <h2>States &amp; UTs overview</h2>
+                <p class="muted" id="statesCount" role="status" aria-live="polite">Showing {{ rows|length }} of {{ rows|length }} states and union territories</p>
+            </div>
+            <div class="table-search">
+                <div class="input-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <input class="input" type="search" id="tableQ" placeholder="Search in table..." autocomplete="off">
+                </div>
+            </div>
+        </div>
+
+        <div class="table-wrap">
+            <table class="data states-table" id="statesTable">
+                <caption class="sr-only">Reported cases by state. Activate a state name to expand district and disease detail.</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">State / UT</th>
+                        <th scope="col" class="num"><button type="button" class="sort" id="sortCases">Cases <span class="sort-caret" aria-hidden="true">▾</span></button></th>
+                        <th scope="col" class="num">Districts</th>
+                        <th scope="col">Top diseases</th>
+                        <th scope="col" class="action-col">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in rows %}
+                    <tr class="state-row" data-name="{{ r.display|lower }}" data-cases="{{ r.cases }}" data-districts="{{ r.districts }}" data-region="{{ r.region }}">
+                        <th scope="row"><span class="row-dot" aria-hidden="true"></span>{{ r.display }}</th>
+                        <td class="num">{{ r.cases }}</td>
+                        <td class="num">{{ r.districts }}</td>
+                        <td>
+                            <ul class="top-diseases">
+                                {% for name, count in r.top_diseases %}<li>{{ name }} <span class="disease-count">{{ count }}</span></li>{% endfor %}
+                            </ul>
+                        </td>
+                        <td class="action-col">
+                            <button type="button" class="chip detail-toggle" aria-expanded="false" aria-label="Show district detail for {{ r.display }}"><span class="detail-label">View Details</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr class="row-detail" hidden>
+                        <td colspan="5">
+                            <div class="detail-grid">
+                                <div>
+                                    <h3>Disease breakdown — {{ r.display }}</h3>
+                                    <table class="mini-table">
+                                        <thead><tr><th scope="col">Disease</th><th scope="col" class="num">Cases</th></tr></thead>
+                                        <tbody>
+                                            {% for disease, c in r.disease_breakdown.items() %}
+                                            <tr><td>{{ disease }}</td><td class="num">{{ c }}</td></tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div>
+                                    <h3>Districts — {{ r.display }}</h3>
+                                    <table class="mini-table">
+                                        <thead><tr><th scope="col">District</th><th scope="col" class="num">Cases</th></tr></thead>
+                                        <tbody>
+                                            {% for district, c in r.district_rows %}
+                                            <tr><td>{{ district }}</td><td class="num">{{ c }}</td></tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tile map (schematic, not a geographic projection) -->
+        <div class="tile-map" id="tileMap" hidden>
+            <p class="tile-map-note">Schematic tile map — each tile is one state or UT, shaded by reported cases. Positions are approximate, not to scale.</p>
+            <div class="tiles" id="tiles">
+                {% for r in rows %}
+                <button type="button" class="tile tile-{{ r.level }}" style="--col: {{ r.tile[0] }}; --row: {{ r.tile[1] }};" data-name="{{ r.display|lower }}" data-display="{{ r.display }}" data-cases="{{ r.cases }}">
+                    <span class="tile-name">{{ r.display }}</span>
+                    <span class="tile-cases">{{ r.cases }}</span>
+                </button>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+            <div class="tile-legend" aria-hidden="true">
+                <span>Lower</span>
+                <span class="swatch s1"></span><span class="swatch s2"></span><span class="swatch s3"></span><span class="swatch s4"></span><span class="swatch s5"></span>
+                <span>Higher</span>
+            </div>
+        </div>
+
+        <div class="empty" id="statesEmpty" hidden>
+            <p><strong>No states match your filters.</strong></p>
+            <p>Clear the search or pick a different region.</p>
+        </div>
+
+        <div class="table-foot">
+            <p class="muted" id="tableRange" role="status" aria-live="polite"></p>
+            <nav class="pager" id="pager" aria-label="Table pages"></nav>
+        </div>
+
+        <p class="muted small-note">Disease totals include CSV cases plus legacy surveillance estimates (COVID-19, Influenza, Tuberculosis) where applicable; district rows list dataset districts only.</p>
     </div>
-    <div class="empty" id="statesEmpty" hidden>
-        <p><strong>No states match your filters.</strong></p>
-        <p>Clear the search or lower the minimum case count.</p>
+
+    <!-- ============ SOURCE NOTE ============ -->
+    <div class="note-strip" role="note">
+        <span class="note-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+        </span>
+        <p><strong>{{ source.label }} — {{ source.detail }}.</strong> Surveillance data updated: <strong>{{ site.surveillance_updated or 'date not available' }}</strong>. Case counts are derived from the project dataset and do not replace official reports.</p>
     </div>
-    <p class="muted">Disease totals include CSV cases plus legacy surveillance estimates (COVID-19, Influenza, Tuberculosis) where applicable; district rows list dataset districts only.</p>
-</div>
+</section>
 {% endblock %}
+
 {% block scripts %}
 <script>
 (function () {
     var q = document.getElementById('stateQ');
-    var minCases = document.getElementById('minCases');
+    var tableQ = document.getElementById('tableQ');
+    var region = document.getElementById('regionFilter');
     var sortBy = document.getElementById('sortBy');
     var tbody = document.querySelector('#statesTable tbody');
-    var count = document.getElementById('stateCount');
+    var countEl = document.getElementById('statesCount');
+    var rangeEl = document.getElementById('tableRange');
+    var pager = document.getElementById('pager');
     var empty = document.getElementById('statesEmpty');
-    if (!tbody) return;
+    var csv = document.getElementById('downloadCsv');
+    var tiles = document.getElementById('tileMap');
+    var PER_PAGE = 10;
+    var page = 1;
+
     // Pair each state row with its detail row
     var pairs = [];
-    var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr.state-row'));
-    rows.forEach(function (r) {
+    Array.prototype.slice.call(tbody.querySelectorAll('tr.state-row')).forEach(function (r) {
         var d = r.nextElementSibling;
         pairs.push({ row: r, detail: (d && d.classList.contains('row-detail')) ? d : null });
     });
-    function apply() {
+
+    function visibleRows() {
         var term = (q.value || '').trim().toLowerCase();
-        var min = parseInt(minCases.value, 10) || 0;
-        var visible = pairs.filter(function (p) {
-            var okName = !term || p.row.dataset.name.indexOf(term) !== -1;
-            var okCases = parseInt(p.row.dataset.cases, 10) >= min;
-            var show = okName && okCases;
-            p.row.hidden = !show;
-            if (p.detail && !show) { p.detail.hidden = true; }
-            return show;
+        var reg = region.value;
+        return pairs.filter(function (p) {
+            var name = p.row.dataset.name;
+            var okName = !term || name.indexOf(term) !== -1;
+            var okRegion = !reg || p.row.dataset.region === reg;
+            return okName && okRegion;
         });
+    }
+    function sortRows(list) {
         var mode = sortBy.value;
-        visible.sort(function (a, b) {
+        list.sort(function (a, b) {
             if (mode === 'name-asc') return a.row.dataset.name.localeCompare(b.row.dataset.name);
             if (mode === 'cases-asc') return (+a.row.dataset.cases) - (+b.row.dataset.cases);
-            if (mode === 'districts-desc') return (+b.row.dataset.districts) - (+a.row.dataset.districts);
+            if (mode === 'districts-desc') return (+b.row.dataset.districts) - (+a.row.dataset.districts) || (+b.row.dataset.cases) - (+a.row.dataset.cases);
             return (+b.row.dataset.cases) - (+a.row.dataset.cases);
         });
-        visible.forEach(function (p) {
+    }
+    function renderPager(total) {
+        var pages = Math.max(1, Math.ceil(total / PER_PAGE));
+        if (page > pages) page = pages;
+        var html = '<button type="button" class="pg-btn" data-page="' + (page - 1) + '"' + (page === 1 ? ' disabled' : '') + ' aria-label="Previous page">‹</button>';
+        for (var i = 1; i <= pages; i++) {
+            html += '<button type="button" class="pg-btn' + (i === page ? ' on' : '') + '" data-page="' + i + '"' + (i === page ? ' aria-current="page"' : '') + '>' + i + '</button>';
+        }
+        html += '<button type="button" class="pg-btn" data-page="' + (page + 1) + '"' + (page === pages ? ' disabled' : '') + ' aria-label="Next page">›</button>';
+        pager.innerHTML = html;
+    }
+    function apply(resetPage) {
+        if (resetPage) page = 1;
+        var list = visibleRows();
+        sortRows(list);
+        var total = list.length;
+        var start = (page - 1) * PER_PAGE;
+        var slice = list.slice(start, start + PER_PAGE);
+
+        // Hide everything, then show only the current page.
+        pairs.forEach(function (p) {
+            p.row.hidden = true;
+            if (p.detail) p.detail.hidden = true;
+        });
+        slice.forEach(function (p) {
+            p.row.hidden = false;
             tbody.appendChild(p.row);
             if (p.detail) tbody.appendChild(p.detail);
         });
-        count.textContent = visible.length + ' of ' + pairs.length + ' states shown.';
-        empty.hidden = visible.length !== 0;
+
+        countEl.textContent = 'Showing ' + total + ' of ' + pairs.length + ' states and union territories';
+        empty.hidden = total !== 0;
+        document.querySelector('.table-wrap').hidden = total === 0;
+
+        if (total === 0) {
+            rangeEl.textContent = 'No entries to show';
+        } else {
+            rangeEl.textContent = 'Showing ' + (start + 1) + ' to ' + Math.min(start + PER_PAGE, total) + ' of ' + total + ' entries';
+        }
+        renderPager(total);
+        updateCsv();
+        syncTiles(list);
     }
+    function updateCsv() {
+        var params = [];
+        if (q.value.trim()) params.push('q=' + encodeURIComponent(q.value.trim()));
+        if (region.value) params.push('region=' + encodeURIComponent(region.value));
+        if (sortBy.value) params.push('sort=' + encodeURIComponent(sortBy.value));
+        csv.href = '/states.csv' + (params.length ? '?' + params.join('&') : '');
+    }
+    function syncTiles(list) {
+        var names = {};
+        list.forEach(function (p) { names[p.row.dataset.name] = p.row.dataset.cases; });
+        document.querySelectorAll('#tiles .tile').forEach(function (t) {
+            var hit = Object.prototype.hasOwnProperty.call(names, t.dataset.name);
+            t.classList.toggle('dim', !hit);
+        });
+    }
+
+    // Two-way bound search boxes
+    [q, tableQ].forEach(function (el) {
+        el.addEventListener('input', function () {
+            var other = (el === q) ? tableQ : q;
+            if (other.value !== el.value) other.value = el.value;
+            apply(true);
+        });
+    });
+    region.addEventListener('change', function () { apply(true); });
+    sortBy.addEventListener('change', function () { apply(true); });
+
+    // Clicking the CASES header sorts by cases, toggling direction.
+    var sortCases = document.getElementById('sortCases');
+    sortCases.addEventListener('click', function () {
+        sortBy.value = sortBy.value === 'cases-desc' ? 'cases-asc' : 'cases-desc';
+        apply(true);
+    });
+
+    pager.addEventListener('click', function (ev) {
+        var btn = ev.target.closest('.pg-btn');
+        if (!btn || btn.disabled) return;
+        page = parseInt(btn.dataset.page, 10);
+        apply(false);
+        document.querySelector('.table-card').scrollIntoView({ block: 'start' });
+    });
+
+    // Drill-down
     tbody.addEventListener('click', function (ev) {
         var btn = ev.target.closest('.detail-toggle');
         if (!btn) return;
@@ -142,13 +391,41 @@
         var show = detail.hidden;
         detail.hidden = !show;
         btn.setAttribute('aria-expanded', show ? 'true' : 'false');
-        btn.textContent = show ? 'Hide' : 'Details';
+        btn.querySelector('.detail-label').textContent = show ? 'Hide Details' : 'View Details';
     });
-    [q, minCases, sortBy].forEach(function (el) {
-        el.addEventListener('input', apply);
-        el.addEventListener('change', apply);
+
+    // Table / map view toggle
+    var btnTable = document.getElementById('viewTable');
+    var btnMap = document.getElementById('viewMap');
+    function setView(isMap) {
+        btnMap.classList.toggle('on', isMap);
+        btnTable.classList.toggle('on', !isMap);
+        btnMap.setAttribute('aria-pressed', isMap ? 'true' : 'false');
+        btnTable.setAttribute('aria-pressed', isMap ? 'false' : 'true');
+        tiles.hidden = !isMap;
+        document.querySelector('.table-wrap').hidden = isMap;
+    }
+    btnTable.addEventListener('click', function () { setView(false); });
+    btnMap.addEventListener('click', function () { setView(true); });
+
+    // Clicking a tile filters the table to that state.
+    document.getElementById('tiles').addEventListener('click', function (ev) {
+        var tile = ev.target.closest('.tile');
+        if (!tile) return;
+        q.value = tile.dataset.display;
+        tableQ.value = q.value;
+        setView(false);
+        apply(true);
     });
-    apply();
+
+    // Reflect URL parameters so filtered views can be shared or bookmarked.
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('q')) { q.value = params.get('q'); tableQ.value = q.value; }
+    if (params.get('region')) region.value = params.get('region');
+    if (params.get('sort')) sortBy.value = params.get('sort');
+
+    apply(false);
+    if (params.get('view') === 'map') setView(true);
 })();
 </script>
 {% endblock %}

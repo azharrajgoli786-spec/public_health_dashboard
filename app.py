@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, make_response
 import csv
 import datetime
+import io
 import os
 import re
 import diseases_data
@@ -218,11 +219,21 @@ def _file_date_label(path):
     return datetime.datetime.fromtimestamp(ts).strftime("%Y-%m-%d")
 
 
+def _file_date_display(path):
+    """Same date, in a human '14 Nov 2025' format for date fields."""
+    try:
+        ts = os.path.getmtime(path)
+    except OSError:
+        return None
+    return datetime.datetime.fromtimestamp(ts).strftime("%d %b %Y").lstrip("0")
+
+
 def site_info():
     return {
         "source_label": DATA_SOURCE["label"],
         "source_detail": DATA_SOURCE["detail"],
         "surveillance_updated": _file_date_label(CSV_PATH),
+        "surveillance_updated_display": _file_date_display(CSV_PATH),
         "library_updated": _file_date_label(
             os.path.join(os.path.dirname(os.path.abspath(__file__)), "diseases_data.py")
         ),
@@ -261,6 +272,145 @@ def _disease_totals():
         for d, c in (v.get("disease_breakdown") or {}).items():
             totals[d] = totals.get(d, 0) + c
     return totals
+
+
+# Zones used by the States page "Region" filter. Keyed by normalised name.
+REGION_BY_STATE = {
+    # Northern
+    "chandigarh": "Northern", "delhi": "Northern", "haryana": "Northern",
+    "himachal pradesh": "Northern", "jammu and kashmir": "Northern",
+    "ladakh": "Northern", "punjab": "Northern", "rajasthan": "Northern",
+    "uttar pradesh": "Northern", "uttarakhand": "Northern",
+    # Western
+    "goa": "Western", "gujarat": "Western", "maharashtra": "Western",
+    "dadra and nagar haveli and daman and diu": "Western",
+    # Central
+    "chhattisgarh": "Central", "madhya pradesh": "Central",
+    # Eastern
+    "bihar": "Eastern", "jharkhand": "Eastern", "odisha": "Eastern",
+    "west bengal": "Eastern",
+    # Southern
+    "andhra pradesh": "Southern", "karnataka": "Southern", "kerala": "Southern",
+    "puducherry": "Southern", "tamil nadu": "Southern", "telangana": "Southern",
+    "lakshadweep": "Southern", "andaman and nicobar islands": "Southern",
+    # North-Eastern
+    "arunachal pradesh": "North-Eastern", "assam": "North-Eastern",
+    "manipur": "North-Eastern", "meghalaya": "North-Eastern",
+    "mizoram": "North-Eastern", "nagaland": "North-Eastern",
+    "sikkim": "North-Eastern", "tripura": "North-Eastern",
+}
+
+REGIONS = ["Northern", "Western", "Central", "Eastern", "Southern", "North-Eastern"]
+
+# Schematic tile-map positions for the States page map view.
+# (column, row) on a grid that loosely mirrors India's geography.
+# This is a tile map, not a geographic projection - the page says so.
+TILE_POS = {
+    "jammu and kashmir": (2, 0), "ladakh": (3, 0),
+    "himachal pradesh": (2, 1), "chandigarh": (4, 1),
+    "punjab": (3, 2), "uttarakhand": (4, 2),
+    "sikkim": (7, 2), "meghalaya": (8, 2), "arunachal pradesh": (9, 2),
+    "delhi": (3, 3), "haryana": (4, 3), "rajasthan": (2, 3),
+    "uttar pradesh": (5, 3), "bihar": (6, 3), "tripura": (7, 3),
+    "assam": (8, 3), "nagaland": (9, 3),
+    "gujarat": (1, 4), "madhya pradesh": (4, 4), "jharkhand": (6, 4),
+    "west bengal": (7, 4), "manipur": (8, 4),
+    "dadra and nagar haveli and daman and diu": (2, 5), "maharashtra": (3, 5),
+    "chhattisgarh": (5, 5), "odisha": (7, 5), "mizoram": (9, 5),
+    "lakshadweep": (0, 6), "goa": (2, 6), "karnataka": (3, 6),
+    "telangana": (4, 6), "andhra pradesh": (5, 6),
+    "kerala": (3, 7), "tamil nadu": (4, 7), "puducherry": (5, 7),
+    "andaman and nicobar islands": (9, 7),
+}
+
+
+def get_state_rows():
+    """Rows for the States page table, map and CSV export."""
+    rows = []
+    for v in health_data.values():
+        key = normalize(v["display"])
+        bd = v.get("disease_breakdown") or {}
+        top = list(bd.items())[:3]
+        rows.append({
+            "display": v["display"],
+            "key": key,
+            "cases": v["cases"],
+            "districts": len(v["districts"]),
+            "top_diseases": top,
+            "diseases": v["diseases"],
+            "disease_breakdown": bd,
+            "district_rows": list(v["districts"].items()),
+            "region": REGION_BY_STATE.get(key, "Other"),
+            "tile": TILE_POS.get(key, (5, 4)),
+        })
+    return rows
+
+
+def _sort_state_rows(rows, sort):
+    if sort == "cases-asc":
+        return sorted(rows, key=lambda r: r["cases"])
+    if sort == "name-asc":
+        return sorted(rows, key=lambda r: r["display"])
+    if sort == "districts-desc":
+        return sorted(rows, key=lambda r: (-r["districts"], -r["cases"]))
+    return sorted(rows, key=lambda r: -r["cases"])
+
+
+def _filter_state_rows(rows, q, region):
+    q = (q or "").strip().lower()
+    region = (region or "").strip()
+    out = []
+    for r in rows:
+        if region and r["region"] != region:
+            continue
+        if q and q not in r["display"].lower() and not any(
+            q in d.lower() for d, _ in r["district_rows"]
+        ):
+            continue
+        out.append(r)
+    return out
+
+
+@app.route("/states.csv")
+def states_csv():
+    """Download the current states view as CSV."""
+    rows = _filter_state_rows(
+        get_state_rows(),
+        request.args.get("q", ""),
+        request.args.get("region", ""),
+    )
+    rows = _sort_state_rows(rows, request.args.get("sort", "cases-desc"))
+    buf = io.StringIO()
+    w = csv.writer(buf, lineterminator="\n")
+    w.writerow(["State / UT", "Region", "Reported cases", "Districts", "Top diseases"])
+    for r in rows:
+        w.writerow([
+            r["display"],
+            r["region"],
+            r["cases"],
+            r["districts"],
+            ", ".join("%s (%d)" % (d, c) for d, c in r["top_diseases"]),
+        ])
+    resp = make_response(buf.getvalue())
+    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
+    resp.headers["Content-Disposition"] = (
+        'attachment; filename="public-health-states.csv"'
+    )
+    return resp
+
+
+@app.route("/states")
+def states():
+    rows = get_state_rows()
+    max_cases = max((r["cases"] for r in rows), default=0)
+    for r in rows:
+        # 1 (lightest) .. 5 (darkest) bucket for the map view shading.
+        r["level"] = 1 + int(4 * (r["cases"] / max_cases)) if max_cases else 1
+    return render_template("states.html", active="states", health_data=health_data,
+                           source=DATA_SOURCE, rows=_sort_state_rows(rows, "cases-desc"),
+                           regions=REGIONS, site=site_info(), stats=get_stats(),
+                           total_districts=sum(len(v["districts"]) for v in health_data.values()))
+
 
 
 def get_home_data():
@@ -303,6 +453,21 @@ def find():
     disease = (request.args.get("disease") or "").strip()
     place = (request.args.get("place") or "").strip()
     view = (request.args.get("view") or "cases").strip()
+    q = (request.args.get("q") or "").strip()
+
+    # Global search (top bar): one free-text box that may name a disease or a place.
+    if q and not disease and not place:
+        surveillance_names = {n.lower() for n in _disease_totals()}
+        library_names = {d["name"].lower() for d in diseases_data.DISEASES}
+        nq = normalize(q)
+        if q.lower() in surveillance_names or q.lower() in library_names:
+            disease = q
+        elif any(nq in normalize(v["display"]) or any(
+            nq in normalize(d) for d in v["districts"]
+        ) for v in health_data.values()):
+            place = q
+        # else: no disease and no place - the template reports no matches.
+
     nd = normalize(disease)
     np_ = normalize(place)
 
@@ -343,6 +508,7 @@ def find():
         active="home",
         disease=disease,
         place=place,
+        query=q,
         view=view,
         guide=guide,
         rows=rows[:15],
@@ -351,11 +517,6 @@ def find():
         state_names=[v["display"] for v in health_data.values()],
         disease_names=sorted(set(_disease_totals().keys()) | {d["name"] for d in diseases_data.DISEASES}),
     )
-
-
-@app.route("/states")
-def states():
-    return render_template("states.html", active="states", health_data=health_data, source=DATA_SOURCE)
 
 
 @app.route("/live_search", methods=["GET", "POST"])

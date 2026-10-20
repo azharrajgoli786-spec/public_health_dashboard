@@ -27,6 +27,11 @@
                     <li><a href="/about" class="{% if active=='about' %}active{% endif %}" {% if active=='about' %}aria-current="page"{% endif %}>About</a></li>
                 </ul>
             </nav>
+            <form class="topsearch" action="/find" method="get" role="search" aria-label="Search the dashboard">
+                <label class="sr-only" for="topSearch">Search diseases and states</label>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input type="search" id="topSearch" name="q" placeholder="Search diseases, states..." autocomplete="off">
+            </form>
         </div>
     </header>
 
@@ -57,6 +62,11 @@
                     <li><a href="/analytics">Analytics</a></li>
                     <li><a href="/about">About this project</a></li>
                 </ul>
+            </div>
+            <div>
+                <h3>Need help?</h3>
+                <p>In case of a medical emergency, contact your nearest healthcare provider or call</p>
+                <p class="helpline"><a href="tel:108">108 / 102</a></p>
             </div>
         </div>
         <div class="disclaimer" role="note" aria-label="Medical disclaimer">

@@ -3,9 +3,9 @@
 {% block meta %}Search disease surveillance cases and health guides by disease and location across India.{% endblock %}
 {% block content %}
 <section class="page-head" aria-labelledby="pageTitle">
-    <span class="eyebrow">Finder &bull; {% if disease %}{{ disease }}{% else %}All diseases{% endif %}{% if place %} &bull; {{ place }}{% endif %}</span>
-    <h1 id="pageTitle">{% if disease %}{{ disease }}{% else %}All diseases{% endif %}{% if place %} in {{ place }}{% endif %}</h1>
-    <p class="lead">{% if guide %}Health guide and dataset rows for this condition.{% else %}Surveillance rows from the current project dataset.{% endif %}</p>
+    <span class="eyebrow">Finder &bull; {% if disease %}{{ disease }}{% elif place %}{{ place }}{% elif query %}{{ query }}{% else %}All diseases{% endif %}</span>
+    <h1 id="pageTitle">{% if disease %}{{ disease }}{% elif place %}All diseases in {{ place }}{% elif query %}No matches for &ldquo;{{ query }}&rdquo;{% else %}All diseases{% endif %}</h1>
+    <p class="lead">{% if guide %}Health guide and dataset rows for this condition.{% elif disease and not total_matches %}No dataset rows report this condition, but the health guide is shown below.{% elif not disease and not place and query %}That search did not match a disease, state, or district in the current dataset. Try a different spelling or browse the <a href="/states">states table</a>.{% else %}Surveillance rows from the current project dataset.{% endif %}</p>
 </section>
 
 <div class="card">
