@@ -92,7 +92,7 @@
     {% endif %}
 
     <div class="notice">
-        <strong>How to read this:</strong> values are dataset case counts (CSV rows plus legacy surveillance estimates where applicable). They show reporting volume, not disease severity or population-adjusted burden.
+        <strong>How to read this:</strong> values are dataset case counts (CSV rows plus legacy surveillance estimates where applicable). They show reporting volume, not disease severity or population-adjusted burden.{% if site.is_demo %} <strong>This is sample data</strong> for interface testing, not official surveillance data.{% endif %}
     </div>
 </div>
 {% endblock %}

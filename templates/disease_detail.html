@@ -1,14 +1,18 @@
 {% extends "base.html" %}
+{% from "_icons.html" import icon %}
 {% block title %}{{ disease.name }} — Diseases Information{% endblock %}
 {% block meta %}{{ disease.short }}{% endblock %}
 {% block content %}
-<section class="page-head teal" aria-labelledby="pageTitle">
-    <span class="eyebrow">{{ disease.category }}</span>
-    <h1 id="pageTitle">{{ disease.name }}</h1>
-    <p class="lead">{{ disease.short }}</p>
-    <div class="meta" style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.6rem;">
-        <span class="badge {% if disease._transmission == 'Non-contagious' %}teal{% elif disease._transmission == 'Vector-borne' %}blue{% else %}neutral{% endif %}">{{ disease._transmission }}</span>
-        {% if disease._vaccine %}<span class="badge blue">Vaccine exists &mdash; ask doctor</span>{% endif %}
+<section class="page-head teal ddetail-head" aria-labelledby="pageTitle">
+    <span class="dcard-icon tone-{{ disease._tone }}">{{ icon(disease._icon) }}</span>
+    <div class="ddetail-head-copy">
+        <span class="eyebrow">{{ disease._short }}</span>
+        <h1 id="pageTitle">{{ disease.name }}</h1>
+        <p class="lead">{{ disease.short }}</p>
+        <div class="meta" style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.6rem;">
+            <span class="badge {% if disease._transmission == 'Non-contagious' %}teal{% elif disease._transmission == 'Vector-borne' %}blue{% else %}neutral{% endif %}">{{ disease._transmission }}</span>
+            {% if disease._vaccine %}<span class="badge blue">Vaccine exists &mdash; ask doctor</span>{% endif %}
+        </div>
     </div>
 </section>
 
@@ -60,19 +64,24 @@
 </article>
 
 {% if related %}
-<section aria-labelledby="relHead">
-    <h2 id="relHead">Related conditions ({{ disease.category }})</h2>
-    <div class="dgrid">
-        {% for r in related %}
-        <article class="dcard" aria-label="{{ r.name }}">
-            <span class="catline">{{ r.category }}</span>
-            <h3><a href="/diseases/{{ r.slug }}">{{ r.name }}</a></h3>
-            <p class="desc">{{ r.short }}</p>
-            <div class="foot"><a href="/diseases/{{ r.slug }}" class="button secondary">View details</a></div>
-        </article>
-        {% endfor %}
-    </div>
+<section class="dlib-section" aria-labelledby="relHead">
+    <h2 id="relHead">Related conditions</h2>
+    <a href="/diseases?category={{ disease.category|urlencode }}">All {{ disease._short }} conditions</a>
 </section>
+<div class="dcard-grid">
+    {% for r in related %}
+    <a class="dcard-new" href="/diseases/{{ r.slug }}">
+        <span class="dcard-top">
+            <span class="dcard-icon tone-{{ r._tone }}">{{ icon(r._icon) }}</span>
+            <span class="dcard-titles">
+                <span class="dcard-name">{{ r.name }}</span>
+                <span class="dcard-cat">{{ r._short }}</span>
+            </span>
+        </span>
+        <span class="dcard-cta">View details</span>
+    </a>
+    {% endfor %}
+</div>
 {% endif %}
 
 <nav class="pager" aria-label="Disease navigation bottom">

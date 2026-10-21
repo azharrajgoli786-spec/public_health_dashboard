@@ -23,6 +23,138 @@ CATEGORIES = [
     "Lifestyle Diseases",
 ]
 
+# Short label for a category, used where the full name is too long
+# (card subtitles, compact lists).
+CATEGORY_SHORT = {
+    "Infectious Diseases": "Infectious",
+    "Vector-Borne Diseases": "Vector-borne",
+    "Waterborne Diseases": "Waterborne",
+    "Respiratory Diseases": "Respiratory",
+    "Non-Communicable Diseases": "Non-communicable",
+    "Nutritional Diseases": "Nutritional",
+    "Lifestyle Diseases": "Lifestyle",
+}
+
+# Icon key per category. Individual diseases may override this - see
+# DISEASE_ICONS - and anything without an entry falls back to its
+# category's icon, so adding a disease never breaks the page.
+CATEGORY_ICONS = {
+    "Infectious Diseases": "virus",
+    "Vector-Borne Diseases": "mosquito",
+    "Waterborne Diseases": "droplet",
+    "Respiratory Diseases": "lungs",
+    "Non-Communicable Diseases": "heart",
+    "Nutritional Diseases": "leaf",
+    "Lifestyle Diseases": "bowl",
+}
+
+# Icon key per disease slug, for diseases that deserve their own symbol
+# (diabetes is a blood condition, not just an infection, and so on).
+DISEASE_ICONS = {
+    "tuberculosis": "lungs",
+    "influenza": "virus",
+    "covid-19": "virus",
+    "hiv-aids": "shield",
+    "hepatitis": "liver",
+    "measles": "child",
+    "chickenpox": "skin",
+    "rabies": "virus",
+    "dengue": "mosquito",
+    "malaria": "mosquito",
+    "chikungunya": "mosquito",
+    "lymphatic-filariasis": "mosquito",
+    "typhoid": "thermometer",
+    "cholera": "droplet",
+    "diarrhoeal-diseases": "stomach",
+    "food-poisoning": "stomach",
+    "amoebiasis": "stomach",
+    "leptospirosis": "droplet",
+    "asthma": "lungs",
+    "pneumonia": "lungs",
+    "copd": "lungs",
+    "bronchitis": "lungs",
+    "diabetes": "blood",
+    "hypertension": "heart",
+    "stroke": "brain",
+    "cancer": "dna",
+    "chronic-kidney-disease": "body",
+    "chronic-liver-disease": "liver",
+    "epilepsy": "brain",
+    "arthritis": "body",
+    "thyroid-disorders": "body",
+    "iron-deficiency-anaemia": "blood",
+    "vitamin-d-deficiency": "leaf",
+    "iodine-deficiency": "leaf",
+    "obesity": "bowl",
+    "fatty-liver-disease": "liver",
+    "cardiovascular-diseases": "heart",
+}
+
+# Featured in the "Popular diseases" strip on the library page. Ordered by
+# how often these come up in general health questions.
+POPULAR_SLUGS = [
+    "dengue",
+    "diabetes",
+    "tuberculosis",
+    "malaria",
+    "hypertension",
+    "covid-19",
+]
+
+# Transmission route for entries whose category default would misdescribe
+# them. Each route is taken from the entry's own "spreads" text.
+TRANSMISSION_OVERRIDES = {
+    # Types A and E spread through contaminated food and water; types B and
+    # C spread through blood and body fluids.
+    "hepatitis": "Blood / water-borne",
+    # Rabies reaches people through bites and scratches from an infected
+    # animal. It is transmissible, just not by casual contact.
+    "rabies": "Person-to-person possible",
+    # People fall ill from the same contaminated food; it is not usually
+    # passed from person to person.
+    "food-poisoning": "Water / food-borne",
+    # Enters through skin cuts or mucous membranes in contaminated water
+    # or soil.
+    "leptospirosis": "Water / food-borne",
+}
+
+# Conditions that do not spread between people, even though their category
+# also holds conditions that do.
+NON_TRANSMISSIBLE = {
+    "asthma",
+    "copd",
+}
+
+# Pastel colour tone per category, used for the round icon badge.
+CATEGORY_TONES = {
+    "Infectious Diseases": "green",
+    "Vector-Borne Diseases": "pink",
+    "Waterborne Diseases": "blue",
+    "Respiratory Diseases": "orange",
+    "Non-Communicable Diseases": "violet",
+    "Nutritional Diseases": "lime",
+    "Lifestyle Diseases": "yellow",
+}
+
+# Tones for individual diseases, so cards in the same category are not all
+# the same colour (e.g. dengue and malaria are both vector-borne).
+DISEASE_TONES = {
+    "dengue": "pink",
+    "diabetes": "red",
+    "tuberculosis": "orange",
+    "malaria": "green",
+    "hypertension": "red",
+    "covid-19": "violet",
+    "chikungunya": "violet",
+    "cholera": "blue",
+    "typhoid": "blue",
+    "asthma": "orange",
+    "pneumonia": "orange",
+    "cancer": "violet",
+    "obesity": "yellow",
+    "fatty-liver-disease": "yellow",
+}
+
 DISEASES = [
     # ---------------- Infectious Diseases (8) ----------------
     {
@@ -618,22 +750,45 @@ def alpha_index():
 
 
 def transmission_badge(disease):
-    """Honest transmission label derived from the entry's own text.
+    """Honest transmission label for a condition.
 
-    Rule-based only (category + 'spreads' wording); never a severity score.
+    The label describes how the condition reaches other people. It is a
+    transmission route, never a severity score.
+
+    The route comes from each entry's own "spreads" text. Matching on that
+    text alone is unreliable, because most entries add a negated clause
+    ("it does not spread by sharing food or mosquito bites") that used to
+    make the reader pick up the wrong route. So the decision is made in
+    three steps:
+
+      1. An explicit override, for entries whose route the category default
+         would misdescribe.
+      2. The category default.
+      3. Person-to-person for the infectious category, where the entries
+         describe transmission between people.
+
     Returns one of: 'Non-contagious', 'Vector-borne', 'Water / food-borne',
-    or 'Person-to-person possible'.
+    'Blood / water-borne' or 'Person-to-person possible'.
     """
-    spreads = (disease.get("spreads") or "").lower()
+    slug = disease.get("slug")
     category = disease.get("category") or ""
-    # Specific routes first: several vector/water-borne entries also note
-    # they do not spread person-to-person, and the route is more useful.
-    if category == "Vector-Borne Diseases" or "mosquito" in spreads:
-        return "Vector-borne"
-    if category == "Waterborne Diseases" or "contaminated food" in spreads or "contaminated water" in spreads or "stool" in spreads:
-        return "Water / food-borne"
-    if "does not spread" in spreads or "not contagious" in spreads or "does not spread from person" in spreads:
+
+    if slug in TRANSMISSION_OVERRIDES:
+        return TRANSMISSION_OVERRIDES[slug]
+    if slug in NON_TRANSMISSIBLE:
         return "Non-contagious"
+    if category == "Vector-Borne Diseases":
+        return "Vector-borne"
+    if category == "Waterborne Diseases":
+        return "Water / food-borne"
+    if category in ("Non-Communicable Diseases", "Nutritional Diseases",
+                    "Lifestyle Diseases"):
+        return "Non-contagious"
+    if category == "Respiratory Diseases":
+        # Pneumonia and bronchitis can be caught from other people; asthma
+        # and COPD are handled above.
+        return "Person-to-person possible"
+    # Infectious conditions describe transmission between people.
     return "Person-to-person possible"
 
 
@@ -650,3 +805,69 @@ def category_counts():
     for d in DISEASES:
         counts[d["category"]] = counts.get(d["category"], 0) + 1
     return counts
+
+
+def icon_for(disease):
+    """Icon key for a disease, falling back to its category's icon."""
+    key = DISEASE_ICONS.get(disease.get("slug"))
+    if key:
+        return key
+    return CATEGORY_ICONS.get(disease.get("category"), "plus")
+
+
+def tone_for(disease):
+    """Pastel colour tone for a disease's icon badge."""
+    key = DISEASE_TONES.get(disease.get("slug"))
+    if key:
+        return key
+    return CATEGORY_TONES.get(disease.get("category"), "blue")
+
+
+def short_category(disease):
+    """Short, human label for a disease's category."""
+    return CATEGORY_SHORT.get(disease.get("category"), disease.get("category") or "")
+
+
+def popular_diseases():
+    """The diseases featured in the "Popular diseases" strip.
+
+    Order follows POPULAR_SLUGS. Any slug that is missing from the library
+    is skipped, so the list stays valid as entries are added or renamed.
+    """
+    out = []
+    for slug in POPULAR_SLUGS:
+        d = DISEASE_MAP.get(slug)
+        if d:
+            out.append(decorate(d))
+    return out
+
+
+def category_cards():
+    """Category metadata for the "Browse by category" grid.
+
+    Returns one dict per category with its display name, short label, icon
+    key, pastel tone and how many conditions it holds.
+    """
+    counts = category_counts()
+    out = []
+    for c in CATEGORIES:
+        out.append({
+            "name": c,
+            "short": CATEGORY_SHORT.get(c, c),
+            "icon": CATEGORY_ICONS.get(c, "plus"),
+            "tone": CATEGORY_TONES.get(c, "blue"),
+            "count": counts.get(c, 0),
+        })
+    return out
+
+
+def decorate(disease):
+    """Attach the template-facing extras (icon, tone, short category).
+
+    Returns a copy, so the library data itself stays untouched.
+    """
+    d = dict(disease)
+    d["_icon"] = icon_for(d)
+    d["_tone"] = tone_for(d)
+    d["_short"] = short_category(d)
+    return d

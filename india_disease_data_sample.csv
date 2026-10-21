@@ -23,6 +23,21 @@ Jharkhand,Jamshedpur,Malaria,120,No
 Karnataka,Bangalore,Dengue,523,Yes
 Karnataka,Mysore,Malaria,212,No
 Karnataka,Mangalore,Chickenpox,130,Yes
+Karnataka,Hubli,Cholera,99,No
+Karnataka,Belagavi,Typhoid,141,Yes
+Karnataka,Bidar,Dengue,65,No
+Karnataka,Mandya,Malaria,48,Yes
+Karnataka,Hassan,Chickenpox,34,No
+Karnataka,Chikodi,Malaria,28,Yes
+Karnataka,Gokak,Typhoid,41,No
+Karnataka,Raybag,Cholera,19,Yes
+Karnataka,Savadatti,Dengue,12,No
+Karnataka,Hukkeri,Malaria,17,No
+Karnataka,Ramdurg,Chickenpox,22,Yes
+Karnataka,Athani,Cholera,11,No
+Karnataka,Bailhongal,Typhoid,9,No
+Karnataka,Saundatti,Chickenpox,7,Yes
+Karnataka,Mudalgi,Malaria,6,No
 Kerala,Kochi,Cholera,92,Yes
 Kerala,Trivandrum,Chickenpox,130,Yes
 Kerala,Kozhikode,Dengue,43,No
@@ -64,26 +79,3 @@ Lakshadweep,Kavaratti,Malaria,2,No
 Andaman and Nicobar Islands,Port Blair,Typhoid,9,No
 Chandigarh,Chandigarh,Chickenpox,24,Yes
 Dadra and Nagar Haveli and Daman and Diu,Daman,Cholera,7,No
-Karnataka,Bangalore,Dengue,523,Yes
-Karnataka,Mysore,Malaria,212,No
-Karnataka,Mangalore,Chickenpox,130,Yes
-Karnataka,Hubli,Cholera,99,No
-Karnataka,Belgaum,Typhoid,141,Yes
-Karnataka,Belgaum City 1,Dengue,65,No
-Karnataka,Belgaum City 2,Malaria,48,Yes
-Karnataka,Belgaum City 3,Chickenpox,34,No
-Karnataka,Chikodi,Malaria,28,Yes
-Karnataka,Gokak,Typhoid,41,No
-Karnataka,Raybag,Cholera,19,Yes
-Karnataka,Savadatti,Dengue,12,No
-Karnataka,Hukkeri,Malaria,17,No
-Karnataka,Ramdurg,Chickenpox,22,Yes
-Karnataka,Athani,Cholera,11,No
-Karnataka,Bailhongal,Typhoid,9,No
-Karnataka,Saundatti,Chickenpox,7,Yes
-Karnataka,Mudalgi,Malaria,6,No
-Maharashtra,Pune,Malaria,410,No
-Kerala,Kochi,Cholera,92,Yes
-Kerala,Trivandrum,Chickenpox,130,Yes
-Tamil Nadu,Chennai,Typhoid,120,No
-Telangana,Hyderabad,Chickenpox,240,Yes

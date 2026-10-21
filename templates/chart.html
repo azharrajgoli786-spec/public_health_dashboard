@@ -1,229 +1,446 @@
 {% extends "base.html" %}
-{% block title %}Analytics — Cases Compared Across States{% endblock %}
-{% block meta %}Ranked charts comparing reported disease cases across Indian states, with disease and display filters.{% endblock %}
+{% block title %}Health analytics — Public Health Dashboard{% endblock %}
+{% block meta %}Reported cases across every Indian state and union territory, with KPI totals, a state ranking, disease mix and district detail.{% endblock %}
 {% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>{% endblock %}
 {% block content %}
-<section class="page-head" aria-labelledby="pageTitle">
-    <span class="eyebrow">Analytics &bull; {{ health_data|length }} states &amp; UTs</span>
-    <h1 id="pageTitle">Analytics — cases compared across states</h1>
-    <p class="lead">Ranked highest to lowest from the project dataset. Filter by disease or limit the number of states shown; the table below always matches the chart. Blue = total cases, teal = single-disease view.</p>
+
+<!-- ============ HEADER ============ -->
+<section class="an-head" aria-labelledby="pageTitle">
+    <h1 id="pageTitle">Health analytics</h1>
+    <p>Reported cases across all {{ stats.total_states }} states and union territories, with district detail.</p>
 </section>
 
-<div class="card">
-    <form id="chartFilters" onsubmit="return false;" aria-label="Chart filters">
-        <div class="filters">
-            <div class="field">
-                <label class="field-label" for="fDisease">Disease</label>
-                <select class="input" id="fDisease">
-                    <option value="">All diseases (total cases)</option>
-                    {% for d in surveillance_diseases %}
-                    <option value="{{ d }}">{{ d }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="field">
-                <label class="field-label" for="fTop">States shown</label>
-                <select class="input" id="fTop">
-                    <option value="10">Top 10</option>
-                    <option value="15" selected>Top 15</option>
-                    <option value="30">Top 30</option>
-                    <option value="0">All states</option>
-                </select>
-            </div>
-            <div class="field">
-                <label class="field-label" for="fSort">Order</label>
-                <select class="input" id="fSort">
-                    <option value="desc">Highest first</option>
-                    <option value="asc">Lowest first</option>
-                </select>
-            </div>
-            <div class="field" style="align-self:end;">
-                <button type="button" class="button secondary" id="fReset">Reset filters</button>
-            </div>
-        </div>
-    </form>
-
-    <div class="chart-box">
-        <div class="chart-wrap" id="chartWrap">
-            <canvas id="casesChart" role="img" aria-label="Horizontal bar chart of reported cases by state"></canvas>
-        </div>
-        <p class="legend-note" id="chartNote"></p>
+<!-- ============ CONTROLS ============ -->
+<div class="an-controls">
+    <div class="field">
+        <label class="sr-only" for="anState">State or union territory</label>
+        <select class="input" id="anState">
+            <option value="">All states &amp; UTs ({{ stats.total_states }})</option>
+            {% for s in payload.states %}
+            <option value="{{ s.display }}">{{ s.display }}</option>
+            {% endfor %}
+        </select>
     </div>
-    <div class="empty" id="chartEmpty" hidden>
-        <p><strong>No data for this selection.</strong></p>
-        <p id="chartEmptyWhy">No state in the dataset reports this disease.</p>
-        <p><button type="button" class="button secondary" id="emptyReset">Show all diseases</button></p>
-    </div>
-    <div class="empty" id="chartLibFail" hidden>
-        <p><strong>The chart could not be drawn.</strong></p>
-        <p id="chartLibWhy">The chart library could not load. The ranked table below still lists every value.</p>
-    </div>
-
-    <h2>Ranked table</h2>
-    <p class="muted" id="tableCount" role="status" aria-live="polite"></p>
-    <div class="table-wrap">
-        <table class="data" id="rankTable">
-            <caption>Reported cases by state for the current filter, ranked.</caption>
-            <thead><tr><th scope="col">Rank</th><th scope="col">State</th><th scope="col" class="num">Cases</th><th scope="col">Diseases reported</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
-
-    <div class="notice">
-        <strong>How to read this:</strong> values are dataset case counts (CSV rows plus legacy surveillance estimates where applicable). They show reporting volume, not disease severity or population-adjusted burden.
+    <div class="field">
+        <label class="sr-only" for="anDisease">Disease</label>
+        <select class="input" id="anDisease">
+            <option value="">All diseases</option>
+            {% for d in payload.diseases %}
+            <option value="{{ d }}">{{ d }}</option>
+            {% endfor %}
+        </select>
     </div>
 </div>
+
+<!-- ============ KPIs ============ -->
+<div class="an-kpis" aria-label="Key indicators">
+    <article class="an-kpi an-kpi-blue">
+        <span class="an-kpi-label">Reported cases</span>
+        <span class="an-kpi-value" id="kpiCases">—</span>
+        <span class="an-kpi-sub" id="kpiCasesSub">All diseases</span>
+    </article>
+    <article class="an-kpi an-kpi-green">
+        <span class="an-kpi-label">States &amp; UTs</span>
+        <span class="an-kpi-value" id="kpiStates">—</span>
+        <span class="an-kpi-sub" id="kpiStatesSub">&nbsp;</span>
+    </article>
+    <article class="an-kpi an-kpi-amber">
+        <span class="an-kpi-label">Districts</span>
+        <span class="an-kpi-value" id="kpiDistricts">—</span>
+        <span class="an-kpi-sub">With reported cases</span>
+    </article>
+    <article class="an-kpi an-kpi-red">
+        <span class="an-kpi-label">Top disease</span>
+        <span class="an-kpi-value" id="kpiTopDisease">—</span>
+        <span class="an-kpi-sub" id="kpiTopDiseaseSub">&nbsp;</span>
+    </article>
+</div>
+
+<!-- ============ TREND ============ -->
+<section class="card an-card" aria-labelledby="trendTitle">
+    <div class="an-card-head">
+        <h2 id="trendTitle">Disease trend over time</h2>
+        <span class="an-badge">Sample trend</span>
+    </div>
+    <div class="chart-wrap an-trend"><canvas id="trendChart" role="img" aria-label="Modelled monthly trend of reported cases"></canvas></div>
+    <p class="an-note" id="trendNote">Modelled shape, not reported data &mdash; the dataset has no time dimension.</p>
+</section>
+
+<!-- ============ STATES ============ -->
+<section class="card an-card" aria-labelledby="statesTitle">
+    <div class="an-card-head">
+        <h2 id="statesTitle">Cases by state &amp; UT</h2>
+        <span class="an-card-note" id="statesTotal"></span>
+    </div>
+    <ol class="an-bars" id="stateBars"></ol>
+    <p class="an-note">Tap a state to see its districts. Figures are reporting volume, not population-adjusted burden.</p>
+</section>
+
+<!-- ============ DISTRIBUTION ============ -->
+<section class="card an-card" aria-labelledby="distTitle">
+    <div class="an-card-head">
+        <h2 id="distTitle">Disease distribution</h2>
+    </div>
+    <div class="an-split">
+        <div class="chart-wrap an-donut"><canvas id="distChart" role="img" aria-label="Donut chart of reported cases by disease"></canvas></div>
+        <ul class="an-legend" id="distLegend"></ul>
+    </div>
+</section>
+
+<!-- ============ DISTRICTS ============ -->
+<section class="card an-card" aria-labelledby="districtsTitle">
+    <div class="an-card-head">
+        <h2 id="districtsTitle">Districts</h2>
+        <span class="an-card-note" id="districtsNote"></span>
+    </div>
+    <div id="districtsBox"></div>
+</section>
+
+<div class="notice">
+    <strong>How to read this:</strong> values are dataset case counts (CSV rows plus modelled legacy surveillance estimates marked <span class="badge-est">est</span>). They show reporting volume, not disease severity or population-adjusted burden.{% if site.is_demo %} <strong>This is sample data</strong> for interface testing, not official surveillance data.{% endif %}
+</div>
+
 {% endblock %}
+
 {% block scripts %}
-<script id="health-data" type="application/json">{{ health_data | tojson }}</script>
+<script id="analytics-data" type="application/json">{{ payload | tojson }}</script>
 <script>
 (function () {
-    var raw = {};
-    try { raw = JSON.parse(document.getElementById('health-data').textContent); }
-    catch (e) { raw = {}; }
-    var entries = Object.keys(raw).map(function (k) { return raw[k]; });
-    var fDisease = document.getElementById('fDisease');
-    var fTop = document.getElementById('fTop');
-    var fSort = document.getElementById('fSort');
-    var note = document.getElementById('chartNote');
-    var emptyBox = document.getElementById('chartEmpty');
-    var emptyWhy = document.getElementById('chartEmptyWhy');
-    var libFail = document.getElementById('chartLibFail');
-    var libWhy = document.getElementById('chartLibWhy');
-    var tableCount = document.getElementById('tableCount');
-    var tbody = document.querySelector('#rankTable tbody');
-    var chart = null;
+    var data = {};
+    try { data = JSON.parse(document.getElementById('analytics-data').textContent); }
+    catch (e) { data = { states: [], diseases: [] }; }
 
-    function valueFor(e, disease) {
-        if (!disease) return e.cases;
-        var bd = e.disease_breakdown || {};
-        return bd[disease] || 0;
+    var selState = document.getElementById('anState');
+    var selDisease = document.getElementById('anDisease');
+    var kpiCases = document.getElementById('kpiCases');
+    var kpiCasesSub = document.getElementById('kpiCasesSub');
+    var kpiStates = document.getElementById('kpiStates');
+    var kpiStatesSub = document.getElementById('kpiStatesSub');
+    var kpiDistricts = document.getElementById('kpiDistricts');
+    var kpiTopDisease = document.getElementById('kpiTopDisease');
+    var kpiTopDiseaseSub = document.getElementById('kpiTopDiseaseSub');
+    var barsBox = document.getElementById('stateBars');
+    var statesTotal = document.getElementById('statesTotal');
+    var legendBox = document.getElementById('distLegend');
+    var districtsBox = document.getElementById('districtsBox');
+    var districtsNote = document.getElementById('districtsNote');
+    var trendNote = document.getElementById('trendNote');
+
+    // Palette for the disease donut, in the order diseases are listed.
+    var PALETTE = ['#2563EB', '#0EA5E9', '#14B8A6', '#F59E0B', '#8B5CF6',
+                   '#EC4899', '#EF4444', '#22C55E', '#A855F7', '#64748B'];
+
+    // A fixed 12-month shape (monsoon-weighted) used only to draw the
+    // illustrative trend. It is scaled to the current total, never to
+    // reported time-series data, because the dataset has no dates.
+    var MONTH_WEIGHTS = [0.62, 0.56, 0.64, 0.78, 0.94, 1.14, 1.36, 1.40, 1.14, 0.92, 0.70, 0.80];
+    var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    var trendChart = null;
+    var distChart = null;
+
+    function casesFor(state, disease) {
+        if (!disease) return state.cases;
+        return (state.diseases[disease] || 0);
     }
-    function currentRows() {
-        var d = fDisease.value;
-        var rows = entries.map(function (e) {
-            return { display: e.display, cases: valueFor(e, d), diseases: e.diseases };
-        }).filter(function (r) { return !d || r.cases > 0; });
-        rows.sort(function (a, b) {
-            return fSort.value === 'asc' ? a.cases - b.cases : b.cases - a.cases;
-        });
-        var top = parseInt(fTop.value, 10) || 0;
-        if (top > 0) rows = rows.slice(0, top);
-        return { rows: rows, disease: d };
+
+    function selectedStates() {
+        var name = selState.value;
+        if (!name) return data.states;
+        var found = data.states.filter(function (s) { return s.display === name; });
+        return found.length ? found : [];
     }
-    function renderTable(rows, disease) {
-        tbody.innerHTML = '';
-        rows.forEach(function (r, i) {
-            var tr = document.createElement('tr');
-            var tdR = document.createElement('td'); tdR.textContent = i + 1;
-            var th = document.createElement('th'); th.scope = 'row'; th.textContent = r.display;
-            var tdC = document.createElement('td'); tdC.className = 'num';
-            var strong = document.createElement('strong'); strong.textContent = r.cases; tdC.appendChild(strong);
-            var tdD = document.createElement('td'); tdD.textContent = disease ? disease : r.diseases;
-            tr.appendChild(tdR); tr.appendChild(th); tr.appendChild(tdC); tr.appendChild(tdD);
-            tbody.appendChild(tr);
-        });
-        tableCount.textContent = rows.length + ' states shown' + (disease ? ' for ' + disease : ' (total cases)') + '.';
+
+    function number(n) {
+        return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     }
-    // Data-label plugin: draw values at the end of each bar (no extra dependency).
-    function dataLabels() {
-        var id = 'inlineDataLabels';
-        try {
-            if (!window.Chart || !window.Chart.registry || typeof window.Chart.registry.getPlugin !== 'function') return;
-            if (window.Chart.registry.getPlugin(id)) return;
-            window.Chart.register({
-                id: id,
-                afterDatasetsDraw: function (c) {
-                    var ctx = c.ctx;
-                    ctx.save();
-                    ctx.font = '600 11px Inter, sans-serif';
-                    ctx.fillStyle = '#0F172A';
-                    c.data.datasets.forEach(function (ds, di) {
-                        var meta = c.getDatasetMeta(di);
-                        meta.data.forEach(function (bar, i) {
-                            var v = ds.data[i];
-                            if (v === null || v === undefined) return;
-                            ctx.fillText(String(v), bar.x + 6, bar.y + 4);
-                        });
-                    });
-                    ctx.restore();
-                }
+
+    // ---- KPI + list rendering -------------------------------------------
+    function render() {
+        var disease = selDisease.value;
+        var states = selectedStates();
+
+        // State rows for the bar list: all states, filtered by disease.
+        var rows = data.states.map(function (s) {
+            return { display: s.display, isUT: s.isUT, cases: casesFor(s, disease) };
+        }).filter(function (r) { return !disease || r.cases > 0; });
+        rows.sort(function (a, b) { return b.cases - a.cases; });
+
+        // --- KPIs ---
+        var total = 0, districtTotal = 0, stateCount = 0, utCount = 0;
+        var diseaseTotals = {};
+        states.forEach(function (s) {
+            var c = casesFor(s, disease);
+            if (c <= 0) return;
+            total += c;
+            stateCount += s.isUT ? 0 : 1;
+            utCount += s.isUT ? 1 : 0;
+            if (!disease) districtTotal += s.districts.length;
+            else {
+                // For a single disease, count districts that report it.
+                districtTotal += s.districts.filter(function (d) {
+                    return (s.diseases[disease] || 0) > 0;
+                }).length;
+            }
+            Object.keys(s.diseases).forEach(function (k) {
+                diseaseTotals[k] = (diseaseTotals[k] || 0) + s.diseases[k];
             });
-        } catch (e) { /* labels are decorative; never break the chart */ }
+        });
+
+        kpiCases.textContent = number(total);
+        kpiCasesSub.textContent = disease || 'All diseases';
+
+        var shownStates = states.filter(function (s) { return casesFor(s, disease) > 0; });
+        var shownStatesCount = shownStates.filter(function (s) { return !s.isUT; }).length;
+        var shownUTs = shownStates.filter(function (s) { return s.isUT; }).length;
+        kpiStates.textContent = String(shownStatesCount + shownUTs);
+        kpiStatesSub.textContent = shownStatesCount + (shownStatesCount === 1 ? ' state · ' : ' states · ') +
+            shownUTs + (shownUTs === 1 ? ' UT' : ' UTs');
+
+        kpiDistricts.textContent = number(districtTotal);
+
+        var topName = '', topCount = 0;
+        Object.keys(diseaseTotals).forEach(function (k) {
+            if (diseaseTotals[k] > topCount) { topCount = diseaseTotals[k]; topName = k; }
+        });
+        kpiTopDisease.textContent = topName || '—';
+        kpiTopDiseaseSub.textContent = topCount ? number(topCount) + ' cases' : '';
+
+        // --- State bar list ---
+        statesTotal.textContent = rows.length + ' states and UTs shown';
+        var max = rows.length ? rows[0].cases : 0;
+        barsBox.innerHTML = '';
+        rows.forEach(function (r) {
+            var li = document.createElement('li');
+            li.className = 'an-bar-row';
+            li.tabIndex = 0;
+            li.setAttribute('role', 'button');
+            li.setAttribute('aria-label', r.display + ', ' + r.cases + ' reported cases');
+            li.dataset.name = r.display;
+
+            var name = document.createElement('span');
+            name.className = 'an-bar-name';
+            name.appendChild(document.createTextNode(r.display));
+            if (r.isUT) {
+                var ut = document.createElement('span');
+                ut.className = 'an-ut';
+                ut.textContent = 'UT';
+                name.appendChild(ut);
+            }
+
+            var track = document.createElement('span');
+            track.className = 'an-bar-track';
+            var fill = document.createElement('span');
+            fill.className = 'an-bar-fill';
+            fill.style.width = (max ? Math.max(1.5, (r.cases / max) * 100) : 0) + '%';
+            track.appendChild(fill);
+
+            var val = document.createElement('span');
+            val.className = 'an-bar-value';
+            val.textContent = number(r.cases);
+
+            li.appendChild(name);
+            li.appendChild(track);
+            li.appendChild(val);
+            barsBox.appendChild(li);
+        });
+
+        renderDistricts(states, disease);
+        renderTrend(total, disease);
+        renderDonut(diseaseTotals, total);
     }
-    function showLibFail(msg) {
-        var canvas = document.getElementById('casesChart');
-        canvas.closest('.chart-box').hidden = true;
-        emptyBox.hidden = true;
-        if (libWhy && msg) libWhy.textContent = msg + ' The ranked table below still lists every value.';
-        libFail.hidden = false;
-    }
-    function renderChart(rows, disease) {
-        var canvas = document.getElementById('casesChart');
-        var box = canvas.closest('.chart-box');
-        var wrap = document.getElementById('chartWrap');
-        if (typeof window.Chart === 'undefined') {
-            showLibFail('The chart library (CDN) could not load. Check your internet connection.');
+
+    // ---- Districts card --------------------------------------------------
+    function renderDistricts(states, disease) {
+        districtsBox.innerHTML = '';
+        var name = selState.value;
+        if (!name) {
+            var all = data.states.reduce(function (n, s) { return n + s.districts.length; }, 0);
+            districtsNote.textContent = '';
+            var p = document.createElement('p');
+            p.className = 'an-note';
+            p.innerHTML = 'Pick a state or union territory above, or tap one in the list, to see its districts&rsquo; cases. Together all ' +
+                data.states.length + ' cover ' + all + ' districts.';
+            districtsBox.appendChild(p);
             return;
         }
-        dataLabels();
-        if (rows.length === 0) {
-            box.hidden = true; emptyBox.hidden = false;
-            emptyWhy.textContent = disease
-                ? 'No state in the dataset reports "' + disease + '". Try another disease or reset.'
-                : 'No states available for the current filters.';
-            return;
-        }
-        box.hidden = false; emptyBox.hidden = true; libFail.hidden = true;
-        // Size the wrapper BEFORE creating the chart: with
-        // maintainAspectRatio:false Chart.js fills its parent, and an
-        // unsized parent renders as a zero-height (empty) box.
-        wrap.style.height = Math.max(280, rows.length * 34) + 'px';
-        var color = disease ? 'rgba(14,116,144,0.75)' : 'rgba(30,64,175,0.75)';
-        var border = disease ? 'rgba(14,116,144,1)' : 'rgba(30,64,175,1)';
-        if (chart) chart.destroy();
-        try {
-            chart = new window.Chart(canvas, {
-            type: 'bar',
+        var s = states[0];
+        if (!s) return;
+        var list = s.districts.slice().sort(function (a, b) { return b.cases - a.cases; });
+        districtsNote.textContent = s.display + ' · ' + list.length + ' districts';
+        var wrap = document.createElement('div');
+        wrap.className = 'an-districts';
+        list.forEach(function (d) {
+            var row = document.createElement('div');
+            row.className = 'an-district-row';
+            var n = document.createElement('span');
+            n.className = 'an-district-name';
+            n.textContent = d.name;
+            var v = document.createElement('span');
+            v.className = 'an-district-cases';
+            v.textContent = number(d.cases);
+            row.appendChild(n);
+            row.appendChild(v);
+            wrap.appendChild(row);
+        });
+        districtsBox.appendChild(wrap);
+    }
+
+    // ---- Sample trend ----------------------------------------------------
+    function renderTrend(total, disease) {
+        var scope = selState.value || 'all states and UTs';
+        var sum = MONTH_WEIGHTS.reduce(function (a, b) { return a + b; }, 0);
+        var values = MONTH_WEIGHTS.map(function (w) {
+            return Math.round((total * w) / sum);
+        });
+        trendNote.textContent = 'Modelled shape scaled to ' + number(total) +
+            ' cases for ' + scope + (disease ? ' (' + disease + ')' : '') +
+            ' — the dataset has no time dimension.';
+
+        var canvas = document.getElementById('trendChart');
+        if (typeof window.Chart === 'undefined' || !canvas) return;
+        var ctx = canvas.getContext('2d');
+        var grad = ctx.createLinearGradient(0, 0, 0, 260);
+        grad.addColorStop(0, 'rgba(37, 99, 235, 0.30)');
+        grad.addColorStop(1, 'rgba(37, 99, 235, 0.02)');
+
+        var config = {
+            type: 'line',
             data: {
-                labels: rows.map(function (r) { return r.display; }),
+                labels: MONTHS,
                 datasets: [{
-                    label: disease ? disease + ' cases' : 'Reported cases (total)',
-                    data: rows.map(function (r) { return r.cases; }),
-                    backgroundColor: color, borderColor: border,
-                    borderWidth: 1, borderRadius: 4
+                    label: 'Cases (sample trend)',
+                    data: values,
+                    borderColor: '#2563EB',
+                    borderWidth: 2.2,
+                    backgroundColor: grad,
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 3,
+                    pointBackgroundColor: '#2563EB',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 1.5
                 }]
             },
             options: {
-                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                layout: { padding: { right: 48 } },
-                plugins: { legend: { display: true } },
-                scales: { x: { beginAtZero: true, title: { display: true, text: 'Reported cases' } } }
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#EEF2F7' },
+                        ticks: { font: { size: 11 } }
+                    }
+                }
             }
-            });
-        } catch (err) {
-            showLibFail('Chart error: ' + (err && err.message ? err.message : err));
-            return;
-        }
-        note.textContent = disease
-            ? 'Showing per-state "' + disease + '" cases (' + rows.length + ' states report it).'
-            : 'Showing total reported cases per state (top ' + rows.length + ').';
+        };
+        if (trendChart) { trendChart.destroy(); trendChart = null; }
+        try { trendChart = new window.Chart(canvas, config); } catch (e) { /* decorative */ }
     }
-    function apply() {
-        var res = currentRows();
-        renderTable(res.rows, res.disease);
-        renderChart(res.rows, res.disease);
+
+    // ---- Disease donut ----------------------------------------------------
+    function renderDonut(diseaseTotals, total) {
+        var entries = Object.keys(diseaseTotals)
+            .map(function (k) { return { name: k, cases: diseaseTotals[k] }; })
+            .sort(function (a, b) { return b.cases - a.cases; });
+        legendBox.innerHTML = '';
+        entries.forEach(function (e, i) {
+            var li = document.createElement('li');
+            li.className = 'an-legend-row';
+            var dot = document.createElement('span');
+            dot.className = 'an-dot';
+            dot.style.background = PALETTE[i % PALETTE.length];
+            var name = document.createElement('span');
+            name.className = 'an-legend-name';
+            name.textContent = e.name;
+            var pct = document.createElement('span');
+            pct.className = 'an-legend-pct';
+            pct.textContent = total ? Math.round((e.cases / total) * 100) + '%' : '0%';
+            li.appendChild(dot);
+            li.appendChild(name);
+            li.appendChild(pct);
+            legendBox.appendChild(li);
+        });
+
+        var canvas = document.getElementById('distChart');
+        if (typeof window.Chart === 'undefined' || !canvas) return;
+        var config = {
+            type: 'doughnut',
+            data: {
+                labels: entries.map(function (e) { return e.name; }),
+                datasets: [{
+                    data: entries.map(function (e) { return e.cases; }),
+                    backgroundColor: entries.map(function (e, i) { return PALETTE[i % PALETTE.length]; }),
+                    borderColor: '#fff',
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '58%',
+                plugins: { legend: { display: false } }
+            }
+        };
+        if (distChart) { distChart.destroy(); distChart = null; }
+        try { distChart = new window.Chart(canvas, config); } catch (e) { /* decorative */ }
     }
-    function reset() {
-        fDisease.value = ''; fTop.value = '15'; fSort.value = 'desc';
-        apply();
+
+    // ---- Events ------------------------------------------------------------
+    if (selState) selState.addEventListener('change', render);
+    if (selDisease) selDisease.addEventListener('change', render);
+
+    // Keep the URL in step so a view can be bookmarked or shared.
+    function syncUrl() {
+        try {
+            var url = new URL(window.location.href);
+            if (selState.value) url.searchParams.set('state', selState.value);
+            else url.searchParams.delete('state');
+            if (selDisease.value) url.searchParams.set('disease', selDisease.value);
+            else url.searchParams.delete('disease');
+            history.replaceState(null, '', url.toString());
+        } catch (e) { /* history is optional */ }
     }
-    [fDisease, fTop, fSort].forEach(function (el) {
-        el.addEventListener('change', apply);
+    [selState, selDisease].forEach(function (el) {
+        if (el) el.addEventListener('change', syncUrl);
     });
-    document.getElementById('fReset').addEventListener('click', reset);
-    document.getElementById('emptyReset').addEventListener('click', reset);
-    apply();
+
+    // Tapping a row in the state list selects that state.
+    if (barsBox) {
+        barsBox.addEventListener('click', function (ev) {
+            var row = ev.target.closest('.an-bar-row');
+            if (!row) return;
+            selState.value = row.dataset.name;
+            syncUrl();
+            render();
+            districtsBox.scrollIntoView({ block: 'nearest' });
+        });
+        barsBox.addEventListener('keydown', function (ev) {
+            if (ev.key !== 'Enter' && ev.key !== ' ') return;
+            var row = ev.target.closest('.an-bar-row');
+            if (!row) return;
+            ev.preventDefault();
+            selState.value = row.dataset.name;
+            syncUrl();
+            render();
+        });
+    }
+
+    // Apply any state or disease given in the URL.
+    (function initFromUrl() {
+        var params = new URLSearchParams(window.location.search);
+        var st = params.get('state');
+        var dz = params.get('disease');
+        if (st) {
+            var match = data.states.filter(function (s) { return s.display === st; })[0];
+            if (match) selState.value = st;
+        }
+        if (dz && data.diseases.indexOf(dz) !== -1) selDisease.value = dz;
+        render();
+    })();
 })();
 </script>
 {% endblock %}

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>{% block title %}Public Health Dashboard{% endblock %}</title>
-    <link rel="stylesheet" href="/static/styles.css?v=6">
+    <link rel="stylesheet" href="/static/styles.css?v=9">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{% block meta %}Disease surveillance and health information for India.{% endblock %}">
     {% block head %}{% endblock %}
@@ -49,9 +49,16 @@
             <div>
                 <h3>Data freshness</h3>
                 <ul>
-                    <li>Surveillance data updated: <strong>{{ site.surveillance_updated or 'Date not available' }}</strong></li>
+                    {% if site.is_demo %}
+                    <li>Sample dataset &mdash; <strong>no reporting period</strong>. The sample file was last modified {{ site.file_modified or 'date not available' }} (a file timestamp, not a data vintage).</li>
+                    {% else %}
+                    <li>Reporting period: <strong>{{ site.data_period_display }}</strong>.</li>
+                    {% endif %}
                     <li>Health library updated: <strong>{{ site.library_updated or 'Date not available' }}</strong></li>
                     <li>Case counts come from the project dataset only; the disease library is educational and carries no case counts.</li>
+                    {% if site.is_demo %}
+                    <li>Population figures ({{ site.population_vintage }}) and district counts ({{ site.district_vintage }}) are public reference data used only to normalise counts.</li>
+                    {% endif %}
                 </ul>
             </div>
             <div>

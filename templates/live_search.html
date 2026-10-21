@@ -50,7 +50,7 @@
                 <thead><tr><th scope="col">Disease</th><th scope="col" class="num">Cases</th></tr></thead>
                 <tbody>
                     {% for disease, c in result.disease_breakdown.items() %}
-                    <tr><th scope="row">{{ disease }}</th><td class="num"><strong>{{ c }}</strong></td></tr>
+                    <tr><th scope="row">{{ disease }}{% if disease in result.estimated_diseases %} <span class="badge-est" title="Modelled estimate, not a reported row">est</span>{% endif %}</th><td class="num"><strong>{{ c }}</strong></td></tr>
                     {% endfor %}
                 </tbody>
             </table>
@@ -104,6 +104,12 @@
     <div class="empty" role="alert">
         <p><strong>No data found for &ldquo;{{ query }}&rdquo;.</strong></p>
         <p>Try Karnataka, Maharashtra, Delhi, Kerala, or Uttar Pradesh — or <a href="/states">browse the states table</a>.</p>
+    </div>
+    {% endif %}
+
+    {% if site.is_demo %}
+    <div class="notice">
+        <strong>Sample data.</strong> These case counts are demo figures for interface testing, not official surveillance data.
     </div>
     {% endif %}
 </div>

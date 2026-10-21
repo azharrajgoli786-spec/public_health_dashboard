@@ -15,8 +15,23 @@
 
 <div class="card">
     <h2>What we track</h2>
-    <p>State and district surveillance from the project dataset (<strong>{{ site.source_label }}</strong> &mdash; {{ site.source_detail }}), updated <strong>{{ site.surveillance_updated or 'date not available' }}</strong>. The disease library ({{ library_count }} conditions, updated {{ site.library_updated or 'date not available' }}) is educational and carries no case counts.</p>
+    <p>State and district surveillance from the project dataset (<strong>{{ site.source_label }}</strong> &mdash; {{ site.source_detail }}), {% if site.is_demo %}which carries no reporting period{% else %}reporting period <strong>{{ site.data_period_display }}</strong>{% endif %}. The disease library ({{ library_count }} conditions, updated {{ site.library_updated or 'date not available' }}) is educational and carries no case counts.</p>
 </div>
+
+{% if site.is_demo %}
+<div class="card">
+    <h2>About the sample dataset</h2>
+    <p>This project ships with a <strong>sample dataset</strong> so the interface can be demonstrated without publishing identifiable or unreleased figures. Please read the numbers accordingly:</p>
+    <ul style="padding-left:1.25rem; line-height:1.9; color:#334155;">
+        <li><strong>These are not surveillance figures.</strong> No figure in this dashboard should be read as real disease activity in India.</li>
+        <li><strong>There is no reporting period.</strong> The sample file carries no date, so none is shown. A file&rsquo;s modification timestamp moves whenever the file is touched, so it is not used as a data vintage.</li>
+        <li><strong>Rows marked <span class="badge-est">est</span> are modelled, not reported.</strong> {{ stats.estimated_diseases|join(', ') }} are reconstructed for every state as a share of that state&rsquo;s dataset total, with a fixed per-state variation so the values are not copy-pasted across states.</li>
+        <li><strong>District coverage varies widely</strong> &mdash; for example, a large state may show many reporting districts while a small state shows only one or two. The states table states how many of each state&rsquo;s districts appear.</li>
+        <li><strong>Reference data is separate from surveillance data.</strong> Populations ({{ site.population_vintage }}) and district counts ({{ site.district_vintage }}) are public reference figures, used only to normalise counts &mdash; for example to rank states by cases per lakh.</li>
+    </ul>
+    <p style="margin-bottom:0;">Dropping a real IDSP outbreak file named <code>idsp_outbreak_data.csv</code> or <code>idsp_real_data.csv</code> next to <code>app.py</code> switches the dashboard to real data automatically.</p>
+</div>
+{% endif %}
 
 <div class="card">
     <h2>Features</h2>

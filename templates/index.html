@@ -25,6 +25,13 @@
                     <span class="snap-value">{{ home_data.chart_states[0].display }}</span>
                     <span class="snap-note">{{ home_data.chart_states[0].cases }} reported cases</span>
                 </li>
+                {% if home_data.highest_per_lakh %}
+                <li>
+                    <span class="snap-label">Highest per lakh</span>
+                    <span class="snap-value">{{ home_data.highest_per_lakh.display }}</span>
+                    <span class="snap-note">{{ home_data.highest_per_lakh.per_lakh }} cases per lakh</span>
+                </li>
+                {% endif %}
                 <li>
                     <span class="snap-label">Most reported disease</span>
                     <span class="snap-value">{{ home_data.chart_diseases[0][0] }}</span>
@@ -36,9 +43,12 @@
                     <span class="snap-note">{{ stats.total_districts }} districts reporting</span>
                 </li>
                 <li>
-                    <span class="snap-label">Data updated</span>
-                    <span class="snap-value">{{ site.surveillance_updated or 'Date unavailable' }}</span>
-                    <span class="snap-note">{{ stats.source_label }} dataset</span>
+                    <span class="snap-label">{% if site.is_demo %}Sample dataset{% else %}Reporting period{% endif %}</span>
+                    <span class="snap-value">
+                        {% if site.is_demo %}No reporting period{% else %}{{ site.data_period_display }}{% endif %}
+                        {% if site.is_demo %}<span class="demo-tag demo-tag-sm">Demo data</span>{% endif %}
+                    </span>
+                    <span class="snap-note">{% if site.is_demo %}Demo figures only &mdash; not a reporting period{% else %}{{ stats.source_label }} dataset{% endif %}</span>
                 </li>
             </ul>
         </aside>
@@ -111,8 +121,8 @@
             </span>
             <div class="stat-body">
                 <div class="stat-value">{{ stats.total_districts }}</div>
-                <div class="stat-label">Districts covered</div>
-                <p class="stat-note">With reported rows</p>
+                <div class="stat-label">Districts reporting</div>
+                <p class="stat-note">{% if stats.possible_districts %}of {{ stats.possible_districts }} in scope &middot; {{ stats.coverage_pct }}% coverage{% else %}With reported rows{% endif %}</p>
             </div>
         </article>
         <article class="stat">
@@ -150,6 +160,13 @@
                 <h3>Top states by reported cases</h3>
                 <a class="glance-link" href="/analytics">Full analytics &rarr;</a>
             </div>
+            <div class="metric-toggle">
+                <span class="metric-toggle-label" id="metricToggleLabel">Rank by</span>
+                <div class="seg" role="group" aria-labelledby="metricToggleLabel">
+                    <button type="button" class="seg-btn on" data-metric="cases" aria-pressed="true">Reported cases</button>
+                    <button type="button" class="seg-btn" data-metric="perLakh" aria-pressed="false">Cases per lakh</button>
+                </div>
+            </div>
             <div class="chart-wrap glance-wrap">
                 <canvas id="glanceChart" role="img" aria-label="Bar chart of reported cases in the top 8 states"></canvas>
             </div>
@@ -172,7 +189,7 @@
                 </li>
                 {% endfor %}
             </ul>
-            <p class="muted small-note">Dataset case counts only &mdash; reporting volume, not population-adjusted burden.</p>
+            <p class="muted small-note">Dataset case counts only &mdash; reporting volume. Switch the chart to <strong>cases per lakh</strong> for a population-adjusted state ranking.</p>
         </div>
     </div>
 </section>
@@ -217,8 +234,8 @@
         <div class="fresh-item">
             <span class="dot" aria-hidden="true"></span>
             <div>
-                <strong>Surveillance data updated {{ site.surveillance_updated or 'date not available' }}</strong>
-                <span>Source: {{ stats.source_label }} &mdash; {{ stats.source_detail }}</span>
+                <strong>{% if site.is_demo %}Sample dataset &mdash; no reporting period{% else %}Surveillance data: {{ site.data_period_display }}{% endif %}</strong>
+                <span>Source: {{ stats.source_label }} &mdash; {{ stats.source_detail }}{% if site.is_demo %} (demo figures, not a reporting period){% endif %}</span>
             </div>
         </div>
         <div class="fresh-item">
@@ -230,13 +247,13 @@
         </div>
         <a class="fresh-link" href="/about">Data notes &amp; disclaimer &rarr;</a>
     </div>
-    <p class="fine-print">Case counts come from the project dataset only. The disease library is educational and does not replace advice from a qualified healthcare professional.</p>
+    <p class="fine-print">{% if site.is_demo %}<strong>Sample dataset:</strong> every figure on this page is demo data for interface testing and must not be read as real surveillance data. {% endif %}Case counts come from the project dataset only. The disease library is educational and does not replace advice from a qualified healthcare professional.</p>
 </section>
 
 {% endblock %}
 
 {% block scripts %}
-<script id="glance-data" type="application/json">{{ home_data.chart_states | tojson }}</script>
+<script id="state-metrics" type="application/json">{{ home_data.state_metrics | tojson }}</script>
 <script>
 (function () {
     // Popular chips fill the finder inputs.
@@ -255,53 +272,113 @@
         });
     });
 
-    // Small India visualisation: top states by reported cases.
+    // Small India visualisation: top states, switchable between raw
+    // reported cases and a population-adjusted "cases per lakh" ranking.
     var canvas = document.getElementById('glanceChart');
     if (!canvas) return;
-    var rows = [];
-    try { rows = JSON.parse(document.getElementById('glance-data').textContent); }
-    catch (e) { rows = []; }
-    if (!rows.length || typeof window.Chart === 'undefined') {
-        var wrap = canvas.closest('.glance-chart');
-        canvas.hidden = true;
-        var note = document.getElementById('glanceNote');
-        if (note) note.textContent = 'Chart unavailable in this browser. The full ranked list is on the analytics page.';
-        return;
+    var note = document.getElementById('glanceNote');
+    var TOP_N = 8;
+    var metric = 'cases';
+    var chart = null;
+
+    var metrics = [];
+    try { metrics = JSON.parse(document.getElementById('state-metrics').textContent); }
+    catch (e) { metrics = []; }
+
+    function metricValue(r) {
+        return metric === 'perLakh' ? r.per_lakh : r.cases;
     }
-    var max = rows[0].cases || 1;
-    try {
-        new window.Chart(canvas, {
-            type: 'bar',
-            data: {
-                labels: rows.map(function (r) { return r.display; }),
-                datasets: [{
-                    label: 'Reported cases',
-                    data: rows.map(function (r) { return r.cases; }),
-                    backgroundColor: rows.map(function (r) {
-                        return r.cases >= max * 0.6 ? 'rgba(14,116,144,0.85)' : 'rgba(30,64,175,0.7)';
-                    }),
-                    borderColor: 'rgba(15,23,42,0.12)',
-                    borderWidth: 1,
-                    borderRadius: 5,
-                    barPercentage: 0.72
-                }]
-            },
-            options: {
-                indexAxis: 'y',
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: {
-                    x: { beginAtZero: true, grid: { color: '#EEF2F7' }, ticks: { font: { size: 11 } } },
-                    y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } }
-                }
-            }
+    function topRows() {
+        var rows = metrics.filter(function (r) {
+            return metric === 'perLakh'
+                ? (r.per_lakh !== null && r.per_lakh !== undefined)
+                : true;
         });
-    } catch (err) {
-        canvas.hidden = true;
-        var n = document.getElementById('glanceNote');
-        if (n) n.textContent = 'Chart unavailable in this browser. The full ranked list is on the analytics page.';
+        rows.sort(function (a, b) { return metricValue(b) - metricValue(a); });
+        return rows.slice(0, TOP_N);
     }
+    function unavailable() {
+        canvas.hidden = true;
+        if (note) {
+            note.textContent = 'Chart unavailable in this browser. The full ranked list is on the analytics page.';
+        }
+    }
+
+    function draw() {
+        var rows = topRows();
+        if (!rows.length || typeof window.Chart === 'undefined') {
+            unavailable();
+            return;
+        }
+        var max = metricValue(rows[0]) || 1;
+        canvas.hidden = false;
+        if (chart) { chart.destroy(); chart = null; }
+        try {
+            chart = new window.Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: rows.map(function (r) { return r.display; }),
+                    datasets: [{
+                        label: metric === 'perLakh' ? 'Cases per lakh' : 'Reported cases',
+                        data: rows.map(function (r) { return metricValue(r); }),
+                        backgroundColor: rows.map(function (r) {
+                            return metricValue(r) >= max * 0.6 ? 'rgba(14,116,144,0.85)' : 'rgba(30,64,175,0.7)';
+                        }),
+                        borderColor: 'rgba(15,23,42,0.12)',
+                        borderWidth: 1,
+                        borderRadius: 5,
+                        barPercentage: 0.72
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            grid: { color: '#EEF2F7' },
+                            ticks: { font: { size: 11 } },
+                            title: {
+                                display: true,
+                                text: metric === 'perLakh' ? 'Cases per lakh' : 'Reported cases',
+                                font: { size: 11 }
+                            }
+                        },
+                        y: { grid: { display: false }, ticks: { font: { size: 12, weight: '600' } } }
+                    }
+                }
+            });
+        } catch (err) {
+            unavailable();
+            return;
+        }
+        if (note) {
+            note.textContent = metric === 'perLakh'
+                ? 'Top ' + rows.length + ' states of ' + metrics.length + ', by cases per lakh (population-adjusted).'
+                : 'Top ' + rows.length + ' states of ' + metrics.length + ', by reported cases.';
+        }
+        canvas.setAttribute('aria-label',
+            metric === 'perLakh'
+                ? 'Bar chart of reported cases per lakh in the top ' + rows.length + ' states'
+                : 'Bar chart of reported cases in the top ' + rows.length + ' states');
+    }
+
+    // Rank-by toggle.
+    document.querySelectorAll('.metric-toggle .seg-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            metric = btn.dataset.metric;
+            document.querySelectorAll('.metric-toggle .seg-btn').forEach(function (b) {
+                var on = b === btn;
+                b.classList.toggle('on', on);
+                b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            draw();
+        });
+    });
+
+    draw();
 })();
 </script>
 {% endblock %}

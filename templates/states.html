@@ -34,64 +34,84 @@
 <section class="container">
     <!-- ============ FILTERS ============ -->
     <div class="card filter-card">
-        <div class="filter-grid">
+        <form class="filter-grid" id="stateFilters" method="get" action="/states" role="search" aria-label="Filter states by name, region and sort order">
+            <input type="hidden" name="view" value="{{ view }}">
             <div class="field">
                 <label class="field-label" for="stateQ">Search state or UT</label>
                 <div class="input-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-                    <input class="input" type="search" id="stateQ" placeholder="Type state or union territory..." autocomplete="off">
+                    <input class="input" type="search" id="stateQ" name="q" value="{{ q }}" placeholder="Type state or union territory..." autocomplete="off">
                 </div>
             </div>
             <div class="field">
                 <label class="field-label" for="regionFilter">Region</label>
-                <select class="input" id="regionFilter">
+                <select class="input" id="regionFilter" name="region">
                     <option value="">All regions</option>
-                    {% for r in regions %}<option value="{{ r }}">{{ r }}</option>{% endfor %}
+                    {% for r in regions %}<option value="{{ r }}" {% if r == region %}selected{% endif %}>{{ r }}</option>{% endfor %}
                 </select>
             </div>
             <div class="field">
                 <label class="field-label" for="sortBy">Sort by</label>
-                <select class="input" id="sortBy">
-                    <option value="cases-desc">Reported cases (High to Low)</option>
-                    <option value="cases-asc">Reported cases (Low to High)</option>
-                    <option value="name-asc">State name (A–Z)</option>
-                    <option value="districts-desc">Districts (Most first)</option>
+                <select class="input" id="sortBy" name="sort">
+                    <option value="cases-desc" {% if sort == 'cases-desc' %}selected{% endif %}>Reported cases (High to Low)</option>
+                    <option value="cases-asc" {% if sort == 'cases-asc' %}selected{% endif %}>Reported cases (Low to High)</option>
+                    <option value="per-lakh-desc" {% if sort == 'per-lakh-desc' %}selected{% endif %}>Cases per lakh (High to Low)</option>
+                    <option value="name-asc" {% if sort == 'name-asc' %}selected{% endif %}>State name (A–Z)</option>
+                    <option value="districts-desc" {% if sort == 'districts-desc' %}selected{% endif %}>Districts (Most first)</option>
                 </select>
             </div>
+
+            <!--
+              Not a control: the dashboard holds a single dataset snapshot, so
+              there is nothing to pick. Rendered as static text with a tooltip
+              that says so, instead of an input that invites a selection.
+            -->
             <div class="field">
-                <label class="field-label" for="snapshotDate">Select date</label>
-                <div class="input-icon">
+                <span class="field-label" id="snapshotLabel">Snapshot</span>
+                <div class="static-field" aria-describedby="snapshotLabel"
+                     title="This dashboard has a single dataset snapshot, so there is no date to select.">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
-                    <input class="input" type="text" id="snapshotDate" value="{{ site.surveillance_updated_display or 'Date not available' }}" readonly title="Dataset snapshot date">
+                    <span>{% if site.is_demo %}No reporting period{% else %}{{ site.data_period_display }}{% endif %}</span>
                 </div>
             </div>
+
             <div class="field">
                 <span class="field-label" id="viewLabel">View</span>
                 <div class="seg" role="group" aria-labelledby="viewLabel">
-                    <button type="button" class="seg-btn on" id="viewTable" aria-pressed="true">Table view</button>
-                    <button type="button" class="seg-btn" id="viewMap" aria-pressed="false">Map view</button>
+                    <a class="seg-btn {% if view != 'map' %}on{% endif %}" id="viewTable" href="{{ view_table_url }}" {% if view != 'map' %}aria-current="page"{% endif %}>Table view</a>
+                    <a class="seg-btn {% if view == 'map' %}on{% endif %}" id="viewMap" href="{{ view_map_url }}" {% if view == 'map' %}aria-current="page"{% endif %}>Map view</a>
                 </div>
             </div>
+
             <div class="field field-action">
-                <a class="button outline-teal" id="downloadCsv" href="/states.csv" download>
+                <button type="submit" class="button outline-teal" id="applyFilters">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    Apply
+                </button>
+                <a class="button outline-teal" id="downloadCsv" href="/states.csv?q={{ q|urlencode }}&amp;region={{ region|urlencode }}&amp;sort={{ sort|urlencode }}" download>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
                     Download CSV
                 </a>
             </div>
-        </div>
-        <p class="filter-note">Showing the <strong>{{ site.surveillance_updated or 'dataset' }}</strong> dataset snapshot. The date is fixed to the dataset, so all figures below match that snapshot.</p>
+        </form>
+        <p class="filter-note">
+            {% if site.is_demo %}
+            <strong>Sample dataset.</strong> Every figure below is demo data for interface testing, not official surveillance data.
+            {% endif %}
+            All figures come from one dataset snapshot, so they always match each other. Districts reporting varies by state because the sample file only covers part of each state&rsquo;s territory.
+        </p>
     </div>
 
     <!-- ============ STAT ROW ============ -->
     <div class="stats stats-5" aria-label="Key indicators">
         <article class="stat">
             <span class="stat-icon green" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c4.8 7 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
             </span>
             <div class="stat-body">
                 <div class="stat-value">{{ rows|length }}</div>
                 <div class="stat-label">States &amp; UTs</div>
-                <p class="stat-note">Tracked</p>
+                <p class="stat-note">On this page</p>
             </div>
         </article>
         <article class="stat">
@@ -100,8 +120,8 @@
             </span>
             <div class="stat-body">
                 <div class="stat-value">{{ total_districts }}</div>
-                <div class="stat-label">Districts</div>
-                <p class="stat-note">Covered</p>
+                <div class="stat-label">Districts reporting</div>
+                <p class="stat-note">{% if stats.possible_districts %}of {{ stats.possible_districts }} in scope &middot; {{ stats.coverage_pct }}%{% else %}With reported rows{% endif %}</p>
             </div>
         </article>
         <article class="stat">
@@ -129,9 +149,9 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
             </span>
             <div class="stat-body">
-                <div class="stat-value stat-date">{{ site.surveillance_updated_display or '—' }}</div>
-                <div class="stat-label">Data last updated</div>
-                <p class="stat-note">Dataset snapshot</p>
+                <div class="stat-value stat-date">{% if site.is_demo %}&mdash;{% else %}{{ site.data_period_display }}{% endif %}</div>
+                <div class="stat-label">{% if site.is_demo %}Reporting period{% else %}Data last updated{% endif %}</div>
+                <p class="stat-note">{% if site.is_demo %}None in sample data{% else %}Dataset snapshot{% endif %}</p>
             </div>
         </article>
     </div>
@@ -141,23 +161,30 @@
         <div class="table-card-head">
             <div>
                 <h2>States &amp; UTs overview</h2>
-                <p class="muted" id="statesCount" role="status" aria-live="polite">Showing {{ rows|length }} of {{ rows|length }} states and union territories</p>
+                <p class="muted" id="statesCount" role="status" aria-live="polite">
+                    {% if total_results %}
+                    Showing {{ start + 1 }}&ndash;{{ start + rows|length }} of {{ total_results }} states and union territories
+                    {% else %}
+                    No states match your filters
+                    {% endif %}
+                </p>
             </div>
             <div class="table-search">
                 <div class="input-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-                    <input class="input" type="search" id="tableQ" placeholder="Search in table..." autocomplete="off">
+                    <input class="input" type="search" id="tableQ" value="{{ q }}" placeholder="Search in table..." autocomplete="off" aria-label="Search in table">
                 </div>
             </div>
         </div>
 
-        <div class="table-wrap">
+        <div class="table-wrap" {% if not total_results %}hidden{% endif %}>
             <table class="data states-table" id="statesTable">
                 <caption class="sr-only">Reported cases by state. Activate a state name to expand district and disease detail.</caption>
                 <thead>
                     <tr>
                         <th scope="col">State / UT</th>
                         <th scope="col" class="num"><button type="button" class="sort" id="sortCases">Cases <span class="sort-caret" aria-hidden="true">▾</span></button></th>
+                        <th scope="col" class="num">Per lakh</th>
                         <th scope="col" class="num">Districts</th>
                         <th scope="col">Top diseases</th>
                         <th scope="col" class="action-col">Action</th>
@@ -168,29 +195,33 @@
                     <tr class="state-row" data-name="{{ r.display|lower }}" data-cases="{{ r.cases }}" data-districts="{{ r.districts }}" data-region="{{ r.region }}">
                         <th scope="row"><span class="row-dot" aria-hidden="true"></span>{{ r.display }}</th>
                         <td class="num">{{ r.cases }}</td>
-                        <td class="num">{{ r.districts }}</td>
-                        <td>
-                            <ul class="top-diseases">
-                                {% for name, count in r.top_diseases %}<li>{{ name }} <span class="disease-count">{{ count }}</span></li>{% endfor %}
-                            </ul>
+                        <td class="num">{% if r.cases_per_lakh is not none %}{{ r.cases_per_lakh }}{% else %}&mdash;{% endif %}</td>
+                        <td class="num">{{ r.districts }}{% if r.district_total %}<span class="cell-sub">of {{ r.district_total }}</span>{% endif %}</td>
+                        <td class="top-diseases-cell">
+                            {%- for name, count in r.top_diseases -%}
+                            <span class="tdisease">{{ name }}{% if name in r.estimated_diseases %}<span class="badge-est" title="Modelled estimate, not a reported row">est</span>{% endif %} <span class="disease-count">{{ count }}</span></span>{% if not loop.last %}<span class="tsep" aria-hidden="true">·</span>{% endif %}
+                            {%- endfor -%}
                         </td>
                         <td class="action-col">
-                            <button type="button" class="chip detail-toggle" aria-expanded="false" aria-label="Show district detail for {{ r.display }}"><span class="detail-label">View Details</span>
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
-                            </button>
+                            <button type="button" class="chip detail-toggle" aria-expanded="false" aria-controls="detail-{{ r.key }}" aria-label="Show district detail for {{ r.display }}"><span class="detail-label">View Details</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></button>
                         </td>
                     </tr>
-                    <tr class="row-detail" hidden>
-                        <td colspan="5">
+                    <!--
+                      Expanded detail for one state. It is a single hidden,
+                      full-width row (colspan covers every column) so it never
+                      reads as extra rows in the state list.
+                    -->
+                    <tr class="row-detail" id="detail-{{ r.key }}" hidden>
+                        <td colspan="6">
                             <div class="detail-grid">
                                 <div>
                                     <h3>Disease breakdown — {{ r.display }}</h3>
                                     <table class="mini-table">
                                         <thead><tr><th scope="col">Disease</th><th scope="col" class="num">Cases</th></tr></thead>
                                         <tbody>
-                                            {% for disease, c in r.disease_breakdown.items() %}
-                                            <tr><td>{{ disease }}</td><td class="num">{{ c }}</td></tr>
-                                            {% endfor %}
+                                            {%- for disease, c in r.disease_breakdown.items() %}
+                                            <tr><td>{{ disease }}{% if disease in r.estimated_diseases %} <span class="badge-est" title="Modelled estimate, not a reported row">est</span>{% endif %}</td><td class="num">{{ c }}</td></tr>
+                                            {%- endfor %}
                                         </tbody>
                                     </table>
                                 </div>
@@ -199,13 +230,17 @@
                                     <table class="mini-table">
                                         <thead><tr><th scope="col">District</th><th scope="col" class="num">Cases</th></tr></thead>
                                         <tbody>
-                                            {% for district, c in r.district_rows %}
+                                            {%- for district, c in r.district_rows %}
                                             <tr><td>{{ district }}</td><td class="num">{{ c }}</td></tr>
-                                            {% endfor %}
+                                            {%- endfor %}
                                         </tbody>
                                     </table>
                                 </div>
                             </div>
+                            <p class="detail-foot">
+                                {% if r.population %}Estimated population {{ '{:,}'.format(r.population) }} &middot; <strong>{{ r.cases_per_lakh }} cases per lakh</strong> &middot; {% endif %}{{ r.districts }} of {% if r.district_total %}{{ r.district_total }}{% else %}&mdash;{% endif %} districts reporting{% if r.coverage_pct %} ({{ r.coverage_pct }}%){% endif %}. Population: {{ site.population_vintage }}. District counts: {{ site.district_vintage }}.
+                                {% if r.synthetic_districts %}<br><span class="badge-est" title="These district names look like placeholders rather than reporting units">placeholder</span> Some district names in this state look like placeholders: {{ r.synthetic_districts|join(', ') }}.{% endif %}
+                            </p>
                         </td>
                     </tr>
                     {% endfor %}
@@ -214,14 +249,11 @@
         </div>
 
         <!-- Tile map (schematic, not a geographic projection) -->
-        <div class="tile-map" id="tileMap" hidden>
-            <p class="tile-map-note">Schematic tile map — each tile is one state or UT, shaded by reported cases. Positions are approximate, not to scale.</p>
+        <div class="tile-map" id="tileMap" {% if view != 'map' %}hidden{% endif %}>
+            <p class="tile-map-note">Schematic tile map — each tile is one state or UT, shaded by reported cases. Positions are approximate, not to scale. Faded tiles fall outside the current filter.</p>
             <div class="tiles" id="tiles">
-                {% for r in rows %}
-                <button type="button" class="tile tile-{{ r.level }}" style="--col: {{ r.tile[0] }}; --row: {{ r.tile[1] }};" data-name="{{ r.display|lower }}" data-display="{{ r.display }}" data-cases="{{ r.cases }}">
-                    <span class="tile-name">{{ r.display }}</span>
-                    <span class="tile-cases">{{ r.cases }}</span>
-                </button>
+                {% for r in all_rows %}
+                <a class="tile tile-{{ r.level }} {% if r.dimmed %}dim{% endif %}" href="{{ tile_urls[r.key] }}" data-name="{{ r.display|lower }}" title="{{ r.display }} &middot; {{ r.cases }} cases"><span class="tile-name">{{ r.display }}</span><span class="tile-cases">{{ r.cases }}</span></a>
                 {% endfor %}
             </div>
             <div class="tile-legend" aria-hidden="true">
@@ -231,17 +263,35 @@
             </div>
         </div>
 
-        <div class="empty" id="statesEmpty" hidden>
+        <div class="empty" id="statesEmpty" {% if total_results %}hidden{% endif %}>
             <p><strong>No states match your filters.</strong></p>
             <p>Clear the search or pick a different region.</p>
         </div>
 
         <div class="table-foot">
-            <p class="muted" id="tableRange" role="status" aria-live="polite"></p>
-            <nav class="pager" id="pager" aria-label="Table pages"></nav>
+            <p class="muted" id="tableRange" role="status" aria-live="polite">
+                {% if total_results %}
+                Showing {{ start + 1 }} to {{ start + rows|length }} of {{ total_results }} entries
+                {% else %}
+                No entries to show
+                {% endif %}
+            </p>
+            <nav class="pager" id="pager" aria-label="Table pages">
+                {% if pages > 1 %}
+                {% if prev_url %}<a class="pg-btn" href="{{ prev_url }}" rel="prev" aria-label="Previous page">&lsaquo;</a>{% else %}<span class="pg-btn is-disabled" aria-hidden="true">&lsaquo;</span>{% endif %}
+                {% for p in range(1, pages + 1) %}
+                <a class="pg-btn {% if p == page %}on{% endif %}" href="{{ page_urls[p] }}" {% if p == page %}aria-current="page"{% endif %}>{{ p }}</a>
+                {% endfor %}
+                {% if next_url %}<a class="pg-btn" href="{{ next_url }}" rel="next" aria-label="Next page">&rsaquo;</a>{% else %}<span class="pg-btn is-disabled" aria-hidden="true">&rsaquo;</span>{% endif %}
+                {% endif %}
+            </nav>
         </div>
 
-        <p class="muted small-note">Disease totals include CSV cases plus legacy surveillance estimates (COVID-19, Influenza, Tuberculosis) where applicable; district rows list dataset districts only.</p>
+        <p class="muted small-note">
+            Disease totals include CSV cases plus modelled legacy surveillance estimates
+            {% if stats.estimated_diseases %}({{ stats.estimated_diseases|join(', ') }}){% endif %}, marked <span class="badge-est">est</span>;
+            district rows list dataset districts only. State totals therefore include estimated rows that are not reported rows.
+        </p>
     </div>
 
     <!-- ============ SOURCE NOTE ============ -->
@@ -249,7 +299,10 @@
         <span class="note-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
         </span>
-        <p><strong>{{ source.label }} — {{ source.detail }}.</strong> Surveillance data updated: <strong>{{ site.surveillance_updated or 'date not available' }}</strong>. Case counts are derived from the project dataset and do not replace official reports.</p>
+        <p><strong>{{ source.label }} — {{ source.detail }}.</strong>
+        {% if site.is_demo %}<strong>This is a sample dataset for interface testing, not official surveillance data.</strong> The sample file carries no reporting period.{% else %}Reporting period: <strong>{{ site.data_period_display }}</strong>.{% endif %}
+        Population ({{ site.population_vintage }}) and district counts ({{ site.district_vintage }}) are public reference data used only to normalise counts.
+        Case counts are derived from the project dataset and do not replace official reports.</p>
     </div>
 </section>
 {% endblock %}
@@ -257,175 +310,113 @@
 {% block scripts %}
 <script>
 (function () {
+    var form = document.getElementById('stateFilters');
     var q = document.getElementById('stateQ');
-    var tableQ = document.getElementById('tableQ');
+    var tableQ = document.getElementByById('tableQ');
     var region = document.getElementById('regionFilter');
     var sortBy = document.getElementById('sortBy');
-    var tbody = document.querySelector('#statesTable tbody');
-    var countEl = document.getElementById('statesCount');
-    var rangeEl = document.getElementById('tableRange');
-    var pager = document.getElementById('pager');
+    var tiles = document.getElementById('tileMap');
+    var tableWrap = document.querySelector('.table-wrap');
     var empty = document.getElementById('statesEmpty');
     var csv = document.getElementById('downloadCsv');
-    var tiles = document.getElementById('tileMap');
-    var PER_PAGE = 10;
-    var page = 1;
 
-    // Pair each state row with its detail row
-    var pairs = [];
-    Array.prototype.slice.call(tbody.querySelectorAll('tr.state-row')).forEach(function (r) {
-        var d = r.nextElementSibling;
-        pairs.push({ row: r, detail: (d && d.classList.contains('row-detail')) ? d : null });
-    });
-
-    function visibleRows() {
-        var term = (q.value || '').trim().toLowerCase();
-        var reg = region.value;
-        return pairs.filter(function (p) {
-            var name = p.row.dataset.name;
-            var okName = !term || name.indexOf(term) !== -1;
-            var okRegion = !reg || p.row.dataset.region === reg;
-            return okName && okRegion;
-        });
+    // Filtering happens on the server, so the page stays light. The form
+    // submits normally (works without JavaScript); this just makes it feel
+    // instant and keeps both search boxes in sync.
+    var timer = null;
+    function submit() {
+        if (form) form.submit();
     }
-    function sortRows(list) {
-        var mode = sortBy.value;
-        list.sort(function (a, b) {
-            if (mode === 'name-asc') return a.row.dataset.name.localeCompare(b.row.dataset.name);
-            if (mode === 'cases-asc') return (+a.row.dataset.cases) - (+b.row.dataset.cases);
-            if (mode === 'districts-desc') return (+b.row.dataset.districts) - (+a.row.dataset.districts) || (+b.row.dataset.cases) - (+a.row.dataset.cases);
-            return (+b.row.dataset.cases) - (+a.row.dataset.cases);
-        });
-    }
-    function renderPager(total) {
-        var pages = Math.max(1, Math.ceil(total / PER_PAGE));
-        if (page > pages) page = pages;
-        var html = '<button type="button" class="pg-btn" data-page="' + (page - 1) + '"' + (page === 1 ? ' disabled' : '') + ' aria-label="Previous page">‹</button>';
-        for (var i = 1; i <= pages; i++) {
-            html += '<button type="button" class="pg-btn' + (i === page ? ' on' : '') + '" data-page="' + i + '"' + (i === page ? ' aria-current="page"' : '') + '>' + i + '</button>';
-        }
-        html += '<button type="button" class="pg-btn" data-page="' + (page + 1) + '"' + (page === pages ? ' disabled' : '') + ' aria-label="Next page">›</button>';
-        pager.innerHTML = html;
-    }
-    function apply(resetPage) {
-        if (resetPage) page = 1;
-        var list = visibleRows();
-        sortRows(list);
-        var total = list.length;
-        var start = (page - 1) * PER_PAGE;
-        var slice = list.slice(start, start + PER_PAGE);
-
-        // Hide everything, then show only the current page.
-        pairs.forEach(function (p) {
-            p.row.hidden = true;
-            if (p.detail) p.detail.hidden = true;
-        });
-        slice.forEach(function (p) {
-            p.row.hidden = false;
-            tbody.appendChild(p.row);
-            if (p.detail) tbody.appendChild(p.detail);
-        });
-
-        countEl.textContent = 'Showing ' + total + ' of ' + pairs.length + ' states and union territories';
-        empty.hidden = total !== 0;
-        document.querySelector('.table-wrap').hidden = total === 0;
-
-        if (total === 0) {
-            rangeEl.textContent = 'No entries to show';
-        } else {
-            rangeEl.textContent = 'Showing ' + (start + 1) + ' to ' + Math.min(start + PER_PAGE, total) + ' of ' + total + ' entries';
-        }
-        renderPager(total);
-        updateCsv();
-        syncTiles(list);
-    }
-    function updateCsv() {
-        var params = [];
-        if (q.value.trim()) params.push('q=' + encodeURIComponent(q.value.trim()));
-        if (region.value) params.push('region=' + encodeURIComponent(region.value));
-        if (sortBy.value) params.push('sort=' + encodeURIComponent(sortBy.value));
-        csv.href = '/states.csv' + (params.length ? '?' + params.join('&') : '');
-    }
-    function syncTiles(list) {
-        var names = {};
-        list.forEach(function (p) { names[p.row.dataset.name] = p.row.dataset.cases; });
-        document.querySelectorAll('#tiles .tile').forEach(function (t) {
-            var hit = Object.prototype.hasOwnProperty.call(names, t.dataset.name);
-            t.classList.toggle('dim', !hit);
-        });
+    function scheduleSubmit() {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(submit, 350);
     }
 
-    // Two-way bound search boxes
-    [q, tableQ].forEach(function (el) {
-        el.addEventListener('input', function () {
-            var other = (el === q) ? tableQ : q;
-            if (other.value !== el.value) other.value = el.value;
-            apply(true);
+    if (q) {
+        q.addEventListener('input', function () {
+            if (tableQ && tableQ.value !== q.value) tableQ.value = q.value;
+            scheduleSubmit();
         });
-    });
-    region.addEventListener('change', function () { apply(true); });
-    sortBy.addEventListener('change', function () { apply(true); });
+    }
+    if (tableQ) {
+        tableQ.addEventListener('input', function () {
+            if (q && q.value !== tableQ.value) q.value = tableQ.value;
+            scheduleSubmit();
+        });
+    }
+    if (region) region.addEventListener('change', submit);
+    if (sortBy) sortBy.addEventListener('change', submit);
 
     // Clicking the CASES header sorts by cases, toggling direction.
     var sortCases = document.getElementById('sortCases');
-    sortCases.addEventListener('click', function () {
-        sortBy.value = sortBy.value === 'cases-desc' ? 'cases-asc' : 'cases-desc';
-        apply(true);
-    });
+    if (sortCases) {
+        sortCases.addEventListener('click', function () {
+            sortBy.value = (sortBy.value === 'cases-desc' || sortBy.value === 'per-lakh-desc') ? 'cases-asc' : 'cases-desc';
+            submit();
+        });
+    }
 
-    pager.addEventListener('click', function (ev) {
-        var btn = ev.target.closest('.pg-btn');
-        if (!btn || btn.disabled) return;
-        page = parseInt(btn.dataset.page, 10);
-        apply(false);
-        document.querySelector('.table-card').scrollIntoView({ block: 'start' });
-    });
+    // Drill-down: the detail row is a single hidden, full-width row.
+    var tbody = document.querySelector('#statesTable tbody');
+    if (tbody) {
+        tbody.addEventListener('click', function (ev) {
+            var btn = ev.target.closest('.detail-toggle');
+            if (!btn) return;
+            var row = btn.closest('tr');
+            var detail = row.nextElementSibling;
+            if (!detail || !detail.classList.contains('row-detail')) return;
+            var show = detail.hidden;
+            detail.hidden = !show;
+            btn.setAttribute('aria-expanded', show ? 'true' : 'false');
+            var label = btn.querySelector('.detail-label');
+            if (label) label.textContent = show ? 'Hide Details' : 'View Details';
+        });
+    }
 
-    // Drill-down
-    tbody.addEventListener('click', function (ev) {
-        var btn = ev.target.closest('.detail-toggle');
-        if (!btn) return;
-        var row = btn.closest('tr');
-        var detail = row.nextElementSibling;
-        if (!detail || !detail.classList.contains('row-detail')) return;
-        var show = detail.hidden;
-        detail.hidden = !show;
-        btn.setAttribute('aria-expanded', show ? 'true' : 'false');
-        btn.querySelector('.detail-label').textContent = show ? 'Hide Details' : 'View Details';
-    });
-
-    // Table / map view toggle
+    // Table / map view toggle. The links work without JavaScript; this
+    // swaps the view in place instead of reloading.
     var btnTable = document.getElementById('viewTable');
     var btnMap = document.getElementById('viewMap');
     function setView(isMap) {
-        btnMap.classList.toggle('on', isMap);
-        btnTable.classList.toggle('on', !isMap);
-        btnMap.setAttribute('aria-pressed', isMap ? 'true' : 'false');
-        btnTable.setAttribute('aria-pressed', isMap ? 'false' : 'true');
-        tiles.hidden = !isMap;
-        document.querySelector('.table-wrap').hidden = isMap;
+        if (btnMap) {
+            btnMap.classList.toggle('on', isMap);
+            if (isMap) btnMap.setAttribute('aria-current', 'page'); else btnMap.removeAttribute('aria-current');
+        }
+        if (btnTable) {
+            btnTable.classList.toggle('on', !isMap);
+            if (!isMap) btnTable.setAttribute('aria-current', 'page'); else btnTable.removeAttribute('aria-current');
+        }
+        if (tiles) tiles.hidden = !isMap;
+        if (tableWrap) tableWrap.hidden = isMap;
+        if (empty) empty.hidden = true;
     }
-    btnTable.addEventListener('click', function () { setView(false); });
-    btnMap.addEventListener('click', function () { setView(true); });
+    function intercept(a, isMap) {
+        if (!a) return;
+        a.addEventListener('click', function (ev) {
+            ev.preventDefault();
+            setView(isMap);
+            try {
+                var url = new URL(a.href);
+                url.searchParams.set('view', isMap ? 'map' : 'table');
+                history.replaceState(null, '', url.toString());
+            } catch (e) { /* history is optional */ }
+        });
+    }
+    intercept(btnTable, false);
+    intercept(btnMap, true);
 
-    // Clicking a tile filters the table to that state.
-    document.getElementById('tiles').addEventListener('click', function (ev) {
-        var tile = ev.target.closest('.tile');
-        if (!tile) return;
-        q.value = tile.dataset.display;
-        tableQ.value = q.value;
-        setView(false);
-        apply(true);
-    });
-
-    // Reflect URL parameters so filtered views can be shared or bookmarked.
-    var params = new URLSearchParams(window.location.search);
-    if (params.get('q')) { q.value = params.get('q'); tableQ.value = q.value; }
-    if (params.get('region')) region.value = params.get('region');
-    if (params.get('sort')) sortBy.value = params.get('sort');
-
-    apply(false);
-    if (params.get('view') === 'map') setView(true);
+    // Keep the download link in step with the current filters.
+    if (csv && q && region && sortBy) {
+        var syncCsv = function () {
+            var params = [];
+            if (q.value.trim()) params.push('q=' + encodeURIComponent(q.value.trim()));
+            if (region.value) params.push('region=' + encodeURIComponent(region.value));
+            if (sortBy.value) params.push('sort=' + encodeURIComponent(sortBy.value));
+            csv.href = '/states.csv' + (params.length ? '?' + params.join('&') : '');
+        };
+        [q, region, sortBy].forEach(function (el) { el.addEventListener('change', syncCsv); });
+        syncCsv();
+    }
 })();
 </script>
 {% endblock %}
