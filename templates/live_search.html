@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Search — Public Health Dashboard{% endblock %}
+{% block title %}Search â€” Public Health Dashboard{% endblock %}
 {% block meta %}Search disease surveillance data, diseases and health guides by Indian state name.{% endblock %}
 {% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>{% endblock %}
 {% block main_class %}search-main{% endblock %}
@@ -8,6 +8,7 @@
 {% macro pinIcon() %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>{% endmacro %}
 
 {% block content %}
+{% from "_provenance.html" import provenance with context %}
 
 <!-- ============ SEARCH BANNER ============ -->
 <section class="search-hero" aria-labelledby="pageTitle">
@@ -99,6 +100,7 @@
                 </table>
             </div>
         </details>
+        {{ provenance() }}
     </section>
     {% endfor %}
     <script>
@@ -159,6 +161,7 @@
             </a>
             {% endfor %}
         </div>
+        {{ provenance('Per-disease totals across the full monthly series.') }}
     </section>
     {% endif %}
 

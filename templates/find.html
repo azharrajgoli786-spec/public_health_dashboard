@@ -1,7 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Find data{% if disease %} — {{ disease }}{% endif %}{% if place %} in {{ place }}{% endif %}{% endblock %}
+{% block title %}Find data{% if disease %} â€” {{ disease }}{% endif %}{% if place %} in {{ place }}{% endif %}{% endblock %}
 {% block meta %}Search disease surveillance cases and health guides by disease and location across India.{% endblock %}
 {% block content %}
+{% from "_provenance.html" import provenance with context %}
 <section class="page-head" aria-labelledby="pageTitle">
     <span class="eyebrow">Finder &bull; {% if disease %}{{ disease }}{% elif place %}{{ place }}{% elif query %}{{ query }}{% else %}All diseases{% endif %}</span>
     <h1 id="pageTitle">{% if disease %}{{ disease }}{% elif place %}All diseases in {{ place }}{% elif query %}No matches for &ldquo;{{ query }}&rdquo;{% else %}All diseases{% endif %}</h1>
@@ -84,6 +85,7 @@
             </tbody>
         </table>
     </div>
+    {{ provenance("Per-disease breakdowns under each state's detail row.") }}
     {% else %}
     <div class="empty" role="alert">
         <p><strong>Nothing matched.</strong></p>

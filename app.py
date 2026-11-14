@@ -952,6 +952,9 @@ def analytics_payload():
         "periods": list(ts["periods"]),
         "series": {name: dict(months) for name, months in ts["disease"].items()},
         "stateSeries": {key: dict(months) for key, months in ts["state"].items()},
+        # "disease|stateKey" -> {period: cases}, for state+ disease trends.
+        "diseaseState": {"%s|%s" % dk: dict(months)
+                         for dk, months in ts["disease_state"].items()},
     }
 
 

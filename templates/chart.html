@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% block title %}Health analytics — Public Health Dashboard{% endblock %}
+{% block title %}Health analytics â€” Public Health Dashboard{% endblock %}
 {% block meta %}Reported cases across every Indian state and union territory, with KPI totals, a state ranking, disease mix and district detail.{% endblock %}
 {% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>{% endblock %}
 {% block content %}
+{% from "_provenance.html" import provenance with context %}
 
 <!-- ============ HEADER ============ -->
 <section class="an-head" aria-labelledby="pageTitle">
@@ -35,23 +36,23 @@
 <!-- ============ KPIs ============ -->
 <div class="an-kpis" aria-label="Key indicators">
     <article class="an-kpi an-kpi-blue">
-        <span class="an-kpi-label">Reported cases</span>
-        <span class="an-kpi-value" id="kpiCases">—</span>
-        <span class="an-kpi-sub" id="kpiCasesSub">All diseases</span>
+        <span class="an-kpi-label" id="kpiCasesLabel">Latest period</span>
+        <span class="an-kpi-value" id="kpiCases">{{ site.latest_period_display or 'â€”' }}</span>
+        <span class="an-kpi-sub" id="kpiCasesSub">{{ site.period_count }} months of data</span>
     </article>
     <article class="an-kpi an-kpi-green">
         <span class="an-kpi-label">States &amp; UTs</span>
-        <span class="an-kpi-value" id="kpiStates">—</span>
+        <span class="an-kpi-value" id="kpiStates">â€”</span>
         <span class="an-kpi-sub" id="kpiStatesSub">&nbsp;</span>
     </article>
     <article class="an-kpi an-kpi-amber">
         <span class="an-kpi-label">Districts</span>
-        <span class="an-kpi-value" id="kpiDistricts">—</span>
+        <span class="an-kpi-value" id="kpiDistricts">â€”</span>
         <span class="an-kpi-sub">With reported cases</span>
     </article>
     <article class="an-kpi an-kpi-red">
         <span class="an-kpi-label">Top disease</span>
-        <span class="an-kpi-value" id="kpiTopDisease">—</span>
+        <span class="an-kpi-value" id="kpiTopDisease">â€”</span>
         <span class="an-kpi-sub" id="kpiTopDiseaseSub">&nbsp;</span>
     </article>
 </div>
@@ -60,10 +61,11 @@
 <section class="card an-card" aria-labelledby="trendTitle">
     <div class="an-card-head">
         <h2 id="trendTitle">Disease trend over time</h2>
-        <span class="an-badge">Sample trend</span>
+        <span class="an-badge">Sample data</span>
     </div>
-    <div class="chart-wrap an-trend"><canvas id="trendChart" role="img" aria-label="Modelled monthly trend of reported cases"></canvas></div>
-    <p class="an-note" id="trendNote">Modelled shape, not reported data &mdash; the dataset has no time dimension.</p>
+    <div class="chart-wrap an-trend"><canvas id="trendChart" role="img" aria-label="Monthly reported cases by disease"></canvas></div>
+    <p class="an-note" id="trendNote">Monthly totals per disease &mdash; no all-disease grand total.</p>
+    {{ provenance('One line per disease; est rows are modelled across the same months.') }}
 </section>
 
 <!-- ============ STATES ============ -->
@@ -74,6 +76,7 @@
     </div>
     <ol class="an-bars" id="stateBars"></ol>
     <p class="an-note">Tap a state to see its districts. Figures are reporting volume, not population-adjusted burden.</p>
+    {{ provenance() }}
 </section>
 
 <!-- ============ DISTRIBUTION ============ -->
@@ -85,6 +88,7 @@
         <div class="chart-wrap an-donut"><canvas id="distChart" role="img" aria-label="Donut chart of reported cases by disease"></canvas></div>
         <ul class="an-legend" id="distLegend"></ul>
     </div>
+    {{ provenance('Totals per disease; percentages are shares of the listed diseases.') }}
 </section>
 
 <!-- ============ DISTRICTS ============ -->
@@ -94,6 +98,7 @@
         <span class="an-card-note" id="districtsNote"></span>
     </div>
     <div id="districtsBox"></div>
+    {{ provenance() }}
 </section>
 
 <div class="notice">
@@ -113,7 +118,12 @@
     var selState = document.getElementById('anState');
     var selDisease = document.getElementById('anDisease');
     var kpiCases = document.getElementById('kpiCases');
+    var kpiCasesLabel = document.getElementById('kpiCasesLabel');
     var kpiCasesSub = document.getElementById('kpiCasesSub');
+    // Period values rendered by the server, restored when the disease
+    // filter is cleared (KPI1 otherwise shows that disease's own total).
+    var kpiPeriodValue = kpiCases ? kpiCases.textContent : 'â€”';
+    var kpiPeriodSub = kpiCasesSub ? kpiCasesSub.textContent : '';
     var kpiStates = document.getElementById('kpiStates');
     var kpiStatesSub = document.getElementById('kpiStatesSub');
     var kpiDistricts = document.getElementById('kpiDistricts');
@@ -130,14 +140,14 @@
     var PALETTE = ['#2563EB', '#0EA5E9', '#14B8A6', '#F59E0B', '#8B5CF6',
                    '#EC4899', '#EF4444', '#22C55E', '#A855F7', '#64748B'];
 
-    // A fixed 12-month shape (monsoon-weighted) used only to draw the
-    // illustrative trend. It is scaled to the current total, never to
-    // reported time-series data, because the dataset has no dates.
-    var MONTH_WEIGHTS = [0.62, 0.56, 0.64, 0.78, 0.94, 1.14, 1.36, 1.40, 1.14, 0.92, 0.70, 0.80];
-    var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
     var trendChart = null;
     var distChart = null;
+
+    function sum(obj) {
+        var n = 0;
+        Object.keys(obj).forEach(function (k) { n += obj[k]; });
+        return n;
+    }
 
     function casesFor(state, disease) {
         if (!disease) return state.cases;
@@ -187,14 +197,24 @@
             });
         });
 
-        kpiCases.textContent = number(total);
-        kpiCasesSub.textContent = disease || 'All diseases';
+        // KPI1 shows the reporting period; with a disease filter it becomes
+        // that single disease's own total (a meaningful figure, unlike an
+        // all-disease grand total, which is deliberately never shown).
+        if (disease) {
+            kpiCasesLabel.textContent = 'Reported cases';
+            kpiCases.textContent = number(total);
+            kpiCasesSub.textContent = disease + (selState.value ? ' Â· ' + selState.value : '');
+        } else {
+            kpiCasesLabel.textContent = 'Latest period';
+            kpiCases.textContent = kpiPeriodValue;
+            kpiCasesSub.textContent = kpiPeriodSub;
+        }
 
         var shownStates = states.filter(function (s) { return casesFor(s, disease) > 0; });
         var shownStatesCount = shownStates.filter(function (s) { return !s.isUT; }).length;
         var shownUTs = shownStates.filter(function (s) { return s.isUT; }).length;
         kpiStates.textContent = String(shownStatesCount + shownUTs);
-        kpiStatesSub.textContent = shownStatesCount + (shownStatesCount === 1 ? ' state · ' : ' states · ') +
+        kpiStatesSub.textContent = shownStatesCount + (shownStatesCount === 1 ? ' state Â· ' : ' states Â· ') +
             shownUTs + (shownUTs === 1 ? ' UT' : ' UTs');
 
         kpiDistricts.textContent = number(districtTotal);
@@ -203,7 +223,7 @@
         Object.keys(diseaseTotals).forEach(function (k) {
             if (diseaseTotals[k] > topCount) { topCount = diseaseTotals[k]; topName = k; }
         });
-        kpiTopDisease.textContent = topName || '—';
+        kpiTopDisease.textContent = topName || 'â€”';
         kpiTopDiseaseSub.textContent = topCount ? number(topCount) + ' cases' : '';
 
         // --- State bar list ---
@@ -246,7 +266,7 @@
         });
 
         renderDistricts(states, disease);
-        renderTrend(total, disease);
+        renderTrend(disease);
         renderDonut(diseaseTotals, total);
     }
 
@@ -267,7 +287,7 @@
         var s = states[0];
         if (!s) return;
         var list = s.districts.slice().sort(function (a, b) { return b.cases - a.cases; });
-        districtsNote.textContent = s.display + ' · ' + list.length + ' districts';
+        districtsNote.textContent = s.display + ' Â· ' + list.length + ' districts';
         var wrap = document.createElement('div');
         wrap.className = 'an-districts';
         list.forEach(function (d) {
@@ -286,48 +306,86 @@
         districtsBox.appendChild(wrap);
     }
 
-    // ---- Sample trend ----------------------------------------------------
-    function renderTrend(total, disease) {
+    // ---- Monthly trend (real dates from the dataset) ---------------------
+    function renderTrend(disease) {
+        var periods = data.periods || [];
+        var stateKey = '';
+        if (selState.value) {
+            var picked = data.states.filter(function (s) { return s.display === selState.value; });
+            stateKey = picked.length ? picked[0].key : '';
+        }
+
+        if (!periods.length) {
+            // Dataset without a date column: nothing honest to plot.
+            if (trendChart) { trendChart.destroy(); trendChart = null; }
+            trendNote.textContent = 'This dataset carries no date column, so no time trend is shown.';
+            return;
+        }
+
+        // One line per disease, filtered to the current selection. An
+        // all-disease total is deliberately never plotted as one line.
+        var lines = [];
+        if (disease && stateKey) {
+            var one = (data.diseaseState || {})[disease + '|' + stateKey];
+            if (one) lines.push({ name: disease, values: one });
+        } else if (disease) {
+            if (data.series && data.series[disease]) {
+                lines.push({ name: disease, values: data.series[disease] });
+            }
+        } else if (stateKey) {
+            Object.keys(data.diseaseState || {}).forEach(function (k) {
+                var parts = k.split('|');
+                if (parts[1] === stateKey) lines.push({ name: parts[0], values: data.diseaseState[k] });
+            });
+        } else {
+            Object.keys(data.series || {}).forEach(function (name) {
+                lines.push({ name: name, values: data.series[name] });
+            });
+        }
+        lines.sort(function (a, b) { return sum(b.values) - sum(a.values); });
+
         var scope = selState.value || 'all states and UTs';
-        var sum = MONTH_WEIGHTS.reduce(function (a, b) { return a + b; }, 0);
-        var values = MONTH_WEIGHTS.map(function (w) {
-            return Math.round((total * w) / sum);
-        });
-        trendNote.textContent = 'Modelled shape scaled to ' + number(total) +
-            ' cases for ' + scope + (disease ? ' (' + disease + ')' : '') +
-            ' — the dataset has no time dimension.';
+        trendNote.textContent = lines.length + (lines.length === 1 ? ' series' : ' series') +
+            ' Â· ' + scope + (disease ? ' Â· ' + disease : '') +
+            ' â€” monthly totals per disease, ' + periods[0] + ' to ' +
+            periods[periods.length - 1] + '. No all-disease grand total is plotted.';
 
         var canvas = document.getElementById('trendChart');
-        if (typeof window.Chart === 'undefined' || !canvas) return;
-        var ctx = canvas.getContext('2d');
-        var grad = ctx.createLinearGradient(0, 0, 0, 260);
-        grad.addColorStop(0, 'rgba(37, 99, 235, 0.30)');
-        grad.addColorStop(1, 'rgba(37, 99, 235, 0.02)');
+        if (typeof window.Chart === 'undefined' || !canvas || !lines.length) return;
+
+        var datasets = lines.map(function (line, i) {
+            var color = PALETTE[i % PALETTE.length];
+            return {
+                label: line.name,
+                data: periods.map(function (p) { return line.values[p] || 0; }),
+                borderColor: color,
+                backgroundColor: color,
+                borderWidth: 2,
+                tension: 0.35,
+                pointRadius: 0,
+                pointHoverRadius: 4
+            };
+        });
 
         var config = {
             type: 'line',
-            data: {
-                labels: MONTHS,
-                datasets: [{
-                    label: 'Cases (sample trend)',
-                    data: values,
-                    borderColor: '#2563EB',
-                    borderWidth: 2.2,
-                    backgroundColor: grad,
-                    fill: true,
-                    tension: 0.35,
-                    pointRadius: 3,
-                    pointBackgroundColor: '#2563EB',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 1.5
-                }]
-            },
+            data: { labels: periods, datasets: datasets },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom',
+                        labels: { boxWidth: 10, usePointStyle: true, font: { size: 11 } }
+                    }
+                },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 11 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 12 }
+                    },
                     y: {
                         beginAtZero: true,
                         grid: { color: '#EEF2F7' },
