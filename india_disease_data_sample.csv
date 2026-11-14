@@ -1,81 +1,1657 @@
-state,district,disease,cases,vaccinated
-Andhra Pradesh,Visakhapatnam,Dengue,314,Yes
-Andhra Pradesh,Vijayawada,Malaria,128,No
-Andhra Pradesh,Guntur,Typhoid,92,Yes
-Arunachal Pradesh,Itanagar,Chickenpox,57,No
-Arunachal Pradesh,Pasighat,Cholera,18,No
-Assam,Guwahati,Malaria,422,No
-Assam,Dibrugarh,Dengue,112,Yes
-Bihar,Patna,Cholera,99,No
-Bihar,Gaya,Typhoid,58,No
-Chhattisgarh,Raipur,Malaria,230,Yes
-Chhattisgarh,Bhilai,Dengue,45,No
-Goa,Panaji,Typhoid,41,Yes
-Goa,Margao,Chickenpox,36,Yes
-Gujarat,Ahmedabad,Malaria,174,No
-Gujarat,Surat,Chickenpox,84,Yes
-Haryana,Gurgaon,Dengue,69,Yes
-Haryana,Faridabad,Typhoid,53,No
-Himachal Pradesh,Shimla,Chickenpox,21,Yes
-Himachal Pradesh,Kullu,Cholera,14,No
-Jharkhand,Ranchi,Dengue,100,No
-Jharkhand,Jamshedpur,Malaria,120,No
-Karnataka,Bangalore,Dengue,523,Yes
-Karnataka,Mysore,Malaria,212,No
-Karnataka,Mangalore,Chickenpox,130,Yes
-Karnataka,Hubli,Cholera,99,No
-Karnataka,Belagavi,Typhoid,141,Yes
-Karnataka,Bidar,Dengue,65,No
-Karnataka,Mandya,Malaria,48,Yes
-Karnataka,Hassan,Chickenpox,34,No
-Karnataka,Chikodi,Malaria,28,Yes
-Karnataka,Gokak,Typhoid,41,No
-Karnataka,Raybag,Cholera,19,Yes
-Karnataka,Savadatti,Dengue,12,No
-Karnataka,Hukkeri,Malaria,17,No
-Karnataka,Ramdurg,Chickenpox,22,Yes
-Karnataka,Athani,Cholera,11,No
-Karnataka,Bailhongal,Typhoid,9,No
-Karnataka,Saundatti,Chickenpox,7,Yes
-Karnataka,Mudalgi,Malaria,6,No
-Kerala,Kochi,Cholera,92,Yes
-Kerala,Trivandrum,Chickenpox,130,Yes
-Kerala,Kozhikode,Dengue,43,No
-Madhya Pradesh,Bhopal,Malaria,210,Yes
-Madhya Pradesh,Indore,Cholera,98,No
-Maharashtra,Mumbai,Chickenpox,305,Yes
-Maharashtra,Pune,Malaria,410,No
-Maharashtra,Nagpur,Dengue,225,No
-Manipur,Imphal,Cholera,16,No
-Meghalaya,Shillong,Typhoid,25,No
-Mizoram,Aizawl,Malaria,12,No
-Nagaland,Kohima,Dengue,15,Yes
-Odisha,Bhubaneswar,Cholera,80,Yes
-Odisha,Cuttack,Typhoid,67,No
-Punjab,Amritsar,Dengue,102,No
-Punjab,Ludhiana,Malaria,98,No
-Rajasthan,Jaipur,Chickenpox,140,Yes
-Rajasthan,Jodhpur,Typhoid,65,No
-Sikkim,Gangtok,Cholera,11,Yes
-Tamil Nadu,Chennai,Typhoid,120,No
-Tamil Nadu,Coimbatore,Dengue,84,Yes
-Tamil Nadu,Madurai,Malaria,134,No
-Telangana,Hyderabad,Chickenpox,240,Yes
-Telangana,Warangal,Dengue,81,No
-Tripura,Agartala,Malaria,14,No
-Uttar Pradesh,Lucknow,Chickenpox,116,Yes
-Uttar Pradesh,Kanpur,Typhoid,98,No
-Uttarakhand,Dehradun,Cholera,39,Yes
-Uttarakhand,Haridwar,Malaria,22,No
-West Bengal,Kolkata,Dengue,293,No
-West Bengal,Howrah,Cholera,99,Yes
-Delhi,New Delhi,Chickenpox,210,Yes
-Delhi,North Delhi,Dengue,186,No
-Jammu and Kashmir,Jammu,Cholera,27,Yes
-Jammu and Kashmir,Srinagar,Malaria,33,No
-Ladakh,Leh,Typhoid,14,Yes
-Puducherry,Puducherry,Dengue,22,No
-Lakshadweep,Kavaratti,Malaria,2,No
-Andaman and Nicobar Islands,Port Blair,Typhoid,9,No
-Chandigarh,Chandigarh,Chickenpox,24,Yes
-Dadra and Nagar Haveli and Daman and Diu,Daman,Cholera,7,No
+date,state,district,disease,cases
+2024-11,Andaman and Nicobar Islands,Port Blair,Typhoid,1
+2025-06,Andaman and Nicobar Islands,Port Blair,Typhoid,1
+2025-07,Andaman and Nicobar Islands,Port Blair,Typhoid,1
+2025-08,Andaman and Nicobar Islands,Port Blair,Typhoid,1
+2025-09,Andaman and Nicobar Islands,Port Blair,Typhoid,1
+2026-06,Andaman and Nicobar Islands,Port Blair,Typhoid,1
+2026-07,Andaman and Nicobar Islands,Port Blair,Typhoid,1
+2026-08,Andaman and Nicobar Islands,Port Blair,Typhoid,1
+2026-09,Andaman and Nicobar Islands,Port Blair,Typhoid,1
+2024-11,Andhra Pradesh,Guntur,Typhoid,3
+2024-12,Andhra Pradesh,Guntur,Typhoid,4
+2025-01,Andhra Pradesh,Guntur,Typhoid,3
+2025-02,Andhra Pradesh,Guntur,Typhoid,3
+2025-03,Andhra Pradesh,Guntur,Typhoid,2
+2025-04,Andhra Pradesh,Guntur,Typhoid,3
+2025-05,Andhra Pradesh,Guntur,Typhoid,4
+2025-06,Andhra Pradesh,Guntur,Typhoid,4
+2025-07,Andhra Pradesh,Guntur,Typhoid,6
+2025-08,Andhra Pradesh,Guntur,Typhoid,5
+2025-09,Andhra Pradesh,Guntur,Typhoid,6
+2025-10,Andhra Pradesh,Guntur,Typhoid,5
+2025-11,Andhra Pradesh,Guntur,Typhoid,3
+2025-12,Andhra Pradesh,Guntur,Typhoid,2
+2026-01,Andhra Pradesh,Guntur,Typhoid,2
+2026-02,Andhra Pradesh,Guntur,Typhoid,3
+2026-03,Andhra Pradesh,Guntur,Typhoid,3
+2026-04,Andhra Pradesh,Guntur,Typhoid,2
+2026-05,Andhra Pradesh,Guntur,Typhoid,3
+2026-06,Andhra Pradesh,Guntur,Typhoid,6
+2026-07,Andhra Pradesh,Guntur,Typhoid,4
+2026-08,Andhra Pradesh,Guntur,Typhoid,5
+2026-09,Andhra Pradesh,Guntur,Typhoid,7
+2026-10,Andhra Pradesh,Guntur,Typhoid,4
+2024-11,Andhra Pradesh,Vijayawada,Malaria,4
+2024-12,Andhra Pradesh,Vijayawada,Malaria,3
+2025-01,Andhra Pradesh,Vijayawada,Malaria,2
+2025-02,Andhra Pradesh,Vijayawada,Malaria,1
+2025-03,Andhra Pradesh,Vijayawada,Malaria,2
+2025-04,Andhra Pradesh,Vijayawada,Malaria,2
+2025-05,Andhra Pradesh,Vijayawada,Malaria,4
+2025-06,Andhra Pradesh,Vijayawada,Malaria,6
+2025-07,Andhra Pradesh,Vijayawada,Malaria,8
+2025-08,Andhra Pradesh,Vijayawada,Malaria,11
+2025-09,Andhra Pradesh,Vijayawada,Malaria,12
+2025-10,Andhra Pradesh,Vijayawada,Malaria,9
+2025-11,Andhra Pradesh,Vijayawada,Malaria,4
+2025-12,Andhra Pradesh,Vijayawada,Malaria,3
+2026-01,Andhra Pradesh,Vijayawada,Malaria,2
+2026-02,Andhra Pradesh,Vijayawada,Malaria,2
+2026-03,Andhra Pradesh,Vijayawada,Malaria,2
+2026-04,Andhra Pradesh,Vijayawada,Malaria,3
+2026-05,Andhra Pradesh,Vijayawada,Malaria,3
+2026-06,Andhra Pradesh,Vijayawada,Malaria,5
+2026-07,Andhra Pradesh,Vijayawada,Malaria,9
+2026-08,Andhra Pradesh,Vijayawada,Malaria,12
+2026-09,Andhra Pradesh,Vijayawada,Malaria,10
+2026-10,Andhra Pradesh,Vijayawada,Malaria,9
+2024-11,Andhra Pradesh,Visakhapatnam,Dengue,9
+2024-12,Andhra Pradesh,Visakhapatnam,Dengue,8
+2025-01,Andhra Pradesh,Visakhapatnam,Dengue,6
+2025-02,Andhra Pradesh,Visakhapatnam,Dengue,4
+2025-03,Andhra Pradesh,Visakhapatnam,Dengue,4
+2025-04,Andhra Pradesh,Visakhapatnam,Dengue,9
+2025-05,Andhra Pradesh,Visakhapatnam,Dengue,10
+2025-06,Andhra Pradesh,Visakhapatnam,Dengue,15
+2025-07,Andhra Pradesh,Visakhapatnam,Dengue,18
+2025-08,Andhra Pradesh,Visakhapatnam,Dengue,21
+2025-09,Andhra Pradesh,Visakhapatnam,Dengue,33
+2025-10,Andhra Pradesh,Visakhapatnam,Dengue,18
+2025-11,Andhra Pradesh,Visakhapatnam,Dengue,13
+2025-12,Andhra Pradesh,Visakhapatnam,Dengue,8
+2026-01,Andhra Pradesh,Visakhapatnam,Dengue,6
+2026-02,Andhra Pradesh,Visakhapatnam,Dengue,3
+2026-03,Andhra Pradesh,Visakhapatnam,Dengue,5
+2026-04,Andhra Pradesh,Visakhapatnam,Dengue,6
+2026-05,Andhra Pradesh,Visakhapatnam,Dengue,12
+2026-06,Andhra Pradesh,Visakhapatnam,Dengue,20
+2026-07,Andhra Pradesh,Visakhapatnam,Dengue,22
+2026-08,Andhra Pradesh,Visakhapatnam,Dengue,26
+2026-09,Andhra Pradesh,Visakhapatnam,Dengue,25
+2026-10,Andhra Pradesh,Visakhapatnam,Dengue,13
+2024-11,Arunachal Pradesh,Itanagar,Chickenpox,2
+2024-12,Arunachal Pradesh,Itanagar,Chickenpox,2
+2025-01,Arunachal Pradesh,Itanagar,Chickenpox,3
+2025-02,Arunachal Pradesh,Itanagar,Chickenpox,2
+2025-03,Arunachal Pradesh,Itanagar,Chickenpox,2
+2025-04,Arunachal Pradesh,Itanagar,Chickenpox,4
+2025-05,Arunachal Pradesh,Itanagar,Chickenpox,2
+2025-06,Arunachal Pradesh,Itanagar,Chickenpox,2
+2025-07,Arunachal Pradesh,Itanagar,Chickenpox,2
+2025-08,Arunachal Pradesh,Itanagar,Chickenpox,2
+2025-09,Arunachal Pradesh,Itanagar,Chickenpox,2
+2025-10,Arunachal Pradesh,Itanagar,Chickenpox,3
+2025-11,Arunachal Pradesh,Itanagar,Chickenpox,3
+2025-12,Arunachal Pradesh,Itanagar,Chickenpox,3
+2026-01,Arunachal Pradesh,Itanagar,Chickenpox,3
+2026-02,Arunachal Pradesh,Itanagar,Chickenpox,2
+2026-03,Arunachal Pradesh,Itanagar,Chickenpox,3
+2026-04,Arunachal Pradesh,Itanagar,Chickenpox,4
+2026-05,Arunachal Pradesh,Itanagar,Chickenpox,2
+2026-06,Arunachal Pradesh,Itanagar,Chickenpox,2
+2026-07,Arunachal Pradesh,Itanagar,Chickenpox,2
+2026-08,Arunachal Pradesh,Itanagar,Chickenpox,1
+2026-09,Arunachal Pradesh,Itanagar,Chickenpox,2
+2026-10,Arunachal Pradesh,Itanagar,Chickenpox,2
+2024-11,Arunachal Pradesh,Pasighat,Cholera,1
+2024-12,Arunachal Pradesh,Pasighat,Cholera,1
+2025-04,Arunachal Pradesh,Pasighat,Cholera,1
+2025-05,Arunachal Pradesh,Pasighat,Cholera,1
+2025-06,Arunachal Pradesh,Pasighat,Cholera,1
+2025-07,Arunachal Pradesh,Pasighat,Cholera,1
+2025-08,Arunachal Pradesh,Pasighat,Cholera,1
+2025-09,Arunachal Pradesh,Pasighat,Cholera,1
+2025-10,Arunachal Pradesh,Pasighat,Cholera,1
+2025-11,Arunachal Pradesh,Pasighat,Cholera,1
+2026-03,Arunachal Pradesh,Pasighat,Cholera,1
+2026-05,Arunachal Pradesh,Pasighat,Cholera,1
+2026-06,Arunachal Pradesh,Pasighat,Cholera,1
+2026-07,Arunachal Pradesh,Pasighat,Cholera,1
+2026-08,Arunachal Pradesh,Pasighat,Cholera,2
+2026-09,Arunachal Pradesh,Pasighat,Cholera,1
+2026-10,Arunachal Pradesh,Pasighat,Cholera,1
+2024-11,Assam,Dibrugarh,Dengue,4
+2024-12,Assam,Dibrugarh,Dengue,3
+2025-01,Assam,Dibrugarh,Dengue,2
+2025-02,Assam,Dibrugarh,Dengue,2
+2025-03,Assam,Dibrugarh,Dengue,2
+2025-04,Assam,Dibrugarh,Dengue,3
+2025-05,Assam,Dibrugarh,Dengue,4
+2025-06,Assam,Dibrugarh,Dengue,6
+2025-07,Assam,Dibrugarh,Dengue,10
+2025-08,Assam,Dibrugarh,Dengue,12
+2025-09,Assam,Dibrugarh,Dengue,7
+2025-10,Assam,Dibrugarh,Dengue,6
+2025-11,Assam,Dibrugarh,Dengue,3
+2025-12,Assam,Dibrugarh,Dengue,2
+2026-01,Assam,Dibrugarh,Dengue,1
+2026-02,Assam,Dibrugarh,Dengue,1
+2026-03,Assam,Dibrugarh,Dengue,2
+2026-04,Assam,Dibrugarh,Dengue,3
+2026-05,Assam,Dibrugarh,Dengue,4
+2026-06,Assam,Dibrugarh,Dengue,4
+2026-07,Assam,Dibrugarh,Dengue,8
+2026-08,Assam,Dibrugarh,Dengue,8
+2026-09,Assam,Dibrugarh,Dengue,7
+2026-10,Assam,Dibrugarh,Dengue,8
+2024-11,Assam,Guwahati,Malaria,10
+2024-12,Assam,Guwahati,Malaria,10
+2025-01,Assam,Guwahati,Malaria,8
+2025-02,Assam,Guwahati,Malaria,6
+2025-03,Assam,Guwahati,Malaria,9
+2025-04,Assam,Guwahati,Malaria,7
+2025-05,Assam,Guwahati,Malaria,16
+2025-06,Assam,Guwahati,Malaria,20
+2025-07,Assam,Guwahati,Malaria,32
+2025-08,Assam,Guwahati,Malaria,32
+2025-09,Assam,Guwahati,Malaria,32
+2025-10,Assam,Guwahati,Malaria,23
+2025-11,Assam,Guwahati,Malaria,10
+2025-12,Assam,Guwahati,Malaria,11
+2026-01,Assam,Guwahati,Malaria,6
+2026-02,Assam,Guwahati,Malaria,5
+2026-03,Assam,Guwahati,Malaria,7
+2026-04,Assam,Guwahati,Malaria,8
+2026-05,Assam,Guwahati,Malaria,15
+2026-06,Assam,Guwahati,Malaria,23
+2026-07,Assam,Guwahati,Malaria,31
+2026-08,Assam,Guwahati,Malaria,39
+2026-09,Assam,Guwahati,Malaria,33
+2026-10,Assam,Guwahati,Malaria,29
+2024-11,Bihar,Gaya,Typhoid,2
+2024-12,Bihar,Gaya,Typhoid,1
+2025-01,Bihar,Gaya,Typhoid,1
+2025-02,Bihar,Gaya,Typhoid,1
+2025-03,Bihar,Gaya,Typhoid,1
+2025-04,Bihar,Gaya,Typhoid,2
+2025-05,Bihar,Gaya,Typhoid,2
+2025-06,Bihar,Gaya,Typhoid,4
+2025-07,Bihar,Gaya,Typhoid,4
+2025-08,Bihar,Gaya,Typhoid,4
+2025-09,Bihar,Gaya,Typhoid,3
+2025-10,Bihar,Gaya,Typhoid,2
+2025-11,Bihar,Gaya,Typhoid,2
+2025-12,Bihar,Gaya,Typhoid,2
+2026-01,Bihar,Gaya,Typhoid,2
+2026-02,Bihar,Gaya,Typhoid,1
+2026-03,Bihar,Gaya,Typhoid,2
+2026-04,Bihar,Gaya,Typhoid,2
+2026-05,Bihar,Gaya,Typhoid,3
+2026-06,Bihar,Gaya,Typhoid,3
+2026-07,Bihar,Gaya,Typhoid,4
+2026-08,Bihar,Gaya,Typhoid,4
+2026-09,Bihar,Gaya,Typhoid,3
+2026-10,Bihar,Gaya,Typhoid,3
+2024-11,Bihar,Patna,Cholera,3
+2024-12,Bihar,Patna,Cholera,3
+2025-01,Bihar,Patna,Cholera,2
+2025-02,Bihar,Patna,Cholera,2
+2025-03,Bihar,Patna,Cholera,2
+2025-04,Bihar,Patna,Cholera,3
+2025-05,Bihar,Patna,Cholera,4
+2025-06,Bihar,Patna,Cholera,6
+2025-07,Bihar,Patna,Cholera,6
+2025-08,Bihar,Patna,Cholera,6
+2025-09,Bihar,Patna,Cholera,8
+2025-10,Bihar,Patna,Cholera,5
+2025-11,Bihar,Patna,Cholera,3
+2025-12,Bihar,Patna,Cholera,2
+2026-01,Bihar,Patna,Cholera,2
+2026-02,Bihar,Patna,Cholera,2
+2026-03,Bihar,Patna,Cholera,2
+2026-04,Bihar,Patna,Cholera,2
+2026-05,Bihar,Patna,Cholera,4
+2026-06,Bihar,Patna,Cholera,6
+2026-07,Bihar,Patna,Cholera,8
+2026-08,Bihar,Patna,Cholera,9
+2026-09,Bihar,Patna,Cholera,4
+2026-10,Bihar,Patna,Cholera,5
+2024-11,Chandigarh,Chandigarh,Chickenpox,1
+2024-12,Chandigarh,Chandigarh,Chickenpox,1
+2025-01,Chandigarh,Chandigarh,Chickenpox,1
+2025-02,Chandigarh,Chandigarh,Chickenpox,1
+2025-03,Chandigarh,Chandigarh,Chickenpox,1
+2025-04,Chandigarh,Chandigarh,Chickenpox,1
+2025-05,Chandigarh,Chandigarh,Chickenpox,1
+2025-06,Chandigarh,Chandigarh,Chickenpox,1
+2025-07,Chandigarh,Chandigarh,Chickenpox,1
+2025-08,Chandigarh,Chandigarh,Chickenpox,1
+2025-09,Chandigarh,Chandigarh,Chickenpox,1
+2025-10,Chandigarh,Chandigarh,Chickenpox,1
+2025-11,Chandigarh,Chandigarh,Chickenpox,1
+2025-12,Chandigarh,Chandigarh,Chickenpox,1
+2026-01,Chandigarh,Chandigarh,Chickenpox,1
+2026-02,Chandigarh,Chandigarh,Chickenpox,1
+2026-03,Chandigarh,Chandigarh,Chickenpox,1
+2026-04,Chandigarh,Chandigarh,Chickenpox,1
+2026-05,Chandigarh,Chandigarh,Chickenpox,1
+2026-06,Chandigarh,Chandigarh,Chickenpox,1
+2026-07,Chandigarh,Chandigarh,Chickenpox,1
+2026-08,Chandigarh,Chandigarh,Chickenpox,1
+2026-09,Chandigarh,Chandigarh,Chickenpox,1
+2026-10,Chandigarh,Chandigarh,Chickenpox,1
+2024-11,Chhattisgarh,Bhilai,Dengue,2
+2024-12,Chhattisgarh,Bhilai,Dengue,1
+2025-01,Chhattisgarh,Bhilai,Dengue,1
+2025-02,Chhattisgarh,Bhilai,Dengue,1
+2025-03,Chhattisgarh,Bhilai,Dengue,1
+2025-04,Chhattisgarh,Bhilai,Dengue,1
+2025-05,Chhattisgarh,Bhilai,Dengue,1
+2025-06,Chhattisgarh,Bhilai,Dengue,2
+2025-07,Chhattisgarh,Bhilai,Dengue,4
+2025-08,Chhattisgarh,Bhilai,Dengue,3
+2025-09,Chhattisgarh,Bhilai,Dengue,4
+2025-10,Chhattisgarh,Bhilai,Dengue,3
+2025-11,Chhattisgarh,Bhilai,Dengue,2
+2025-12,Chhattisgarh,Bhilai,Dengue,1
+2026-01,Chhattisgarh,Bhilai,Dengue,1
+2026-03,Chhattisgarh,Bhilai,Dengue,1
+2026-04,Chhattisgarh,Bhilai,Dengue,1
+2026-05,Chhattisgarh,Bhilai,Dengue,1
+2026-06,Chhattisgarh,Bhilai,Dengue,2
+2026-07,Chhattisgarh,Bhilai,Dengue,3
+2026-08,Chhattisgarh,Bhilai,Dengue,3
+2026-09,Chhattisgarh,Bhilai,Dengue,3
+2026-10,Chhattisgarh,Bhilai,Dengue,3
+2024-11,Chhattisgarh,Raipur,Malaria,6
+2024-12,Chhattisgarh,Raipur,Malaria,6
+2025-01,Chhattisgarh,Raipur,Malaria,4
+2025-02,Chhattisgarh,Raipur,Malaria,4
+2025-03,Chhattisgarh,Raipur,Malaria,3
+2025-04,Chhattisgarh,Raipur,Malaria,6
+2025-05,Chhattisgarh,Raipur,Malaria,7
+2025-06,Chhattisgarh,Raipur,Malaria,11
+2025-07,Chhattisgarh,Raipur,Malaria,14
+2025-08,Chhattisgarh,Raipur,Malaria,22
+2025-09,Chhattisgarh,Raipur,Malaria,19
+2025-10,Chhattisgarh,Raipur,Malaria,15
+2025-11,Chhattisgarh,Raipur,Malaria,9
+2025-12,Chhattisgarh,Raipur,Malaria,5
+2026-01,Chhattisgarh,Raipur,Malaria,3
+2026-02,Chhattisgarh,Raipur,Malaria,2
+2026-03,Chhattisgarh,Raipur,Malaria,4
+2026-04,Chhattisgarh,Raipur,Malaria,6
+2026-05,Chhattisgarh,Raipur,Malaria,9
+2026-06,Chhattisgarh,Raipur,Malaria,10
+2026-07,Chhattisgarh,Raipur,Malaria,16
+2026-08,Chhattisgarh,Raipur,Malaria,14
+2026-09,Chhattisgarh,Raipur,Malaria,20
+2026-10,Chhattisgarh,Raipur,Malaria,15
+2025-06,Dadra and Nagar Haveli and Daman and Diu,Daman,Cholera,1
+2025-08,Dadra and Nagar Haveli and Daman and Diu,Daman,Cholera,1
+2025-09,Dadra and Nagar Haveli and Daman and Diu,Daman,Cholera,1
+2025-10,Dadra and Nagar Haveli and Daman and Diu,Daman,Cholera,1
+2026-06,Dadra and Nagar Haveli and Daman and Diu,Daman,Cholera,1
+2026-08,Dadra and Nagar Haveli and Daman and Diu,Daman,Cholera,1
+2026-09,Dadra and Nagar Haveli and Daman and Diu,Daman,Cholera,1
+2024-11,Delhi,New Delhi,Chickenpox,8
+2024-12,Delhi,New Delhi,Chickenpox,9
+2025-01,Delhi,New Delhi,Chickenpox,6
+2025-02,Delhi,New Delhi,Chickenpox,9
+2025-03,Delhi,New Delhi,Chickenpox,11
+2025-04,Delhi,New Delhi,Chickenpox,14
+2025-05,Delhi,New Delhi,Chickenpox,11
+2025-06,Delhi,New Delhi,Chickenpox,10
+2025-07,Delhi,New Delhi,Chickenpox,6
+2025-08,Delhi,New Delhi,Chickenpox,5
+2025-09,Delhi,New Delhi,Chickenpox,9
+2025-10,Delhi,New Delhi,Chickenpox,8
+2025-11,Delhi,New Delhi,Chickenpox,7
+2025-12,Delhi,New Delhi,Chickenpox,9
+2026-01,Delhi,New Delhi,Chickenpox,6
+2026-02,Delhi,New Delhi,Chickenpox,10
+2026-03,Delhi,New Delhi,Chickenpox,11
+2026-04,Delhi,New Delhi,Chickenpox,9
+2026-05,Delhi,New Delhi,Chickenpox,11
+2026-06,Delhi,New Delhi,Chickenpox,7
+2026-07,Delhi,New Delhi,Chickenpox,6
+2026-08,Delhi,New Delhi,Chickenpox,8
+2026-09,Delhi,New Delhi,Chickenpox,10
+2026-10,Delhi,New Delhi,Chickenpox,10
+2024-11,Delhi,North Delhi,Dengue,7
+2024-12,Delhi,North Delhi,Dengue,4
+2025-01,Delhi,North Delhi,Dengue,4
+2025-02,Delhi,North Delhi,Dengue,3
+2025-03,Delhi,North Delhi,Dengue,2
+2025-04,Delhi,North Delhi,Dengue,3
+2025-05,Delhi,North Delhi,Dengue,7
+2025-06,Delhi,North Delhi,Dengue,11
+2025-07,Delhi,North Delhi,Dengue,14
+2025-08,Delhi,North Delhi,Dengue,12
+2025-09,Delhi,North Delhi,Dengue,19
+2025-10,Delhi,North Delhi,Dengue,13
+2025-11,Delhi,North Delhi,Dengue,5
+2025-12,Delhi,North Delhi,Dengue,4
+2026-01,Delhi,North Delhi,Dengue,3
+2026-02,Delhi,North Delhi,Dengue,3
+2026-03,Delhi,North Delhi,Dengue,3
+2026-04,Delhi,North Delhi,Dengue,4
+2026-05,Delhi,North Delhi,Dengue,7
+2026-06,Delhi,North Delhi,Dengue,9
+2026-07,Delhi,North Delhi,Dengue,12
+2026-08,Delhi,North Delhi,Dengue,12
+2026-09,Delhi,North Delhi,Dengue,17
+2026-10,Delhi,North Delhi,Dengue,8
+2024-11,Goa,Margao,Chickenpox,1
+2024-12,Goa,Margao,Chickenpox,2
+2025-01,Goa,Margao,Chickenpox,1
+2025-02,Goa,Margao,Chickenpox,1
+2025-03,Goa,Margao,Chickenpox,2
+2025-04,Goa,Margao,Chickenpox,2
+2025-05,Goa,Margao,Chickenpox,2
+2025-06,Goa,Margao,Chickenpox,2
+2025-07,Goa,Margao,Chickenpox,1
+2025-08,Goa,Margao,Chickenpox,1
+2025-09,Goa,Margao,Chickenpox,1
+2025-10,Goa,Margao,Chickenpox,2
+2025-11,Goa,Margao,Chickenpox,2
+2025-12,Goa,Margao,Chickenpox,1
+2026-01,Goa,Margao,Chickenpox,2
+2026-02,Goa,Margao,Chickenpox,1
+2026-03,Goa,Margao,Chickenpox,2
+2026-04,Goa,Margao,Chickenpox,2
+2026-05,Goa,Margao,Chickenpox,2
+2026-06,Goa,Margao,Chickenpox,1
+2026-07,Goa,Margao,Chickenpox,1
+2026-08,Goa,Margao,Chickenpox,2
+2026-09,Goa,Margao,Chickenpox,1
+2026-10,Goa,Margao,Chickenpox,1
+2024-11,Goa,Panaji,Typhoid,2
+2024-12,Goa,Panaji,Typhoid,1
+2025-01,Goa,Panaji,Typhoid,1
+2025-02,Goa,Panaji,Typhoid,1
+2025-03,Goa,Panaji,Typhoid,1
+2025-04,Goa,Panaji,Typhoid,1
+2025-05,Goa,Panaji,Typhoid,1
+2025-06,Goa,Panaji,Typhoid,2
+2025-07,Goa,Panaji,Typhoid,3
+2025-08,Goa,Panaji,Typhoid,3
+2025-09,Goa,Panaji,Typhoid,2
+2025-10,Goa,Panaji,Typhoid,2
+2025-11,Goa,Panaji,Typhoid,1
+2025-12,Goa,Panaji,Typhoid,1
+2026-01,Goa,Panaji,Typhoid,1
+2026-02,Goa,Panaji,Typhoid,1
+2026-03,Goa,Panaji,Typhoid,1
+2026-04,Goa,Panaji,Typhoid,1
+2026-05,Goa,Panaji,Typhoid,2
+2026-06,Goa,Panaji,Typhoid,3
+2026-07,Goa,Panaji,Typhoid,2
+2026-08,Goa,Panaji,Typhoid,3
+2026-09,Goa,Panaji,Typhoid,3
+2026-10,Goa,Panaji,Typhoid,2
+2024-11,Gujarat,Ahmedabad,Malaria,4
+2024-12,Gujarat,Ahmedabad,Malaria,5
+2025-01,Gujarat,Ahmedabad,Malaria,3
+2025-02,Gujarat,Ahmedabad,Malaria,3
+2025-03,Gujarat,Ahmedabad,Malaria,2
+2025-04,Gujarat,Ahmedabad,Malaria,4
+2025-05,Gujarat,Ahmedabad,Malaria,5
+2025-06,Gujarat,Ahmedabad,Malaria,12
+2025-07,Gujarat,Ahmedabad,Malaria,12
+2025-08,Gujarat,Ahmedabad,Malaria,16
+2025-09,Gujarat,Ahmedabad,Malaria,12
+2025-10,Gujarat,Ahmedabad,Malaria,9
+2025-11,Gujarat,Ahmedabad,Malaria,5
+2025-12,Gujarat,Ahmedabad,Malaria,3
+2026-01,Gujarat,Ahmedabad,Malaria,3
+2026-02,Gujarat,Ahmedabad,Malaria,2
+2026-03,Gujarat,Ahmedabad,Malaria,3
+2026-04,Gujarat,Ahmedabad,Malaria,5
+2026-05,Gujarat,Ahmedabad,Malaria,5
+2026-06,Gujarat,Ahmedabad,Malaria,8
+2026-07,Gujarat,Ahmedabad,Malaria,19
+2026-08,Gujarat,Ahmedabad,Malaria,12
+2026-09,Gujarat,Ahmedabad,Malaria,12
+2026-10,Gujarat,Ahmedabad,Malaria,10
+2024-11,Gujarat,Surat,Chickenpox,5
+2024-12,Gujarat,Surat,Chickenpox,4
+2025-01,Gujarat,Surat,Chickenpox,3
+2025-02,Gujarat,Surat,Chickenpox,4
+2025-03,Gujarat,Surat,Chickenpox,5
+2025-04,Gujarat,Surat,Chickenpox,4
+2025-05,Gujarat,Surat,Chickenpox,4
+2025-06,Gujarat,Surat,Chickenpox,4
+2025-07,Gujarat,Surat,Chickenpox,2
+2025-08,Gujarat,Surat,Chickenpox,2
+2025-09,Gujarat,Surat,Chickenpox,3
+2025-10,Gujarat,Surat,Chickenpox,3
+2025-11,Gujarat,Surat,Chickenpox,3
+2025-12,Gujarat,Surat,Chickenpox,4
+2026-01,Gujarat,Surat,Chickenpox,4
+2026-02,Gujarat,Surat,Chickenpox,3
+2026-03,Gujarat,Surat,Chickenpox,4
+2026-04,Gujarat,Surat,Chickenpox,5
+2026-05,Gujarat,Surat,Chickenpox,4
+2026-06,Gujarat,Surat,Chickenpox,3
+2026-07,Gujarat,Surat,Chickenpox,2
+2026-08,Gujarat,Surat,Chickenpox,2
+2026-09,Gujarat,Surat,Chickenpox,3
+2026-10,Gujarat,Surat,Chickenpox,4
+2024-11,Haryana,Faridabad,Typhoid,2
+2024-12,Haryana,Faridabad,Typhoid,1
+2025-01,Haryana,Faridabad,Typhoid,1
+2025-02,Haryana,Faridabad,Typhoid,1
+2025-03,Haryana,Faridabad,Typhoid,1
+2025-04,Haryana,Faridabad,Typhoid,2
+2025-05,Haryana,Faridabad,Typhoid,3
+2025-06,Haryana,Faridabad,Typhoid,2
+2025-07,Haryana,Faridabad,Typhoid,3
+2025-08,Haryana,Faridabad,Typhoid,3
+2025-09,Haryana,Faridabad,Typhoid,3
+2025-10,Haryana,Faridabad,Typhoid,3
+2025-11,Haryana,Faridabad,Typhoid,2
+2025-12,Haryana,Faridabad,Typhoid,2
+2026-01,Haryana,Faridabad,Typhoid,1
+2026-02,Haryana,Faridabad,Typhoid,1
+2026-03,Haryana,Faridabad,Typhoid,2
+2026-04,Haryana,Faridabad,Typhoid,1
+2026-05,Haryana,Faridabad,Typhoid,2
+2026-06,Haryana,Faridabad,Typhoid,3
+2026-07,Haryana,Faridabad,Typhoid,3
+2026-08,Haryana,Faridabad,Typhoid,4
+2026-09,Haryana,Faridabad,Typhoid,4
+2026-10,Haryana,Faridabad,Typhoid,3
+2024-11,Haryana,Gurgaon,Dengue,2
+2024-12,Haryana,Gurgaon,Dengue,1
+2025-01,Haryana,Gurgaon,Dengue,1
+2025-02,Haryana,Gurgaon,Dengue,1
+2025-03,Haryana,Gurgaon,Dengue,1
+2025-04,Haryana,Gurgaon,Dengue,1
+2025-05,Haryana,Gurgaon,Dengue,2
+2025-06,Haryana,Gurgaon,Dengue,4
+2025-07,Haryana,Gurgaon,Dengue,5
+2025-08,Haryana,Gurgaon,Dengue,5
+2025-09,Haryana,Gurgaon,Dengue,5
+2025-10,Haryana,Gurgaon,Dengue,4
+2025-11,Haryana,Gurgaon,Dengue,3
+2025-12,Haryana,Gurgaon,Dengue,2
+2026-01,Haryana,Gurgaon,Dengue,1
+2026-02,Haryana,Gurgaon,Dengue,1
+2026-03,Haryana,Gurgaon,Dengue,1
+2026-04,Haryana,Gurgaon,Dengue,2
+2026-05,Haryana,Gurgaon,Dengue,2
+2026-06,Haryana,Gurgaon,Dengue,4
+2026-07,Haryana,Gurgaon,Dengue,4
+2026-08,Haryana,Gurgaon,Dengue,8
+2026-09,Haryana,Gurgaon,Dengue,6
+2026-10,Haryana,Gurgaon,Dengue,3
+2025-05,Himachal Pradesh,Kullu,Cholera,1
+2025-06,Himachal Pradesh,Kullu,Cholera,1
+2025-07,Himachal Pradesh,Kullu,Cholera,1
+2025-08,Himachal Pradesh,Kullu,Cholera,1
+2025-09,Himachal Pradesh,Kullu,Cholera,1
+2025-10,Himachal Pradesh,Kullu,Cholera,1
+2025-11,Himachal Pradesh,Kullu,Cholera,1
+2025-12,Himachal Pradesh,Kullu,Cholera,1
+2026-05,Himachal Pradesh,Kullu,Cholera,1
+2026-06,Himachal Pradesh,Kullu,Cholera,1
+2026-07,Himachal Pradesh,Kullu,Cholera,1
+2026-08,Himachal Pradesh,Kullu,Cholera,1
+2026-09,Himachal Pradesh,Kullu,Cholera,1
+2026-10,Himachal Pradesh,Kullu,Cholera,1
+2024-11,Himachal Pradesh,Shimla,Chickenpox,1
+2025-01,Himachal Pradesh,Shimla,Chickenpox,1
+2025-02,Himachal Pradesh,Shimla,Chickenpox,1
+2025-03,Himachal Pradesh,Shimla,Chickenpox,1
+2025-04,Himachal Pradesh,Shimla,Chickenpox,1
+2025-05,Himachal Pradesh,Shimla,Chickenpox,1
+2025-06,Himachal Pradesh,Shimla,Chickenpox,1
+2025-07,Himachal Pradesh,Shimla,Chickenpox,1
+2025-08,Himachal Pradesh,Shimla,Chickenpox,1
+2025-09,Himachal Pradesh,Shimla,Chickenpox,1
+2025-11,Himachal Pradesh,Shimla,Chickenpox,1
+2025-12,Himachal Pradesh,Shimla,Chickenpox,1
+2026-01,Himachal Pradesh,Shimla,Chickenpox,1
+2026-02,Himachal Pradesh,Shimla,Chickenpox,1
+2026-03,Himachal Pradesh,Shimla,Chickenpox,1
+2026-04,Himachal Pradesh,Shimla,Chickenpox,1
+2026-06,Himachal Pradesh,Shimla,Chickenpox,1
+2026-07,Himachal Pradesh,Shimla,Chickenpox,1
+2026-08,Himachal Pradesh,Shimla,Chickenpox,1
+2026-09,Himachal Pradesh,Shimla,Chickenpox,1
+2026-10,Himachal Pradesh,Shimla,Chickenpox,1
+2024-11,Jammu and Kashmir,Jammu,Cholera,1
+2024-12,Jammu and Kashmir,Jammu,Cholera,1
+2025-01,Jammu and Kashmir,Jammu,Cholera,1
+2025-02,Jammu and Kashmir,Jammu,Cholera,1
+2025-03,Jammu and Kashmir,Jammu,Cholera,1
+2025-04,Jammu and Kashmir,Jammu,Cholera,1
+2025-05,Jammu and Kashmir,Jammu,Cholera,1
+2025-06,Jammu and Kashmir,Jammu,Cholera,2
+2025-07,Jammu and Kashmir,Jammu,Cholera,2
+2025-08,Jammu and Kashmir,Jammu,Cholera,2
+2025-09,Jammu and Kashmir,Jammu,Cholera,2
+2025-10,Jammu and Kashmir,Jammu,Cholera,1
+2025-11,Jammu and Kashmir,Jammu,Cholera,1
+2025-12,Jammu and Kashmir,Jammu,Cholera,1
+2026-03,Jammu and Kashmir,Jammu,Cholera,1
+2026-04,Jammu and Kashmir,Jammu,Cholera,1
+2026-05,Jammu and Kashmir,Jammu,Cholera,1
+2026-06,Jammu and Kashmir,Jammu,Cholera,1
+2026-07,Jammu and Kashmir,Jammu,Cholera,2
+2026-08,Jammu and Kashmir,Jammu,Cholera,1
+2026-09,Jammu and Kashmir,Jammu,Cholera,1
+2026-10,Jammu and Kashmir,Jammu,Cholera,1
+2024-11,Jammu and Kashmir,Srinagar,Malaria,1
+2024-12,Jammu and Kashmir,Srinagar,Malaria,1
+2025-02,Jammu and Kashmir,Srinagar,Malaria,1
+2025-04,Jammu and Kashmir,Srinagar,Malaria,1
+2025-05,Jammu and Kashmir,Srinagar,Malaria,1
+2025-06,Jammu and Kashmir,Srinagar,Malaria,2
+2025-07,Jammu and Kashmir,Srinagar,Malaria,3
+2025-08,Jammu and Kashmir,Srinagar,Malaria,3
+2025-09,Jammu and Kashmir,Srinagar,Malaria,2
+2025-10,Jammu and Kashmir,Srinagar,Malaria,3
+2025-11,Jammu and Kashmir,Srinagar,Malaria,1
+2025-12,Jammu and Kashmir,Srinagar,Malaria,1
+2026-03,Jammu and Kashmir,Srinagar,Malaria,1
+2026-04,Jammu and Kashmir,Srinagar,Malaria,1
+2026-05,Jammu and Kashmir,Srinagar,Malaria,1
+2026-06,Jammu and Kashmir,Srinagar,Malaria,2
+2026-07,Jammu and Kashmir,Srinagar,Malaria,2
+2026-08,Jammu and Kashmir,Srinagar,Malaria,2
+2026-09,Jammu and Kashmir,Srinagar,Malaria,2
+2026-10,Jammu and Kashmir,Srinagar,Malaria,2
+2024-11,Jharkhand,Jamshedpur,Malaria,3
+2024-12,Jharkhand,Jamshedpur,Malaria,3
+2025-01,Jharkhand,Jamshedpur,Malaria,2
+2025-02,Jharkhand,Jamshedpur,Malaria,1
+2025-03,Jharkhand,Jamshedpur,Malaria,2
+2025-04,Jharkhand,Jamshedpur,Malaria,2
+2025-05,Jharkhand,Jamshedpur,Malaria,5
+2025-06,Jharkhand,Jamshedpur,Malaria,6
+2025-07,Jharkhand,Jamshedpur,Malaria,11
+2025-08,Jharkhand,Jamshedpur,Malaria,13
+2025-09,Jharkhand,Jamshedpur,Malaria,8
+2025-10,Jharkhand,Jamshedpur,Malaria,5
+2025-11,Jharkhand,Jamshedpur,Malaria,3
+2025-12,Jharkhand,Jamshedpur,Malaria,2
+2026-01,Jharkhand,Jamshedpur,Malaria,2
+2026-02,Jharkhand,Jamshedpur,Malaria,2
+2026-03,Jharkhand,Jamshedpur,Malaria,2
+2026-04,Jharkhand,Jamshedpur,Malaria,3
+2026-05,Jharkhand,Jamshedpur,Malaria,3
+2026-06,Jharkhand,Jamshedpur,Malaria,7
+2026-07,Jharkhand,Jamshedpur,Malaria,7
+2026-08,Jharkhand,Jamshedpur,Malaria,13
+2026-09,Jharkhand,Jamshedpur,Malaria,7
+2026-10,Jharkhand,Jamshedpur,Malaria,8
+2024-11,Jharkhand,Ranchi,Dengue,4
+2024-12,Jharkhand,Ranchi,Dengue,2
+2025-01,Jharkhand,Ranchi,Dengue,2
+2025-02,Jharkhand,Ranchi,Dengue,1
+2025-03,Jharkhand,Ranchi,Dengue,1
+2025-04,Jharkhand,Ranchi,Dengue,3
+2025-05,Jharkhand,Ranchi,Dengue,3
+2025-06,Jharkhand,Ranchi,Dengue,6
+2025-07,Jharkhand,Ranchi,Dengue,7
+2025-08,Jharkhand,Ranchi,Dengue,8
+2025-09,Jharkhand,Ranchi,Dengue,7
+2025-10,Jharkhand,Ranchi,Dengue,4
+2025-11,Jharkhand,Ranchi,Dengue,2
+2025-12,Jharkhand,Ranchi,Dengue,2
+2026-01,Jharkhand,Ranchi,Dengue,2
+2026-02,Jharkhand,Ranchi,Dengue,2
+2026-03,Jharkhand,Ranchi,Dengue,2
+2026-04,Jharkhand,Ranchi,Dengue,2
+2026-05,Jharkhand,Ranchi,Dengue,3
+2026-06,Jharkhand,Ranchi,Dengue,4
+2026-07,Jharkhand,Ranchi,Dengue,9
+2026-08,Jharkhand,Ranchi,Dengue,8
+2026-09,Jharkhand,Ranchi,Dengue,10
+2026-10,Jharkhand,Ranchi,Dengue,6
+2025-05,Karnataka,Athani,Cholera,1
+2025-06,Karnataka,Athani,Cholera,1
+2025-07,Karnataka,Athani,Cholera,1
+2025-08,Karnataka,Athani,Cholera,1
+2025-09,Karnataka,Athani,Cholera,1
+2025-10,Karnataka,Athani,Cholera,1
+2026-06,Karnataka,Athani,Cholera,1
+2026-07,Karnataka,Athani,Cholera,1
+2026-08,Karnataka,Athani,Cholera,1
+2026-09,Karnataka,Athani,Cholera,1
+2026-10,Karnataka,Athani,Cholera,1
+2025-06,Karnataka,Bailhongal,Typhoid,1
+2025-07,Karnataka,Bailhongal,Typhoid,1
+2025-08,Karnataka,Bailhongal,Typhoid,1
+2025-09,Karnataka,Bailhongal,Typhoid,1
+2026-06,Karnataka,Bailhongal,Typhoid,1
+2026-07,Karnataka,Bailhongal,Typhoid,1
+2026-08,Karnataka,Bailhongal,Typhoid,1
+2026-09,Karnataka,Bailhongal,Typhoid,1
+2026-10,Karnataka,Bailhongal,Typhoid,1
+2024-11,Karnataka,Bangalore,Dengue,18
+2024-12,Karnataka,Bangalore,Dengue,13
+2025-01,Karnataka,Bangalore,Dengue,6
+2025-02,Karnataka,Bangalore,Dengue,5
+2025-03,Karnataka,Bangalore,Dengue,7
+2025-04,Karnataka,Bangalore,Dengue,13
+2025-05,Karnataka,Bangalore,Dengue,12
+2025-06,Karnataka,Bangalore,Dengue,25
+2025-07,Karnataka,Bangalore,Dengue,42
+2025-08,Karnataka,Bangalore,Dengue,56
+2025-09,Karnataka,Bangalore,Dengue,50
+2025-10,Karnataka,Bangalore,Dengue,22
+2025-11,Karnataka,Bangalore,Dengue,21
+2025-12,Karnataka,Bangalore,Dengue,8
+2026-01,Karnataka,Bangalore,Dengue,8
+2026-02,Karnataka,Bangalore,Dengue,9
+2026-03,Karnataka,Bangalore,Dengue,10
+2026-04,Karnataka,Bangalore,Dengue,14
+2026-05,Karnataka,Bangalore,Dengue,18
+2026-06,Karnataka,Bangalore,Dengue,23
+2026-07,Karnataka,Bangalore,Dengue,37
+2026-08,Karnataka,Bangalore,Dengue,45
+2026-09,Karnataka,Bangalore,Dengue,32
+2026-10,Karnataka,Bangalore,Dengue,29
+2024-11,Karnataka,Belagavi,Typhoid,4
+2024-12,Karnataka,Belagavi,Typhoid,5
+2025-01,Karnataka,Belagavi,Typhoid,4
+2025-02,Karnataka,Belagavi,Typhoid,4
+2025-03,Karnataka,Belagavi,Typhoid,4
+2025-04,Karnataka,Belagavi,Typhoid,3
+2025-05,Karnataka,Belagavi,Typhoid,5
+2025-06,Karnataka,Belagavi,Typhoid,10
+2025-07,Karnataka,Belagavi,Typhoid,8
+2025-08,Karnataka,Belagavi,Typhoid,7
+2025-09,Karnataka,Belagavi,Typhoid,9
+2025-10,Karnataka,Belagavi,Typhoid,7
+2025-11,Karnataka,Belagavi,Typhoid,4
+2025-12,Karnataka,Belagavi,Typhoid,5
+2026-01,Karnataka,Belagavi,Typhoid,3
+2026-02,Karnataka,Belagavi,Typhoid,4
+2026-03,Karnataka,Belagavi,Typhoid,3
+2026-04,Karnataka,Belagavi,Typhoid,5
+2026-05,Karnataka,Belagavi,Typhoid,7
+2026-06,Karnataka,Belagavi,Typhoid,7
+2026-07,Karnataka,Belagavi,Typhoid,10
+2026-08,Karnataka,Belagavi,Typhoid,9
+2026-09,Karnataka,Belagavi,Typhoid,8
+2026-10,Karnataka,Belagavi,Typhoid,6
+2024-11,Karnataka,Bidar,Dengue,2
+2024-12,Karnataka,Bidar,Dengue,1
+2025-01,Karnataka,Bidar,Dengue,1
+2025-02,Karnataka,Bidar,Dengue,1
+2025-03,Karnataka,Bidar,Dengue,1
+2025-04,Karnataka,Bidar,Dengue,2
+2025-05,Karnataka,Bidar,Dengue,2
+2025-06,Karnataka,Bidar,Dengue,2
+2025-07,Karnataka,Bidar,Dengue,5
+2025-08,Karnataka,Bidar,Dengue,7
+2025-09,Karnataka,Bidar,Dengue,6
+2025-10,Karnataka,Bidar,Dengue,3
+2025-11,Karnataka,Bidar,Dengue,2
+2025-12,Karnataka,Bidar,Dengue,1
+2026-01,Karnataka,Bidar,Dengue,1
+2026-02,Karnataka,Bidar,Dengue,1
+2026-03,Karnataka,Bidar,Dengue,1
+2026-04,Karnataka,Bidar,Dengue,1
+2026-05,Karnataka,Bidar,Dengue,2
+2026-06,Karnataka,Bidar,Dengue,3
+2026-07,Karnataka,Bidar,Dengue,5
+2026-08,Karnataka,Bidar,Dengue,4
+2026-09,Karnataka,Bidar,Dengue,6
+2026-10,Karnataka,Bidar,Dengue,5
+2024-11,Karnataka,Chikodi,Malaria,1
+2025-01,Karnataka,Chikodi,Malaria,1
+2025-04,Karnataka,Chikodi,Malaria,1
+2025-05,Karnataka,Chikodi,Malaria,1
+2025-06,Karnataka,Chikodi,Malaria,1
+2025-07,Karnataka,Chikodi,Malaria,3
+2025-08,Karnataka,Chikodi,Malaria,3
+2025-09,Karnataka,Chikodi,Malaria,2
+2025-10,Karnataka,Chikodi,Malaria,1
+2025-11,Karnataka,Chikodi,Malaria,1
+2025-12,Karnataka,Chikodi,Malaria,1
+2026-01,Karnataka,Chikodi,Malaria,1
+2026-04,Karnataka,Chikodi,Malaria,1
+2026-05,Karnataka,Chikodi,Malaria,1
+2026-06,Karnataka,Chikodi,Malaria,1
+2026-07,Karnataka,Chikodi,Malaria,1
+2026-08,Karnataka,Chikodi,Malaria,3
+2026-09,Karnataka,Chikodi,Malaria,2
+2026-10,Karnataka,Chikodi,Malaria,2
+2024-11,Karnataka,Gokak,Typhoid,2
+2024-12,Karnataka,Gokak,Typhoid,1
+2025-01,Karnataka,Gokak,Typhoid,1
+2025-02,Karnataka,Gokak,Typhoid,1
+2025-03,Karnataka,Gokak,Typhoid,1
+2025-04,Karnataka,Gokak,Typhoid,1
+2025-05,Karnataka,Gokak,Typhoid,2
+2025-06,Karnataka,Gokak,Typhoid,2
+2025-07,Karnataka,Gokak,Typhoid,2
+2025-08,Karnataka,Gokak,Typhoid,2
+2025-09,Karnataka,Gokak,Typhoid,3
+2025-10,Karnataka,Gokak,Typhoid,2
+2025-11,Karnataka,Gokak,Typhoid,1
+2025-12,Karnataka,Gokak,Typhoid,1
+2026-01,Karnataka,Gokak,Typhoid,1
+2026-02,Karnataka,Gokak,Typhoid,1
+2026-03,Karnataka,Gokak,Typhoid,1
+2026-04,Karnataka,Gokak,Typhoid,1
+2026-05,Karnataka,Gokak,Typhoid,2
+2026-06,Karnataka,Gokak,Typhoid,2
+2026-07,Karnataka,Gokak,Typhoid,3
+2026-08,Karnataka,Gokak,Typhoid,4
+2026-09,Karnataka,Gokak,Typhoid,2
+2026-10,Karnataka,Gokak,Typhoid,2
+2024-11,Karnataka,Hassan,Chickenpox,1
+2024-12,Karnataka,Hassan,Chickenpox,1
+2025-01,Karnataka,Hassan,Chickenpox,2
+2025-02,Karnataka,Hassan,Chickenpox,2
+2025-03,Karnataka,Hassan,Chickenpox,2
+2025-04,Karnataka,Hassan,Chickenpox,2
+2025-05,Karnataka,Hassan,Chickenpox,2
+2025-06,Karnataka,Hassan,Chickenpox,1
+2025-07,Karnataka,Hassan,Chickenpox,1
+2025-08,Karnataka,Hassan,Chickenpox,1
+2025-09,Karnataka,Hassan,Chickenpox,2
+2025-10,Karnataka,Hassan,Chickenpox,1
+2025-11,Karnataka,Hassan,Chickenpox,1
+2025-12,Karnataka,Hassan,Chickenpox,1
+2026-01,Karnataka,Hassan,Chickenpox,1
+2026-02,Karnataka,Hassan,Chickenpox,1
+2026-03,Karnataka,Hassan,Chickenpox,2
+2026-04,Karnataka,Hassan,Chickenpox,2
+2026-05,Karnataka,Hassan,Chickenpox,2
+2026-06,Karnataka,Hassan,Chickenpox,2
+2026-07,Karnataka,Hassan,Chickenpox,1
+2026-08,Karnataka,Hassan,Chickenpox,1
+2026-09,Karnataka,Hassan,Chickenpox,1
+2026-10,Karnataka,Hassan,Chickenpox,1
+2024-11,Karnataka,Hubli,Cholera,3
+2024-12,Karnataka,Hubli,Cholera,3
+2025-01,Karnataka,Hubli,Cholera,2
+2025-02,Karnataka,Hubli,Cholera,2
+2025-03,Karnataka,Hubli,Cholera,2
+2025-04,Karnataka,Hubli,Cholera,3
+2025-05,Karnataka,Hubli,Cholera,3
+2025-06,Karnataka,Hubli,Cholera,5
+2025-07,Karnataka,Hubli,Cholera,6
+2025-08,Karnataka,Hubli,Cholera,9
+2025-09,Karnataka,Hubli,Cholera,5
+2025-10,Karnataka,Hubli,Cholera,5
+2025-11,Karnataka,Hubli,Cholera,2
+2025-12,Karnataka,Hubli,Cholera,3
+2026-01,Karnataka,Hubli,Cholera,2
+2026-02,Karnataka,Hubli,Cholera,2
+2026-03,Karnataka,Hubli,Cholera,2
+2026-04,Karnataka,Hubli,Cholera,2
+2026-05,Karnataka,Hubli,Cholera,3
+2026-06,Karnataka,Hubli,Cholera,7
+2026-07,Karnataka,Hubli,Cholera,8
+2026-08,Karnataka,Hubli,Cholera,9
+2026-09,Karnataka,Hubli,Cholera,6
+2026-10,Karnataka,Hubli,Cholera,5
+2024-11,Karnataka,Hukkeri,Malaria,1
+2025-05,Karnataka,Hukkeri,Malaria,1
+2025-06,Karnataka,Hukkeri,Malaria,1
+2025-07,Karnataka,Hukkeri,Malaria,2
+2025-08,Karnataka,Hukkeri,Malaria,2
+2025-09,Karnataka,Hukkeri,Malaria,2
+2025-10,Karnataka,Hukkeri,Malaria,1
+2026-05,Karnataka,Hukkeri,Malaria,1
+2026-06,Karnataka,Hukkeri,Malaria,1
+2026-07,Karnataka,Hukkeri,Malaria,1
+2026-08,Karnataka,Hukkeri,Malaria,2
+2026-09,Karnataka,Hukkeri,Malaria,1
+2026-10,Karnataka,Hukkeri,Malaria,1
+2024-11,Karnataka,Mandya,Malaria,1
+2024-12,Karnataka,Mandya,Malaria,1
+2025-01,Karnataka,Mandya,Malaria,1
+2025-02,Karnataka,Mandya,Malaria,1
+2025-03,Karnataka,Mandya,Malaria,1
+2025-04,Karnataka,Mandya,Malaria,1
+2025-05,Karnataka,Mandya,Malaria,1
+2025-06,Karnataka,Mandya,Malaria,2
+2025-07,Karnataka,Mandya,Malaria,4
+2025-08,Karnataka,Mandya,Malaria,3
+2025-09,Karnataka,Mandya,Malaria,5
+2025-10,Karnataka,Mandya,Malaria,3
+2025-11,Karnataka,Mandya,Malaria,2
+2025-12,Karnataka,Mandya,Malaria,1
+2026-01,Karnataka,Mandya,Malaria,1
+2026-02,Karnataka,Mandya,Malaria,1
+2026-03,Karnataka,Mandya,Malaria,1
+2026-04,Karnataka,Mandya,Malaria,1
+2026-05,Karnataka,Mandya,Malaria,2
+2026-06,Karnataka,Mandya,Malaria,2
+2026-07,Karnataka,Mandya,Malaria,4
+2026-08,Karnataka,Mandya,Malaria,3
+2026-09,Karnataka,Mandya,Malaria,3
+2026-10,Karnataka,Mandya,Malaria,3
+2024-11,Karnataka,Mangalore,Chickenpox,5
+2024-12,Karnataka,Mangalore,Chickenpox,3
+2025-01,Karnataka,Mangalore,Chickenpox,5
+2025-02,Karnataka,Mangalore,Chickenpox,5
+2025-03,Karnataka,Mangalore,Chickenpox,8
+2025-04,Karnataka,Mangalore,Chickenpox,8
+2025-05,Karnataka,Mangalore,Chickenpox,6
+2025-06,Karnataka,Mangalore,Chickenpox,6
+2025-07,Karnataka,Mangalore,Chickenpox,4
+2025-08,Karnataka,Mangalore,Chickenpox,4
+2025-09,Karnataka,Mangalore,Chickenpox,4
+2025-10,Karnataka,Mangalore,Chickenpox,6
+2025-11,Karnataka,Mangalore,Chickenpox,6
+2025-12,Karnataka,Mangalore,Chickenpox,5
+2026-01,Karnataka,Mangalore,Chickenpox,5
+2026-02,Karnataka,Mangalore,Chickenpox,5
+2026-03,Karnataka,Mangalore,Chickenpox,7
+2026-04,Karnataka,Mangalore,Chickenpox,8
+2026-05,Karnataka,Mangalore,Chickenpox,7
+2026-06,Karnataka,Mangalore,Chickenpox,3
+2026-07,Karnataka,Mangalore,Chickenpox,5
+2026-08,Karnataka,Mangalore,Chickenpox,3
+2026-09,Karnataka,Mangalore,Chickenpox,6
+2026-10,Karnataka,Mangalore,Chickenpox,6
+2025-07,Karnataka,Mudalgi,Malaria,1
+2025-08,Karnataka,Mudalgi,Malaria,1
+2025-09,Karnataka,Mudalgi,Malaria,1
+2025-10,Karnataka,Mudalgi,Malaria,1
+2026-07,Karnataka,Mudalgi,Malaria,1
+2026-08,Karnataka,Mudalgi,Malaria,1
+2024-11,Karnataka,Mysore,Malaria,7
+2024-12,Karnataka,Mysore,Malaria,3
+2025-01,Karnataka,Mysore,Malaria,4
+2025-02,Karnataka,Mysore,Malaria,3
+2025-03,Karnataka,Mysore,Malaria,3
+2025-04,Karnataka,Mysore,Malaria,5
+2025-05,Karnataka,Mysore,Malaria,8
+2025-06,Karnataka,Mysore,Malaria,9
+2025-07,Karnataka,Mysore,Malaria,19
+2025-08,Karnataka,Mysore,Malaria,16
+2025-09,Karnataka,Mysore,Malaria,16
+2025-10,Karnataka,Mysore,Malaria,11
+2025-11,Karnataka,Mysore,Malaria,6
+2025-12,Karnataka,Mysore,Malaria,4
+2026-01,Karnataka,Mysore,Malaria,3
+2026-02,Karnataka,Mysore,Malaria,3
+2026-03,Karnataka,Mysore,Malaria,3
+2026-04,Karnataka,Mysore,Malaria,6
+2026-05,Karnataka,Mysore,Malaria,6
+2026-06,Karnataka,Mysore,Malaria,8
+2026-07,Karnataka,Mysore,Malaria,16
+2026-08,Karnataka,Mysore,Malaria,16
+2026-09,Karnataka,Mysore,Malaria,21
+2026-10,Karnataka,Mysore,Malaria,16
+2024-11,Karnataka,Ramdurg,Chickenpox,1
+2024-12,Karnataka,Ramdurg,Chickenpox,1
+2025-01,Karnataka,Ramdurg,Chickenpox,1
+2025-02,Karnataka,Ramdurg,Chickenpox,1
+2025-03,Karnataka,Ramdurg,Chickenpox,1
+2025-04,Karnataka,Ramdurg,Chickenpox,1
+2025-05,Karnataka,Ramdurg,Chickenpox,1
+2025-06,Karnataka,Ramdurg,Chickenpox,1
+2025-08,Karnataka,Ramdurg,Chickenpox,1
+2025-09,Karnataka,Ramdurg,Chickenpox,1
+2025-10,Karnataka,Ramdurg,Chickenpox,1
+2025-11,Karnataka,Ramdurg,Chickenpox,1
+2025-12,Karnataka,Ramdurg,Chickenpox,1
+2026-01,Karnataka,Ramdurg,Chickenpox,1
+2026-02,Karnataka,Ramdurg,Chickenpox,1
+2026-03,Karnataka,Ramdurg,Chickenpox,1
+2026-04,Karnataka,Ramdurg,Chickenpox,1
+2026-05,Karnataka,Ramdurg,Chickenpox,1
+2026-06,Karnataka,Ramdurg,Chickenpox,1
+2026-07,Karnataka,Ramdurg,Chickenpox,1
+2026-09,Karnataka,Ramdurg,Chickenpox,1
+2026-10,Karnataka,Ramdurg,Chickenpox,1
+2024-11,Karnataka,Raybag,Cholera,1
+2024-12,Karnataka,Raybag,Cholera,1
+2025-04,Karnataka,Raybag,Cholera,1
+2025-05,Karnataka,Raybag,Cholera,1
+2025-06,Karnataka,Raybag,Cholera,1
+2025-07,Karnataka,Raybag,Cholera,1
+2025-08,Karnataka,Raybag,Cholera,2
+2025-09,Karnataka,Raybag,Cholera,1
+2025-10,Karnataka,Raybag,Cholera,1
+2025-11,Karnataka,Raybag,Cholera,1
+2026-04,Karnataka,Raybag,Cholera,1
+2026-05,Karnataka,Raybag,Cholera,1
+2026-06,Karnataka,Raybag,Cholera,1
+2026-07,Karnataka,Raybag,Cholera,1
+2026-08,Karnataka,Raybag,Cholera,2
+2026-09,Karnataka,Raybag,Cholera,1
+2026-10,Karnataka,Raybag,Cholera,1
+2024-11,Karnataka,Saundatti,Chickenpox,1
+2025-02,Karnataka,Saundatti,Chickenpox,1
+2025-03,Karnataka,Saundatti,Chickenpox,1
+2025-04,Karnataka,Saundatti,Chickenpox,1
+2025-06,Karnataka,Saundatti,Chickenpox,1
+2026-04,Karnataka,Saundatti,Chickenpox,1
+2026-05,Karnataka,Saundatti,Chickenpox,1
+2025-06,Karnataka,Savadatti,Dengue,1
+2025-07,Karnataka,Savadatti,Dengue,1
+2025-08,Karnataka,Savadatti,Dengue,1
+2025-09,Karnataka,Savadatti,Dengue,1
+2025-10,Karnataka,Savadatti,Dengue,1
+2025-11,Karnataka,Savadatti,Dengue,1
+2026-05,Karnataka,Savadatti,Dengue,1
+2026-06,Karnataka,Savadatti,Dengue,1
+2026-07,Karnataka,Savadatti,Dengue,1
+2026-08,Karnataka,Savadatti,Dengue,1
+2026-09,Karnataka,Savadatti,Dengue,1
+2026-10,Karnataka,Savadatti,Dengue,1
+2024-11,Kerala,Kochi,Cholera,3
+2024-12,Kerala,Kochi,Cholera,2
+2025-01,Kerala,Kochi,Cholera,2
+2025-02,Kerala,Kochi,Cholera,2
+2025-03,Kerala,Kochi,Cholera,2
+2025-04,Kerala,Kochi,Cholera,3
+2025-05,Kerala,Kochi,Cholera,3
+2025-06,Kerala,Kochi,Cholera,6
+2025-07,Kerala,Kochi,Cholera,7
+2025-08,Kerala,Kochi,Cholera,5
+2025-09,Kerala,Kochi,Cholera,5
+2025-10,Kerala,Kochi,Cholera,6
+2025-11,Kerala,Kochi,Cholera,4
+2025-12,Kerala,Kochi,Cholera,2
+2026-01,Kerala,Kochi,Cholera,2
+2026-02,Kerala,Kochi,Cholera,2
+2026-03,Kerala,Kochi,Cholera,2
+2026-04,Kerala,Kochi,Cholera,2
+2026-05,Kerala,Kochi,Cholera,4
+2026-06,Kerala,Kochi,Cholera,5
+2026-07,Kerala,Kochi,Cholera,6
+2026-08,Kerala,Kochi,Cholera,7
+2026-09,Kerala,Kochi,Cholera,5
+2026-10,Kerala,Kochi,Cholera,5
+2024-11,Kerala,Kozhikode,Dengue,1
+2024-12,Kerala,Kozhikode,Dengue,1
+2025-01,Kerala,Kozhikode,Dengue,1
+2025-02,Kerala,Kozhikode,Dengue,1
+2025-04,Kerala,Kozhikode,Dengue,1
+2025-05,Kerala,Kozhikode,Dengue,1
+2025-06,Kerala,Kozhikode,Dengue,2
+2025-07,Kerala,Kozhikode,Dengue,3
+2025-08,Kerala,Kozhikode,Dengue,4
+2025-09,Kerala,Kozhikode,Dengue,4
+2025-10,Kerala,Kozhikode,Dengue,2
+2025-11,Kerala,Kozhikode,Dengue,2
+2025-12,Kerala,Kozhikode,Dengue,1
+2026-02,Kerala,Kozhikode,Dengue,1
+2026-03,Kerala,Kozhikode,Dengue,1
+2026-04,Kerala,Kozhikode,Dengue,1
+2026-05,Kerala,Kozhikode,Dengue,1
+2026-06,Kerala,Kozhikode,Dengue,2
+2026-07,Kerala,Kozhikode,Dengue,3
+2026-08,Kerala,Kozhikode,Dengue,4
+2026-09,Kerala,Kozhikode,Dengue,4
+2026-10,Kerala,Kozhikode,Dengue,2
+2024-11,Kerala,Trivandrum,Chickenpox,6
+2024-12,Kerala,Trivandrum,Chickenpox,6
+2025-01,Kerala,Trivandrum,Chickenpox,6
+2025-02,Kerala,Trivandrum,Chickenpox,7
+2025-03,Kerala,Trivandrum,Chickenpox,7
+2025-04,Kerala,Trivandrum,Chickenpox,6
+2025-05,Kerala,Trivandrum,Chickenpox,7
+2025-06,Kerala,Trivandrum,Chickenpox,4
+2025-07,Kerala,Trivandrum,Chickenpox,6
+2025-08,Kerala,Trivandrum,Chickenpox,5
+2025-09,Kerala,Trivandrum,Chickenpox,4
+2025-10,Kerala,Trivandrum,Chickenpox,6
+2025-11,Kerala,Trivandrum,Chickenpox,6
+2025-12,Kerala,Trivandrum,Chickenpox,5
+2026-01,Kerala,Trivandrum,Chickenpox,5
+2026-02,Kerala,Trivandrum,Chickenpox,4
+2026-03,Kerala,Trivandrum,Chickenpox,6
+2026-04,Kerala,Trivandrum,Chickenpox,9
+2026-05,Kerala,Trivandrum,Chickenpox,6
+2026-06,Kerala,Trivandrum,Chickenpox,5
+2026-07,Kerala,Trivandrum,Chickenpox,3
+2026-08,Kerala,Trivandrum,Chickenpox,3
+2026-09,Kerala,Trivandrum,Chickenpox,4
+2026-10,Kerala,Trivandrum,Chickenpox,4
+2024-11,Ladakh,Leh,Typhoid,1
+2025-06,Ladakh,Leh,Typhoid,1
+2025-07,Ladakh,Leh,Typhoid,1
+2025-08,Ladakh,Leh,Typhoid,1
+2025-09,Ladakh,Leh,Typhoid,1
+2025-10,Ladakh,Leh,Typhoid,1
+2025-11,Ladakh,Leh,Typhoid,1
+2025-12,Ladakh,Leh,Typhoid,1
+2026-04,Ladakh,Leh,Typhoid,1
+2026-06,Ladakh,Leh,Typhoid,1
+2026-07,Ladakh,Leh,Typhoid,1
+2026-08,Ladakh,Leh,Typhoid,1
+2026-09,Ladakh,Leh,Typhoid,1
+2026-10,Ladakh,Leh,Typhoid,1
+2025-08,Lakshadweep,Kavaratti,Malaria,1
+2026-08,Lakshadweep,Kavaratti,Malaria,1
+2024-11,Madhya Pradesh,Bhopal,Malaria,8
+2024-12,Madhya Pradesh,Bhopal,Malaria,5
+2025-01,Madhya Pradesh,Bhopal,Malaria,3
+2025-02,Madhya Pradesh,Bhopal,Malaria,3
+2025-03,Madhya Pradesh,Bhopal,Malaria,2
+2025-04,Madhya Pradesh,Bhopal,Malaria,5
+2025-05,Madhya Pradesh,Bhopal,Malaria,5
+2025-06,Madhya Pradesh,Bhopal,Malaria,10
+2025-07,Madhya Pradesh,Bhopal,Malaria,18
+2025-08,Madhya Pradesh,Bhopal,Malaria,20
+2025-09,Madhya Pradesh,Bhopal,Malaria,16
+2025-10,Madhya Pradesh,Bhopal,Malaria,10
+2025-11,Madhya Pradesh,Bhopal,Malaria,8
+2025-12,Madhya Pradesh,Bhopal,Malaria,5
+2026-01,Madhya Pradesh,Bhopal,Malaria,4
+2026-02,Madhya Pradesh,Bhopal,Malaria,3
+2026-03,Madhya Pradesh,Bhopal,Malaria,3
+2026-04,Madhya Pradesh,Bhopal,Malaria,5
+2026-05,Madhya Pradesh,Bhopal,Malaria,6
+2026-06,Madhya Pradesh,Bhopal,Malaria,12
+2026-07,Madhya Pradesh,Bhopal,Malaria,16
+2026-08,Madhya Pradesh,Bhopal,Malaria,20
+2026-09,Madhya Pradesh,Bhopal,Malaria,13
+2026-10,Madhya Pradesh,Bhopal,Malaria,10
+2024-11,Madhya Pradesh,Indore,Cholera,4
+2024-12,Madhya Pradesh,Indore,Cholera,3
+2025-01,Madhya Pradesh,Indore,Cholera,2
+2025-02,Madhya Pradesh,Indore,Cholera,2
+2025-03,Madhya Pradesh,Indore,Cholera,2
+2025-04,Madhya Pradesh,Indore,Cholera,2
+2025-05,Madhya Pradesh,Indore,Cholera,4
+2025-06,Madhya Pradesh,Indore,Cholera,5
+2025-07,Madhya Pradesh,Indore,Cholera,6
+2025-08,Madhya Pradesh,Indore,Cholera,9
+2025-09,Madhya Pradesh,Indore,Cholera,8
+2025-10,Madhya Pradesh,Indore,Cholera,5
+2025-11,Madhya Pradesh,Indore,Cholera,3
+2025-12,Madhya Pradesh,Indore,Cholera,3
+2026-01,Madhya Pradesh,Indore,Cholera,3
+2026-02,Madhya Pradesh,Indore,Cholera,1
+2026-03,Madhya Pradesh,Indore,Cholera,2
+2026-04,Madhya Pradesh,Indore,Cholera,3
+2026-05,Madhya Pradesh,Indore,Cholera,4
+2026-06,Madhya Pradesh,Indore,Cholera,5
+2026-07,Madhya Pradesh,Indore,Cholera,5
+2026-08,Madhya Pradesh,Indore,Cholera,8
+2026-09,Madhya Pradesh,Indore,Cholera,5
+2026-10,Madhya Pradesh,Indore,Cholera,4
+2024-11,Maharashtra,Mumbai,Chickenpox,14
+2024-12,Maharashtra,Mumbai,Chickenpox,12
+2025-01,Maharashtra,Mumbai,Chickenpox,10
+2025-02,Maharashtra,Mumbai,Chickenpox,13
+2025-03,Maharashtra,Mumbai,Chickenpox,19
+2025-04,Maharashtra,Mumbai,Chickenpox,20
+2025-05,Maharashtra,Mumbai,Chickenpox,13
+2025-06,Maharashtra,Mumbai,Chickenpox,11
+2025-07,Maharashtra,Mumbai,Chickenpox,10
+2025-08,Maharashtra,Mumbai,Chickenpox,9
+2025-09,Maharashtra,Mumbai,Chickenpox,11
+2025-10,Maharashtra,Mumbai,Chickenpox,14
+2025-11,Maharashtra,Mumbai,Chickenpox,15
+2025-12,Maharashtra,Mumbai,Chickenpox,11
+2026-01,Maharashtra,Mumbai,Chickenpox,12
+2026-02,Maharashtra,Mumbai,Chickenpox,9
+2026-03,Maharashtra,Mumbai,Chickenpox,18
+2026-04,Maharashtra,Mumbai,Chickenpox,19
+2026-05,Maharashtra,Mumbai,Chickenpox,18
+2026-06,Maharashtra,Mumbai,Chickenpox,12
+2026-07,Maharashtra,Mumbai,Chickenpox,9
+2026-08,Maharashtra,Mumbai,Chickenpox,8
+2026-09,Maharashtra,Mumbai,Chickenpox,8
+2026-10,Maharashtra,Mumbai,Chickenpox,10
+2024-11,Maharashtra,Nagpur,Dengue,8
+2024-12,Maharashtra,Nagpur,Dengue,5
+2025-01,Maharashtra,Nagpur,Dengue,3
+2025-02,Maharashtra,Nagpur,Dengue,2
+2025-03,Maharashtra,Nagpur,Dengue,3
+2025-04,Maharashtra,Nagpur,Dengue,4
+2025-05,Maharashtra,Nagpur,Dengue,7
+2025-06,Maharashtra,Nagpur,Dengue,11
+2025-07,Maharashtra,Nagpur,Dengue,16
+2025-08,Maharashtra,Nagpur,Dengue,25
+2025-09,Maharashtra,Nagpur,Dengue,16
+2025-10,Maharashtra,Nagpur,Dengue,11
+2025-11,Maharashtra,Nagpur,Dengue,9
+2025-12,Maharashtra,Nagpur,Dengue,4
+2026-01,Maharashtra,Nagpur,Dengue,3
+2026-02,Maharashtra,Nagpur,Dengue,3
+2026-03,Maharashtra,Nagpur,Dengue,4
+2026-04,Maharashtra,Nagpur,Dengue,6
+2026-05,Maharashtra,Nagpur,Dengue,6
+2026-06,Maharashtra,Nagpur,Dengue,15
+2026-07,Maharashtra,Nagpur,Dengue,22
+2026-08,Maharashtra,Nagpur,Dengue,15
+2026-09,Maharashtra,Nagpur,Dengue,14
+2026-10,Maharashtra,Nagpur,Dengue,13
+2024-11,Maharashtra,Pune,Malaria,12
+2024-12,Maharashtra,Pune,Malaria,6
+2025-01,Maharashtra,Pune,Malaria,6
+2025-02,Maharashtra,Pune,Malaria,4
+2025-03,Maharashtra,Pune,Malaria,6
+2025-04,Maharashtra,Pune,Malaria,9
+2025-05,Maharashtra,Pune,Malaria,10
+2025-06,Maharashtra,Pune,Malaria,13
+2025-07,Maharashtra,Pune,Malaria,37
+2025-08,Maharashtra,Pune,Malaria,34
+2025-09,Maharashtra,Pune,Malaria,40
+2025-10,Maharashtra,Pune,Malaria,22
+2025-11,Maharashtra,Pune,Malaria,10
+2025-12,Maharashtra,Pune,Malaria,7
+2026-01,Maharashtra,Pune,Malaria,8
+2026-02,Maharashtra,Pune,Malaria,5
+2026-03,Maharashtra,Pune,Malaria,7
+2026-04,Maharashtra,Pune,Malaria,6
+2026-05,Maharashtra,Pune,Malaria,10
+2026-06,Maharashtra,Pune,Malaria,23
+2026-07,Maharashtra,Pune,Malaria,37
+2026-08,Maharashtra,Pune,Malaria,42
+2026-09,Maharashtra,Pune,Malaria,33
+2026-10,Maharashtra,Pune,Malaria,23
+2024-11,Manipur,Imphal,Cholera,1
+2025-04,Manipur,Imphal,Cholera,1
+2025-05,Manipur,Imphal,Cholera,1
+2025-06,Manipur,Imphal,Cholera,1
+2025-07,Manipur,Imphal,Cholera,1
+2025-08,Manipur,Imphal,Cholera,2
+2025-09,Manipur,Imphal,Cholera,1
+2025-10,Manipur,Imphal,Cholera,1
+2025-11,Manipur,Imphal,Cholera,1
+2026-05,Manipur,Imphal,Cholera,1
+2026-06,Manipur,Imphal,Cholera,1
+2026-07,Manipur,Imphal,Cholera,1
+2026-08,Manipur,Imphal,Cholera,1
+2026-09,Manipur,Imphal,Cholera,1
+2026-10,Manipur,Imphal,Cholera,1
+2024-11,Meghalaya,Shillong,Typhoid,1
+2025-01,Meghalaya,Shillong,Typhoid,1
+2025-02,Meghalaya,Shillong,Typhoid,1
+2025-03,Meghalaya,Shillong,Typhoid,1
+2025-04,Meghalaya,Shillong,Typhoid,1
+2025-05,Meghalaya,Shillong,Typhoid,1
+2025-06,Meghalaya,Shillong,Typhoid,1
+2025-07,Meghalaya,Shillong,Typhoid,1
+2025-08,Meghalaya,Shillong,Typhoid,2
+2025-09,Meghalaya,Shillong,Typhoid,1
+2025-10,Meghalaya,Shillong,Typhoid,1
+2025-11,Meghalaya,Shillong,Typhoid,1
+2025-12,Meghalaya,Shillong,Typhoid,1
+2026-01,Meghalaya,Shillong,Typhoid,1
+2026-02,Meghalaya,Shillong,Typhoid,1
+2026-03,Meghalaya,Shillong,Typhoid,1
+2026-04,Meghalaya,Shillong,Typhoid,1
+2026-05,Meghalaya,Shillong,Typhoid,1
+2026-06,Meghalaya,Shillong,Typhoid,1
+2026-07,Meghalaya,Shillong,Typhoid,2
+2026-08,Meghalaya,Shillong,Typhoid,1
+2026-09,Meghalaya,Shillong,Typhoid,1
+2026-10,Meghalaya,Shillong,Typhoid,1
+2025-06,Mizoram,Aizawl,Malaria,1
+2025-07,Mizoram,Aizawl,Malaria,1
+2025-08,Mizoram,Aizawl,Malaria,1
+2025-09,Mizoram,Aizawl,Malaria,1
+2025-10,Mizoram,Aizawl,Malaria,1
+2025-11,Mizoram,Aizawl,Malaria,1
+2026-05,Mizoram,Aizawl,Malaria,1
+2026-06,Mizoram,Aizawl,Malaria,1
+2026-07,Mizoram,Aizawl,Malaria,1
+2026-08,Mizoram,Aizawl,Malaria,1
+2026-09,Mizoram,Aizawl,Malaria,1
+2026-10,Mizoram,Aizawl,Malaria,1
+2024-11,Nagaland,Kohima,Dengue,1
+2025-05,Nagaland,Kohima,Dengue,1
+2025-06,Nagaland,Kohima,Dengue,1
+2025-07,Nagaland,Kohima,Dengue,1
+2025-08,Nagaland,Kohima,Dengue,1
+2025-09,Nagaland,Kohima,Dengue,1
+2025-10,Nagaland,Kohima,Dengue,1
+2025-11,Nagaland,Kohima,Dengue,1
+2026-05,Nagaland,Kohima,Dengue,1
+2026-06,Nagaland,Kohima,Dengue,1
+2026-07,Nagaland,Kohima,Dengue,1
+2026-08,Nagaland,Kohima,Dengue,1
+2026-09,Nagaland,Kohima,Dengue,2
+2026-10,Nagaland,Kohima,Dengue,1
+2024-11,Odisha,Bhubaneswar,Cholera,2
+2024-12,Odisha,Bhubaneswar,Cholera,2
+2025-01,Odisha,Bhubaneswar,Cholera,2
+2025-02,Odisha,Bhubaneswar,Cholera,2
+2025-03,Odisha,Bhubaneswar,Cholera,1
+2025-04,Odisha,Bhubaneswar,Cholera,2
+2025-05,Odisha,Bhubaneswar,Cholera,3
+2025-06,Odisha,Bhubaneswar,Cholera,3
+2025-07,Odisha,Bhubaneswar,Cholera,6
+2025-08,Odisha,Bhubaneswar,Cholera,6
+2025-09,Odisha,Bhubaneswar,Cholera,5
+2025-10,Odisha,Bhubaneswar,Cholera,4
+2025-11,Odisha,Bhubaneswar,Cholera,3
+2025-12,Odisha,Bhubaneswar,Cholera,2
+2026-01,Odisha,Bhubaneswar,Cholera,1
+2026-02,Odisha,Bhubaneswar,Cholera,2
+2026-03,Odisha,Bhubaneswar,Cholera,1
+2026-04,Odisha,Bhubaneswar,Cholera,2
+2026-05,Odisha,Bhubaneswar,Cholera,4
+2026-06,Odisha,Bhubaneswar,Cholera,5
+2026-07,Odisha,Bhubaneswar,Cholera,7
+2026-08,Odisha,Bhubaneswar,Cholera,5
+2026-09,Odisha,Bhubaneswar,Cholera,6
+2026-10,Odisha,Bhubaneswar,Cholera,4
+2024-11,Odisha,Cuttack,Typhoid,3
+2024-12,Odisha,Cuttack,Typhoid,2
+2025-01,Odisha,Cuttack,Typhoid,2
+2025-02,Odisha,Cuttack,Typhoid,1
+2025-03,Odisha,Cuttack,Typhoid,2
+2025-04,Odisha,Cuttack,Typhoid,2
+2025-05,Odisha,Cuttack,Typhoid,2
+2025-06,Odisha,Cuttack,Typhoid,3
+2025-07,Odisha,Cuttack,Typhoid,4
+2025-08,Odisha,Cuttack,Typhoid,5
+2025-09,Odisha,Cuttack,Typhoid,3
+2025-10,Odisha,Cuttack,Typhoid,3
+2025-11,Odisha,Cuttack,Typhoid,3
+2025-12,Odisha,Cuttack,Typhoid,3
+2026-01,Odisha,Cuttack,Typhoid,2
+2026-02,Odisha,Cuttack,Typhoid,1
+2026-03,Odisha,Cuttack,Typhoid,1
+2026-04,Odisha,Cuttack,Typhoid,3
+2026-05,Odisha,Cuttack,Typhoid,3
+2026-06,Odisha,Cuttack,Typhoid,4
+2026-07,Odisha,Cuttack,Typhoid,6
+2026-08,Odisha,Cuttack,Typhoid,3
+2026-09,Odisha,Cuttack,Typhoid,3
+2026-10,Odisha,Cuttack,Typhoid,3
+2024-11,Puducherry,Puducherry,Dengue,1
+2024-12,Puducherry,Puducherry,Dengue,1
+2025-04,Puducherry,Puducherry,Dengue,1
+2025-05,Puducherry,Puducherry,Dengue,1
+2025-06,Puducherry,Puducherry,Dengue,1
+2025-07,Puducherry,Puducherry,Dengue,1
+2025-08,Puducherry,Puducherry,Dengue,2
+2025-09,Puducherry,Puducherry,Dengue,2
+2025-10,Puducherry,Puducherry,Dengue,1
+2025-11,Puducherry,Puducherry,Dengue,1
+2026-04,Puducherry,Puducherry,Dengue,1
+2026-05,Puducherry,Puducherry,Dengue,1
+2026-06,Puducherry,Puducherry,Dengue,1
+2026-07,Puducherry,Puducherry,Dengue,2
+2026-08,Puducherry,Puducherry,Dengue,2
+2026-09,Puducherry,Puducherry,Dengue,2
+2026-10,Puducherry,Puducherry,Dengue,1
+2024-11,Punjab,Amritsar,Dengue,4
+2024-12,Punjab,Amritsar,Dengue,2
+2025-01,Punjab,Amritsar,Dengue,2
+2025-02,Punjab,Amritsar,Dengue,1
+2025-03,Punjab,Amritsar,Dengue,2
+2025-04,Punjab,Amritsar,Dengue,2
+2025-05,Punjab,Amritsar,Dengue,4
+2025-06,Punjab,Amritsar,Dengue,6
+2025-07,Punjab,Amritsar,Dengue,9
+2025-08,Punjab,Amritsar,Dengue,6
+2025-09,Punjab,Amritsar,Dengue,8
+2025-10,Punjab,Amritsar,Dengue,7
+2025-11,Punjab,Amritsar,Dengue,2
+2025-12,Punjab,Amritsar,Dengue,2
+2026-01,Punjab,Amritsar,Dengue,1
+2026-02,Punjab,Amritsar,Dengue,1
+2026-03,Punjab,Amritsar,Dengue,2
+2026-04,Punjab,Amritsar,Dengue,2
+2026-05,Punjab,Amritsar,Dengue,4
+2026-06,Punjab,Amritsar,Dengue,6
+2026-07,Punjab,Amritsar,Dengue,7
+2026-08,Punjab,Amritsar,Dengue,10
+2026-09,Punjab,Amritsar,Dengue,6
+2026-10,Punjab,Amritsar,Dengue,6
+2024-11,Punjab,Ludhiana,Malaria,4
+2024-12,Punjab,Ludhiana,Malaria,2
+2025-01,Punjab,Ludhiana,Malaria,2
+2025-02,Punjab,Ludhiana,Malaria,1
+2025-03,Punjab,Ludhiana,Malaria,2
+2025-04,Punjab,Ludhiana,Malaria,2
+2025-05,Punjab,Ludhiana,Malaria,3
+2025-06,Punjab,Ludhiana,Malaria,4
+2025-07,Punjab,Ludhiana,Malaria,6
+2025-08,Punjab,Ludhiana,Malaria,7
+2025-09,Punjab,Ludhiana,Malaria,8
+2025-10,Punjab,Ludhiana,Malaria,7
+2025-11,Punjab,Ludhiana,Malaria,3
+2025-12,Punjab,Ludhiana,Malaria,2
+2026-01,Punjab,Ludhiana,Malaria,2
+2026-02,Punjab,Ludhiana,Malaria,2
+2026-03,Punjab,Ludhiana,Malaria,2
+2026-04,Punjab,Ludhiana,Malaria,2
+2026-05,Punjab,Ludhiana,Malaria,4
+2026-06,Punjab,Ludhiana,Malaria,4
+2026-07,Punjab,Ludhiana,Malaria,6
+2026-08,Punjab,Ludhiana,Malaria,9
+2026-09,Punjab,Ludhiana,Malaria,7
+2026-10,Punjab,Ludhiana,Malaria,7
+2024-11,Rajasthan,Jaipur,Chickenpox,7
+2024-12,Rajasthan,Jaipur,Chickenpox,4
+2025-01,Rajasthan,Jaipur,Chickenpox,4
+2025-02,Rajasthan,Jaipur,Chickenpox,5
+2025-03,Rajasthan,Jaipur,Chickenpox,7
+2025-04,Rajasthan,Jaipur,Chickenpox,7
+2025-05,Rajasthan,Jaipur,Chickenpox,8
+2025-06,Rajasthan,Jaipur,Chickenpox,7
+2025-07,Rajasthan,Jaipur,Chickenpox,5
+2025-08,Rajasthan,Jaipur,Chickenpox,3
+2025-09,Rajasthan,Jaipur,Chickenpox,4
+2025-10,Rajasthan,Jaipur,Chickenpox,6
+2025-11,Rajasthan,Jaipur,Chickenpox,6
+2025-12,Rajasthan,Jaipur,Chickenpox,6
+2026-01,Rajasthan,Jaipur,Chickenpox,5
+2026-02,Rajasthan,Jaipur,Chickenpox,6
+2026-03,Rajasthan,Jaipur,Chickenpox,9
+2026-04,Rajasthan,Jaipur,Chickenpox,6
+2026-05,Rajasthan,Jaipur,Chickenpox,8
+2026-06,Rajasthan,Jaipur,Chickenpox,5
+2026-07,Rajasthan,Jaipur,Chickenpox,6
+2026-08,Rajasthan,Jaipur,Chickenpox,5
+2026-09,Rajasthan,Jaipur,Chickenpox,5
+2026-10,Rajasthan,Jaipur,Chickenpox,6
+2024-11,Rajasthan,Jodhpur,Typhoid,3
+2024-12,Rajasthan,Jodhpur,Typhoid,2
+2025-01,Rajasthan,Jodhpur,Typhoid,2
+2025-02,Rajasthan,Jodhpur,Typhoid,1
+2025-03,Rajasthan,Jodhpur,Typhoid,2
+2025-04,Rajasthan,Jodhpur,Typhoid,2
+2025-05,Rajasthan,Jodhpur,Typhoid,2
+2025-06,Rajasthan,Jodhpur,Typhoid,5
+2025-07,Rajasthan,Jodhpur,Typhoid,3
+2025-08,Rajasthan,Jodhpur,Typhoid,3
+2025-09,Rajasthan,Jodhpur,Typhoid,4
+2025-10,Rajasthan,Jodhpur,Typhoid,3
+2025-11,Rajasthan,Jodhpur,Typhoid,3
+2025-12,Rajasthan,Jodhpur,Typhoid,2
+2026-01,Rajasthan,Jodhpur,Typhoid,1
+2026-02,Rajasthan,Jodhpur,Typhoid,1
+2026-03,Rajasthan,Jodhpur,Typhoid,2
+2026-04,Rajasthan,Jodhpur,Typhoid,2
+2026-05,Rajasthan,Jodhpur,Typhoid,3
+2026-06,Rajasthan,Jodhpur,Typhoid,3
+2026-07,Rajasthan,Jodhpur,Typhoid,5
+2026-08,Rajasthan,Jodhpur,Typhoid,5
+2026-09,Rajasthan,Jodhpur,Typhoid,3
+2026-10,Rajasthan,Jodhpur,Typhoid,3
+2025-05,Sikkim,Gangtok,Cholera,1
+2025-06,Sikkim,Gangtok,Cholera,1
+2025-07,Sikkim,Gangtok,Cholera,1
+2025-08,Sikkim,Gangtok,Cholera,1
+2025-09,Sikkim,Gangtok,Cholera,1
+2025-10,Sikkim,Gangtok,Cholera,1
+2026-05,Sikkim,Gangtok,Cholera,1
+2026-06,Sikkim,Gangtok,Cholera,1
+2026-07,Sikkim,Gangtok,Cholera,1
+2026-08,Sikkim,Gangtok,Cholera,1
+2026-09,Sikkim,Gangtok,Cholera,1
+2024-11,Tamil Nadu,Chennai,Typhoid,5
+2024-12,Tamil Nadu,Chennai,Typhoid,3
+2025-01,Tamil Nadu,Chennai,Typhoid,3
+2025-02,Tamil Nadu,Chennai,Typhoid,2
+2025-03,Tamil Nadu,Chennai,Typhoid,2
+2025-04,Tamil Nadu,Chennai,Typhoid,4
+2025-05,Tamil Nadu,Chennai,Typhoid,5
+2025-06,Tamil Nadu,Chennai,Typhoid,8
+2025-07,Tamil Nadu,Chennai,Typhoid,9
+2025-08,Tamil Nadu,Chennai,Typhoid,9
+2025-09,Tamil Nadu,Chennai,Typhoid,7
+2025-10,Tamil Nadu,Chennai,Typhoid,6
+2025-11,Tamil Nadu,Chennai,Typhoid,3
+2025-12,Tamil Nadu,Chennai,Typhoid,4
+2026-01,Tamil Nadu,Chennai,Typhoid,3
+2026-02,Tamil Nadu,Chennai,Typhoid,3
+2026-03,Tamil Nadu,Chennai,Typhoid,4
+2026-04,Tamil Nadu,Chennai,Typhoid,3
+2026-05,Tamil Nadu,Chennai,Typhoid,3
+2026-06,Tamil Nadu,Chennai,Typhoid,7
+2026-07,Tamil Nadu,Chennai,Typhoid,7
+2026-08,Tamil Nadu,Chennai,Typhoid,8
+2026-09,Tamil Nadu,Chennai,Typhoid,8
+2026-10,Tamil Nadu,Chennai,Typhoid,4
+2024-11,Tamil Nadu,Coimbatore,Dengue,3
+2024-12,Tamil Nadu,Coimbatore,Dengue,2
+2025-01,Tamil Nadu,Coimbatore,Dengue,2
+2025-02,Tamil Nadu,Coimbatore,Dengue,1
+2025-03,Tamil Nadu,Coimbatore,Dengue,1
+2025-04,Tamil Nadu,Coimbatore,Dengue,2
+2025-05,Tamil Nadu,Coimbatore,Dengue,3
+2025-06,Tamil Nadu,Coimbatore,Dengue,4
+2025-07,Tamil Nadu,Coimbatore,Dengue,7
+2025-08,Tamil Nadu,Coimbatore,Dengue,7
+2025-09,Tamil Nadu,Coimbatore,Dengue,5
+2025-10,Tamil Nadu,Coimbatore,Dengue,5
+2025-11,Tamil Nadu,Coimbatore,Dengue,3
+2025-12,Tamil Nadu,Coimbatore,Dengue,2
+2026-01,Tamil Nadu,Coimbatore,Dengue,1
+2026-02,Tamil Nadu,Coimbatore,Dengue,1
+2026-03,Tamil Nadu,Coimbatore,Dengue,1
+2026-04,Tamil Nadu,Coimbatore,Dengue,2
+2026-05,Tamil Nadu,Coimbatore,Dengue,3
+2026-06,Tamil Nadu,Coimbatore,Dengue,4
+2026-07,Tamil Nadu,Coimbatore,Dengue,5
+2026-08,Tamil Nadu,Coimbatore,Dengue,7
+2026-09,Tamil Nadu,Coimbatore,Dengue,8
+2026-10,Tamil Nadu,Coimbatore,Dengue,5
+2024-11,Tamil Nadu,Madurai,Malaria,5
+2024-12,Tamil Nadu,Madurai,Malaria,3
+2025-01,Tamil Nadu,Madurai,Malaria,2
+2025-02,Tamil Nadu,Madurai,Malaria,2
+2025-03,Tamil Nadu,Madurai,Malaria,3
+2025-04,Tamil Nadu,Madurai,Malaria,3
+2025-05,Tamil Nadu,Madurai,Malaria,4
+2025-06,Tamil Nadu,Madurai,Malaria,7
+2025-07,Tamil Nadu,Madurai,Malaria,10
+2025-08,Tamil Nadu,Madurai,Malaria,9
+2025-09,Tamil Nadu,Madurai,Malaria,12
+2025-10,Tamil Nadu,Madurai,Malaria,8
+2025-11,Tamil Nadu,Madurai,Malaria,3
+2025-12,Tamil Nadu,Madurai,Malaria,3
+2026-01,Tamil Nadu,Madurai,Malaria,3
+2026-02,Tamil Nadu,Madurai,Malaria,2
+2026-03,Tamil Nadu,Madurai,Malaria,2
+2026-04,Tamil Nadu,Madurai,Malaria,4
+2026-05,Tamil Nadu,Madurai,Malaria,6
+2026-06,Tamil Nadu,Madurai,Malaria,8
+2026-07,Tamil Nadu,Madurai,Malaria,10
+2026-08,Tamil Nadu,Madurai,Malaria,9
+2026-09,Tamil Nadu,Madurai,Malaria,10
+2026-10,Tamil Nadu,Madurai,Malaria,6
+2024-11,Telangana,Hyderabad,Chickenpox,9
+2024-12,Telangana,Hyderabad,Chickenpox,8
+2025-01,Telangana,Hyderabad,Chickenpox,10
+2025-02,Telangana,Hyderabad,Chickenpox,9
+2025-03,Telangana,Hyderabad,Chickenpox,12
+2025-04,Telangana,Hyderabad,Chickenpox,11
+2025-05,Telangana,Hyderabad,Chickenpox,14
+2025-06,Telangana,Hyderabad,Chickenpox,11
+2025-07,Telangana,Hyderabad,Chickenpox,10
+2025-08,Telangana,Hyderabad,Chickenpox,6
+2025-09,Telangana,Hyderabad,Chickenpox,7
+2025-10,Telangana,Hyderabad,Chickenpox,10
+2025-11,Telangana,Hyderabad,Chickenpox,13
+2025-12,Telangana,Hyderabad,Chickenpox,9
+2026-01,Telangana,Hyderabad,Chickenpox,11
+2026-02,Telangana,Hyderabad,Chickenpox,10
+2026-03,Telangana,Hyderabad,Chickenpox,9
+2026-04,Telangana,Hyderabad,Chickenpox,16
+2026-05,Telangana,Hyderabad,Chickenpox,14
+2026-06,Telangana,Hyderabad,Chickenpox,12
+2026-07,Telangana,Hyderabad,Chickenpox,7
+2026-08,Telangana,Hyderabad,Chickenpox,8
+2026-09,Telangana,Hyderabad,Chickenpox,7
+2026-10,Telangana,Hyderabad,Chickenpox,7
+2024-11,Telangana,Warangal,Dengue,2
+2024-12,Telangana,Warangal,Dengue,2
+2025-01,Telangana,Warangal,Dengue,1
+2025-02,Telangana,Warangal,Dengue,1
+2025-03,Telangana,Warangal,Dengue,1
+2025-04,Telangana,Warangal,Dengue,2
+2025-05,Telangana,Warangal,Dengue,3
+2025-06,Telangana,Warangal,Dengue,4
+2025-07,Telangana,Warangal,Dengue,7
+2025-08,Telangana,Warangal,Dengue,7
+2025-09,Telangana,Warangal,Dengue,7
+2025-10,Telangana,Warangal,Dengue,4
+2025-11,Telangana,Warangal,Dengue,2
+2025-12,Telangana,Warangal,Dengue,1
+2026-01,Telangana,Warangal,Dengue,1
+2026-02,Telangana,Warangal,Dengue,1
+2026-03,Telangana,Warangal,Dengue,2
+2026-04,Telangana,Warangal,Dengue,2
+2026-05,Telangana,Warangal,Dengue,3
+2026-06,Telangana,Warangal,Dengue,5
+2026-07,Telangana,Warangal,Dengue,6
+2026-08,Telangana,Warangal,Dengue,6
+2026-09,Telangana,Warangal,Dengue,6
+2026-10,Telangana,Warangal,Dengue,5
+2024-11,Tripura,Agartala,Malaria,1
+2025-05,Tripura,Agartala,Malaria,1
+2025-06,Tripura,Agartala,Malaria,1
+2025-07,Tripura,Agartala,Malaria,2
+2025-08,Tripura,Agartala,Malaria,2
+2025-09,Tripura,Agartala,Malaria,1
+2025-10,Tripura,Agartala,Malaria,1
+2026-06,Tripura,Agartala,Malaria,1
+2026-07,Tripura,Agartala,Malaria,1
+2026-08,Tripura,Agartala,Malaria,1
+2026-09,Tripura,Agartala,Malaria,1
+2026-10,Tripura,Agartala,Malaria,1
+2024-11,Uttar Pradesh,Kanpur,Typhoid,3
+2024-12,Uttar Pradesh,Kanpur,Typhoid,2
+2025-01,Uttar Pradesh,Kanpur,Typhoid,3
+2025-02,Uttar Pradesh,Kanpur,Typhoid,3
+2025-03,Uttar Pradesh,Kanpur,Typhoid,2
+2025-04,Uttar Pradesh,Kanpur,Typhoid,4
+2025-05,Uttar Pradesh,Kanpur,Typhoid,5
+2025-06,Uttar Pradesh,Kanpur,Typhoid,5
+2025-07,Uttar Pradesh,Kanpur,Typhoid,7
+2025-08,Uttar Pradesh,Kanpur,Typhoid,5
+2025-09,Uttar Pradesh,Kanpur,Typhoid,4
+2025-10,Uttar Pradesh,Kanpur,Typhoid,5
+2025-11,Uttar Pradesh,Kanpur,Typhoid,3
+2025-12,Uttar Pradesh,Kanpur,Typhoid,3
+2026-01,Uttar Pradesh,Kanpur,Typhoid,2
+2026-02,Uttar Pradesh,Kanpur,Typhoid,2
+2026-03,Uttar Pradesh,Kanpur,Typhoid,3
+2026-04,Uttar Pradesh,Kanpur,Typhoid,3
+2026-05,Uttar Pradesh,Kanpur,Typhoid,3
+2026-06,Uttar Pradesh,Kanpur,Typhoid,6
+2026-07,Uttar Pradesh,Kanpur,Typhoid,8
+2026-08,Uttar Pradesh,Kanpur,Typhoid,6
+2026-09,Uttar Pradesh,Kanpur,Typhoid,6
+2026-10,Uttar Pradesh,Kanpur,Typhoid,5
+2024-11,Uttar Pradesh,Lucknow,Chickenpox,4
+2024-12,Uttar Pradesh,Lucknow,Chickenpox,4
+2025-01,Uttar Pradesh,Lucknow,Chickenpox,5
+2025-02,Uttar Pradesh,Lucknow,Chickenpox,5
+2025-03,Uttar Pradesh,Lucknow,Chickenpox,6
+2025-04,Uttar Pradesh,Lucknow,Chickenpox,7
+2025-05,Uttar Pradesh,Lucknow,Chickenpox,5
+2025-06,Uttar Pradesh,Lucknow,Chickenpox,5
+2025-07,Uttar Pradesh,Lucknow,Chickenpox,4
+2025-08,Uttar Pradesh,Lucknow,Chickenpox,4
+2025-09,Uttar Pradesh,Lucknow,Chickenpox,6
+2025-10,Uttar Pradesh,Lucknow,Chickenpox,4
+2025-11,Uttar Pradesh,Lucknow,Chickenpox,6
+2025-12,Uttar Pradesh,Lucknow,Chickenpox,4
+2026-01,Uttar Pradesh,Lucknow,Chickenpox,5
+2026-02,Uttar Pradesh,Lucknow,Chickenpox,4
+2026-03,Uttar Pradesh,Lucknow,Chickenpox,5
+2026-04,Uttar Pradesh,Lucknow,Chickenpox,8
+2026-05,Uttar Pradesh,Lucknow,Chickenpox,5
+2026-06,Uttar Pradesh,Lucknow,Chickenpox,4
+2026-07,Uttar Pradesh,Lucknow,Chickenpox,4
+2026-08,Uttar Pradesh,Lucknow,Chickenpox,4
+2026-09,Uttar Pradesh,Lucknow,Chickenpox,4
+2026-10,Uttar Pradesh,Lucknow,Chickenpox,4
+2024-11,Uttarakhand,Dehradun,Cholera,2
+2024-12,Uttarakhand,Dehradun,Cholera,1
+2025-01,Uttarakhand,Dehradun,Cholera,1
+2025-02,Uttarakhand,Dehradun,Cholera,1
+2025-03,Uttarakhand,Dehradun,Cholera,1
+2025-04,Uttarakhand,Dehradun,Cholera,1
+2025-05,Uttarakhand,Dehradun,Cholera,2
+2025-06,Uttarakhand,Dehradun,Cholera,2
+2025-07,Uttarakhand,Dehradun,Cholera,3
+2025-08,Uttarakhand,Dehradun,Cholera,2
+2025-09,Uttarakhand,Dehradun,Cholera,2
+2025-10,Uttarakhand,Dehradun,Cholera,2
+2025-11,Uttarakhand,Dehradun,Cholera,1
+2025-12,Uttarakhand,Dehradun,Cholera,1
+2026-01,Uttarakhand,Dehradun,Cholera,1
+2026-02,Uttarakhand,Dehradun,Cholera,1
+2026-03,Uttarakhand,Dehradun,Cholera,1
+2026-04,Uttarakhand,Dehradun,Cholera,1
+2026-05,Uttarakhand,Dehradun,Cholera,1
+2026-06,Uttarakhand,Dehradun,Cholera,2
+2026-07,Uttarakhand,Dehradun,Cholera,3
+2026-08,Uttarakhand,Dehradun,Cholera,3
+2026-09,Uttarakhand,Dehradun,Cholera,2
+2026-10,Uttarakhand,Dehradun,Cholera,2
+2024-11,Uttarakhand,Haridwar,Malaria,1
+2024-12,Uttarakhand,Haridwar,Malaria,1
+2025-04,Uttarakhand,Haridwar,Malaria,1
+2025-05,Uttarakhand,Haridwar,Malaria,1
+2025-06,Uttarakhand,Haridwar,Malaria,1
+2025-07,Uttarakhand,Haridwar,Malaria,1
+2025-08,Uttarakhand,Haridwar,Malaria,2
+2025-09,Uttarakhand,Haridwar,Malaria,1
+2025-10,Uttarakhand,Haridwar,Malaria,2
+2025-11,Uttarakhand,Haridwar,Malaria,1
+2026-04,Uttarakhand,Haridwar,Malaria,1
+2026-05,Uttarakhand,Haridwar,Malaria,1
+2026-06,Uttarakhand,Haridwar,Malaria,1
+2026-07,Uttarakhand,Haridwar,Malaria,2
+2026-08,Uttarakhand,Haridwar,Malaria,2
+2026-09,Uttarakhand,Haridwar,Malaria,2
+2026-10,Uttarakhand,Haridwar,Malaria,1
+2024-11,West Bengal,Howrah,Cholera,3
+2024-12,West Bengal,Howrah,Cholera,3
+2025-01,West Bengal,Howrah,Cholera,2
+2025-02,West Bengal,Howrah,Cholera,2
+2025-03,West Bengal,Howrah,Cholera,2
+2025-04,West Bengal,Howrah,Cholera,3
+2025-05,West Bengal,Howrah,Cholera,4
+2025-06,West Bengal,Howrah,Cholera,6
+2025-07,West Bengal,Howrah,Cholera,6
+2025-08,West Bengal,Howrah,Cholera,10
+2025-09,West Bengal,Howrah,Cholera,6
+2025-10,West Bengal,Howrah,Cholera,3
+2025-11,West Bengal,Howrah,Cholera,3
+2025-12,West Bengal,Howrah,Cholera,2
+2026-01,West Bengal,Howrah,Cholera,2
+2026-02,West Bengal,Howrah,Cholera,2
+2026-03,West Bengal,Howrah,Cholera,2
+2026-04,West Bengal,Howrah,Cholera,3
+2026-05,West Bengal,Howrah,Cholera,4
+2026-06,West Bengal,Howrah,Cholera,7
+2026-07,West Bengal,Howrah,Cholera,7
+2026-08,West Bengal,Howrah,Cholera,5
+2026-09,West Bengal,Howrah,Cholera,7
+2026-10,West Bengal,Howrah,Cholera,5
+2024-11,West Bengal,Kolkata,Dengue,9
+2024-12,West Bengal,Kolkata,Dengue,5
+2025-01,West Bengal,Kolkata,Dengue,3
+2025-02,West Bengal,Kolkata,Dengue,3
+2025-03,West Bengal,Kolkata,Dengue,4
+2025-04,West Bengal,Kolkata,Dengue,7
+2025-05,West Bengal,Kolkata,Dengue,11
+2025-06,West Bengal,Kolkata,Dengue,17
+2025-07,West Bengal,Kolkata,Dengue,23
+2025-08,West Bengal,Kolkata,Dengue,21
+2025-09,West Bengal,Kolkata,Dengue,21
+2025-10,West Bengal,Kolkata,Dengue,17
+2025-11,West Bengal,Kolkata,Dengue,9
+2025-12,West Bengal,Kolkata,Dengue,7
+2026-01,West Bengal,Kolkata,Dengue,4
+2026-02,West Bengal,Kolkata,Dengue,4
+2026-03,West Bengal,Kolkata,Dengue,5
+2026-04,West Bengal,Kolkata,Dengue,7
+2026-05,West Bengal,Kolkata,Dengue,9
+2026-06,West Bengal,Kolkata,Dengue,9
+2026-07,West Bengal,Kolkata,Dengue,26
+2026-08,West Bengal,Kolkata,Dengue,28
+2026-09,West Bengal,Kolkata,Dengue,25
+2026-10,West Bengal,Kolkata,Dengue,19

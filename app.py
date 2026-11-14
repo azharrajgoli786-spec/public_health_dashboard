@@ -170,19 +170,71 @@ def _legacy_estimate(state_key, disease, base_total, share):
     return max(LEGACY_FLOOR, round(base_total * share * factor))
 
 
+# Monthly time series built while loading a dated CSV (schema:
+# date,state,district,disease,cases). Empty when the dataset carries no
+# usable dates (e.g. the real IDSP fallback aggregates a single year).
+TIME_SERIES = {"periods": [], "disease": {}, "state": {}, "disease_state": {}}
+
+_PERIOD_RE = re.compile(r"^\d{4}-(?:0[1-9]|1[0-2])$")
+
+_MONTH_ABBR = ("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+
+def _month_label(period):
+    """'2026-10' -> 'Oct 2026'; returns the input unchanged if malformed."""
+    try:
+        year, month = int(period[:4]), int(period[5:7])
+        if not 1 <= month <= 12:
+            return period
+    except (ValueError, TypeError, IndexError):
+        return period
+    return "%s %d" % (_MONTH_ABBR[month - 1], year)
+
+
+def _bump(bucket, key, period, n):
+    """Add n cases to bucket[key][period] in place."""
+    bucket.setdefault(key, {})
+    bucket[key][period] = bucket[key].get(period, 0) + n
+
+
+def _allocate(total, weights):
+    """Split total into integers summing exactly to it (largest remainder)."""
+    if total <= 0:
+        return [0] * len(weights)
+    s = sum(weights)
+    if s <= 0:
+        weights = [1] * len(weights)
+        s = len(weights)
+    raw = [total * w / s for w in weights]
+    base = [int(x) for x in raw]
+    short = total - sum(base)
+    order = sorted(range(len(raw)), key=lambda i: raw[i] - base[i], reverse=True)
+    for i in order[:short]:
+        base[i] += 1
+    return base
+
+
 def load_health_data():
     """Load, deduplicate and aggregate CSV into {key: {display, cases, diseases, districts}}.
 
     Dedupes exact duplicate rows, sums cases per district,
     derives total cases and disease list per state.
+    Also builds TIME_SERIES from the CSV's YYYY-MM ``date`` column when
+    present (the monthly series is additive: state/disease/district
+    aggregates are identical with or without dates).
     Restores legacy surveillance diseases (COVID-19, Influenza,
-    Tuberculosis) for every state, proportional to its CSV total.
+    Tuberculosis) for every state, proportional to its CSV total, and
+    spreads each modelled total across the months using that state's own
+    shape (still badged ``est`` everywhere it is shown).
     Falls back to {} if CSV is missing.
     """
     data = {}
     if not os.path.exists(CSV_PATH):
         return data
     seen = set()
+    periods = set()
+    state_months = {}
     with open(CSV_PATH, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
             state = (row.get("state") or "").strip()
@@ -194,8 +246,13 @@ def load_health_data():
                 cases = int(str(row.get("cases") or "0").strip())
             except ValueError:
                 cases = 0
-            # Deduplicate exact rows (CSV contains ~8 exact dups)
-            sig = (state.lower(), district.lower(), disease.lower(), cases)
+            # Monthly date column; rows without a valid YYYY-MM date are
+            # still accepted (aggregates only, no time series entry).
+            date = (row.get("date") or "").strip()
+            if not _PERIOD_RE.match(date):
+                date = ""
+            # Deduplicate exact rows (CSV contained exact dups)
+            sig = (state.lower(), district.lower(), disease.lower(), date, cases)
             if sig in seen:
                 continue
             seen.add(sig)
@@ -221,6 +278,17 @@ def load_health_data():
             if disease:
                 entry["diseases_set"].add(disease)
                 entry["disease_cases"][disease] = entry["disease_cases"].get(disease, 0) + cases
+            # Monthly series accumulation (no-op when the file is undated).
+            if date:
+                periods.add(date)
+                _bump(state_months, key, date, cases)
+                if disease:
+                    _bump(TIME_SERIES["disease"], disease, date, cases)
+                    _bump(TIME_SERIES["state"], key, date, cases)
+                    _bump(TIME_SERIES["disease_state"], (disease, key), date, cases)
+
+    plist = sorted(periods)
+    TIME_SERIES["periods"] = plist
 
     # Finalize: sort states A-Z, districts + diseases by cases desc.
     # Add legacy diseases on top; district table stays CSV-only (see footnote in templates).
@@ -239,6 +307,17 @@ def load_health_data():
             e["disease_cases"][disease] = e["disease_cases"].get(disease, 0) + extra
             e["cases"] += extra
             estimated[disease] = extra
+        # Spread each modelled legacy total across the months using this
+        # state's own reported shape, so est rows get a time dimension too.
+        months = state_months.get(key) or {}
+        if plist and months:
+            weights = [months.get(p, 0) for p in plist]
+            for disease, extra in estimated.items():
+                for p, n in zip(plist, _allocate(extra, weights)):
+                    if n:
+                        _bump(TIME_SERIES["disease"], disease, p, n)
+                        _bump(TIME_SERIES["state"], key, p, n)
+                        _bump(TIME_SERIES["disease_state"], (disease, key), p, n)
         finalized[key] = {
             "display": e["display"],
             "cases": e["cases"],
@@ -256,6 +335,11 @@ def load_health_data():
             _real, _info = load_idsp_real_data(_p)
             if _real:
                 DATA_SOURCE.update(_info)
+                # The real file aggregates a single year: drop the sample
+                # series built above so no sample dates leak into real data.
+                TIME_SERIES["periods"] = []
+                for _k in ("disease", "state", "disease_state"):
+                    TIME_SERIES[_k] = {}
                 return _add_reference_data(_real)
     return _add_reference_data(finalized)
 
@@ -308,20 +392,29 @@ def _file_date_display(path):
 def site_info():
     """Metadata shared with every template.
 
-    ``data_period`` is the reporting period taken from the data itself.
-    It is deliberately None for the sample dataset: the sample CSV carries
-    no reporting period, and borrowing the file's modification time would
-    present a meaningless date as if it were a data vintage (it moves
-    whenever anyone touches the file).
+    ``data_period`` is the reporting period taken from the data itself:
+    the real IDSP year when a real file is loaded, otherwise the range of
+    the CSV's monthly ``date`` column. File modification times are kept
+    separately and only ever labelled as file timestamps.
     """
     period = DATA_SOURCE.get("period")
+    periods = TIME_SERIES.get("periods") or []
+    series_range = None
+    if periods:
+        series_range = "%s \u2013 %s" % (_month_label(periods[0]),
+                                         _month_label(periods[-1]))
     return {
         "source_label": DATA_SOURCE["label"],
         "source_detail": DATA_SOURCE["detail"],
         "source_kind": DATA_SOURCE.get("kind", "sample"),
         "is_demo": bool(DATA_SOURCE.get("is_demo", True)),
-        "data_period": period,
-        "data_period_display": period or "No reporting period",
+        "data_period": period or series_range,
+        "data_period_display": period or series_range or "No reporting period",
+        # Latest month in the series (YYYY-MM + display form) for
+        # "last updated" provenance under charts and tables.
+        "latest_period": periods[-1] if periods else None,
+        "latest_period_display": _month_label(periods[-1]) if periods else None,
+        "period_count": len(periods),
         # Kept, but only ever labelled as a file timestamp.
         "file_modified": _file_date_label(CSV_PATH),
         "file_modified_display": _file_date_display(CSV_PATH),
@@ -598,6 +691,9 @@ def states():
         "states.html", active="states", health_data=health_data,
         source=DATA_SOURCE, rows=rows, all_rows=all_rows,
         regions=REGIONS, site=site_info(), stats=get_stats(),
+        library_count=len(diseases_data.DISEASES),
+        disease_totals=sorted(_disease_totals().items(),
+                              key=lambda kv: -kv[1]),
         total_districts=sum(len(v["districts"]) for v in health_data.values()),
         q=q, region=region, sort=sort, view=view, page=page, pages=pages,
         total_results=total, start=start,
@@ -834,6 +930,7 @@ def analytics_payload():
         key = normalize(v["display"])
         states.append({
             "display": v["display"],
+            "key": key,
             "cases": v["cases"],
             "isUT": geo_data.is_union_territory(key),
             "perLakh": v.get("cases_per_lakh"),
@@ -846,7 +943,16 @@ def analytics_payload():
     diseases = sorted(
         {d for v in health_data.values() for d in (v.get("disease_breakdown") or {})}
     )
-    return {"states": states, "diseases": diseases}
+    ts = TIME_SERIES
+    return {
+        "states": states,
+        "diseases": diseases,
+        # Monthly series: YYYY-MM periods plus cases per disease and per
+        # state key. Empty lists when the dataset has no date column.
+        "periods": list(ts["periods"]),
+        "series": {name: dict(months) for name, months in ts["disease"].items()},
+        "stateSeries": {key: dict(months) for key, months in ts["state"].items()},
+    }
 
 
 @app.route("/chart")
