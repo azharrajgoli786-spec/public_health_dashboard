@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>{% block title %}Public Health Dashboard{% endblock %}</title>
-    <link rel="stylesheet" href="/static/styles.css?v=12">
+    <link rel="stylesheet" href="/static/styles.css?v=13">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{% block meta %}Disease surveillance and health information for India.{% endblock %}">
     {% block head %}{% endblock %}
@@ -36,8 +36,9 @@
     </header>
 
     <!-- Persistent data-status banner: the demo/real label stays visible on
-         every page, above the content, for as long as the site is open. -->
-    <div class="data-banner {% if site.is_demo %}is-demo{% else %}is-real{% endif %}" role="note">
+         every page, above the content, until the visitor dismisses it
+         (dismissal lasts for the browser session via sessionStorage). -->
+    <div class="data-banner {% if site.is_demo %}is-demo{% else %}is-real{% endif %}" id="dataBanner" role="note">
         <div class="data-banner-inner">
             {% if site.is_demo %}
             <strong>Sample dataset for UI demonstration</strong>
@@ -46,6 +47,7 @@
             <strong>Real dataset</strong>
             <span>&mdash; {{ site.source_label }} &middot; reporting period {{ site.data_period_display }}.</span>
             {% endif %}
+            <button type="button" class="data-banner-close" id="dataBannerClose" aria-label="Dismiss the data status banner">&times;</button>
         </div>
     </div>
 
@@ -97,12 +99,30 @@
     (function () {
         var btn = document.getElementById('navToggle');
         var nav = document.getElementById('primaryNav');
-        if (!btn || !nav) return;
-        btn.addEventListener('click', function () {
-            var open = nav.classList.toggle('open');
-            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-            btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-        });
+        if (btn && nav) {
+            btn.addEventListener('click', function () {
+                var open = nav.classList.toggle('open');
+                btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+            });
+        }
+        // Data-status banner: shown on every page by default; the X hides it
+        // for the rest of the session (and stays hidden across pages).
+        var banner = document.getElementById('dataBanner');
+        var close = document.getElementById('dataBannerClose');
+        if (banner) {
+            try {
+                if (sessionStorage.getItem('phd-banner-dismissed') === '1') {
+                    banner.hidden = true;
+                }
+            } catch (e) { /* storage unavailable: banner stays visible */ }
+        }
+        if (close && banner) {
+            close.addEventListener('click', function () {
+                banner.hidden = true;
+                try { sessionStorage.setItem('phd-banner-dismissed', '1'); } catch (e) { /* optional */ }
+            });
+        }
     })();
     </script>
     {% block scripts %}{% endblock %}
