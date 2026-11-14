@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>{% block title %}Public Health Dashboard{% endblock %}</title>
-    <link rel="stylesheet" href="/static/styles.css?v=11">
+    <link rel="stylesheet" href="/static/styles.css?v=12">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{% block meta %}Disease surveillance and health information for India.{% endblock %}">
     {% block head %}{% endblock %}
@@ -35,6 +35,20 @@
         </div>
     </header>
 
+    <!-- Persistent data-status banner: the demo/real label stays visible on
+         every page, above the content, for as long as the site is open. -->
+    <div class="data-banner {% if site.is_demo %}is-demo{% else %}is-real{% endif %}" role="note">
+        <div class="data-banner-inner">
+            {% if site.is_demo %}
+            <strong>Sample dataset for UI demonstration</strong>
+            <span>&mdash; synthetic figures, not official surveillance data. Monthly series {{ site.data_period_display }}.</span>
+            {% else %}
+            <strong>Real dataset</strong>
+            <span>&mdash; {{ site.source_label }} &middot; reporting period {{ site.data_period_display }}.</span>
+            {% endif %}
+        </div>
+    </div>
+
     <main class="{% block main_class %}container{% endblock %}" id="main">
         {% block content %}{% endblock %}
     </main>
@@ -49,11 +63,7 @@
             <div>
                 <h3>Data freshness</h3>
                 <ul>
-                    {% if site.is_demo %}
-                    <li>Sample dataset &mdash; <strong>no reporting period</strong>. The sample file was last modified {{ site.file_modified or 'date not available' }} (a file timestamp, not a data vintage).</li>
-                    {% else %}
-                    <li>Reporting period: <strong>{{ site.data_period_display }}</strong>.</li>
-                    {% endif %}
+                    <li>Reporting period: <strong>{{ site.data_period_display }}</strong>{% if site.latest_period_display %} (latest: {{ site.latest_period_display }}){% endif %}.</li>
                     <li>Health library updated: <strong>{{ site.library_updated or 'Date not available' }}</strong></li>
                     <li>Case counts come from the project dataset only; the disease library is educational and carries no case counts.</li>
                     {% if site.is_demo %}

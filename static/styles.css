@@ -1446,3 +1446,53 @@ tbody tr[hidden] { display: none !important; }
   .top-diseases-cell { max-width: none; }
   .static-field { font-size: 0.88rem; }
 }
+
+/* ============ Phase 1: data-status banner + chart/table provenance ===== */
+.data-banner {
+  background: #FEF3C7;
+  border-bottom: 1px solid #FCD34D;
+  color: #78350F;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  padding: 0.5rem 0;
+}
+.data-banner.is-real {
+  background: #DCFCE7;
+  border-bottom-color: #86EFAC;
+  color: #14532D;
+}
+.data-banner-inner {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+.data-banner strong { font-weight: 800; }
+.data-banner span { opacity: 0.9; }
+
+.provenance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 1rem;
+  margin: 0.75rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.provenance strong { color: var(--text); font-weight: 700; }
+.prov-demo {
+  background: #FEF3C7;
+  border: 1px solid #FCD34D;
+  color: #92400E;
+  border-radius: 999px;
+  padding: 0 0.55rem;
+  font-weight: 700;
+  font-size: 0.74rem;
+}
+
+@media (max-width: 720px) {
+  .data-banner { font-size: 0.8rem; }
+  .data-banner-inner { padding: 0 1rem; }
+}

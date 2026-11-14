@@ -1,0 +1,15 @@
+{# Source / last-updated line placed under every chart and table.
+
+   Usage inside a block:
+     {% from "_provenance.html" import provenance %}
+     {{ provenance() }}
+   Optional note adds a trailing clause, e.g. {{ provenance('District rows
+   list dataset districts only.') }} #}
+{% macro provenance(note='') -%}
+<p class="provenance">
+    <span>Source: <strong>{{ site.source_label }}</strong>{% if site.source_detail %} &mdash; {{ site.source_detail }}{% endif %}</span>
+    <span>Last updated: <strong>{{ site.latest_period_display or site.data_period_display }}</strong>{% if site.period_count %} ({{ site.period_count }} months){% endif %}</span>
+    {% if site.is_demo %}<span class="prov-demo">Sample dataset for UI demonstration</span>{% endif %}
+    {% if note %}<span>{{ note }}</span>{% endif %}
+</p>
+{%- endmacro %}
