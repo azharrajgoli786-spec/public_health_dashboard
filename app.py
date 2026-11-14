@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort, make_response
+from flask import Flask, render_template, request, abort, make_response, redirect, url_for
 import csv
 import datetime
 import hashlib
@@ -693,9 +693,16 @@ def find():
         for d in diseases_data.DISEASES:
             if normalize(d["name"]) == nd:
                 guide = dict(d)
-                guide["_transmission"] = diseases_data.transmission_badge(guide)
-                guide["_vaccine"] = diseases_data.has_vaccine_note(guide)
                 break
+        # Fall back to the nearest guide name ("Tuberculosis" -> "Tuberculosis (TB)").
+        if guide is None and len(nd) >= 4:
+            for d in diseases_data.DISEASES:
+                if normalize(d["name"]).startswith(nd):
+                    guide = dict(d)
+                    break
+        if guide is not None:
+            guide["_transmission"] = diseases_data.transmission_badge(guide)
+            guide["_vaccine"] = diseases_data.has_vaccine_note(guide)
 
     # Surveillance rows for the requested disease (all diseases when blank).
     rows = []
@@ -707,6 +714,14 @@ def find():
         bd = v.get("disease_breakdown") or {}
         if nd:
             cases = bd.get(disease, 0)
+            if cases <= 0 and len(nd) >= 4:
+                # Alias/prefix fallback: "Tuberculosis (TB)" and "Tuberculosis"
+                # name the same surveillance rows.
+                for k, c in bd.items():
+                    nk = normalize(k)
+                    if nk == nd or nd.startswith(nk) or nk.startswith(nd):
+                        cases = c
+                        break
             if cases <= 0:
                 continue
         else:
@@ -737,7 +752,7 @@ def find():
 
 @app.route("/live_search", methods=["GET", "POST"])
 def live_search():
-    query = ""
+    """Search page: states get a full breakdown; a disease opens its guide."""
     if request.method == "POST":
         query = request.form.get("search", "")
     else:
@@ -755,7 +770,57 @@ def live_search():
             for key, info in health_data.items():
                 if nq in key or key in nq:
                     results.append((key, info["display"], info))
-    return render_template("live_search.html", active="search", query=query, results=results, health_data=health_data)
+        # 3. not a state: a disease name (or an unambiguous fragment of one)
+        #    opens the finder, which pairs the guide with surveillance rows.
+        if not results:
+            totals = _disease_totals()
+            by_name = {normalize(d["name"]): d["name"] for d in diseases_data.DISEASES}
+            for name in totals:
+                by_name.setdefault(normalize(name), name)
+            hits = [orig for nrm, orig in by_name.items() if nrm == nq]
+            if not hits:
+                hits = [orig for nrm, orig in by_name.items() if nq in nrm]
+            if len(hits) > 1:
+                # Alias pairs such as "Tuberculosis" / "Tuberculosis (TB)":
+                # prefer the surveillance name, which carries the case rows.
+                surv = {normalize(n) for n in totals}
+                pref = [h for h in hits if normalize(h) in surv]
+                if pref:
+                    hits = pref
+            if len(hits) > 1:
+                # Still several: collapse name variants of one disease
+                # ("Hypertension" / "Hypertension (HTN)") to the shortest.
+                hits.sort(key=len)
+                base = hits[0]
+                if all(base.lower() in h.lower() for h in hits[1:]):
+                    hits = [base]
+            if len(hits) == 1:
+                return redirect(url_for("find", disease=hits[0]))
+
+    # Page furniture: trending diseases and the client-side instant index.
+    totals = _disease_totals()
+    trending = [
+        {"name": name, "cases": cases}
+        for name, cases in sorted(totals.items(), key=lambda kv: kv[1], reverse=True)[:6]
+    ]
+    disease_index = [
+        {"n": name, "c": cases}
+        for name, cases in sorted(totals.items(), key=lambda kv: kv[1], reverse=True)
+    ]
+    seen = {normalize(d["n"]) for d in disease_index}
+    for d in diseases_data.DISEASES:
+        if normalize(d["name"]) not in seen:
+            disease_index.append({"n": d["name"], "c": None})
+    state_index = sorted(
+        ({"n": v["display"], "c": v["cases"]} for v in health_data.values()),
+        key=lambda r: -r["c"],
+    )
+    return render_template(
+        "live_search.html", active="search", query=query, results=results,
+        health_data=health_data, trending=trending,
+        search_index={"diseases": disease_index, "states": state_index},
+        library_count=len(diseases_data.DISEASES),
+    )
 
 
 def analytics_payload():

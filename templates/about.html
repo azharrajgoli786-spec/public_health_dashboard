@@ -2,55 +2,224 @@
 {% block title %}About — Public Health Dashboard{% endblock %}
 {% block meta %}About the public health dashboard: mission, data coverage, features, and data sources.{% endblock %}
 {% block content %}
-<section class="page-head" aria-labelledby="pageTitle">
-    <span class="eyebrow">About this project</span>
-    <h1 id="pageTitle">About this project</h1>
-    <p class="lead">Clear, accessible, and reliable health information: surveillance numbers where they exist, and plain-language disease guidance for everyone.</p>
+
+{% macro globeIcon() %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><ellipse cx="12" cy="12" rx="4.2" ry="9"/><path d="M5 6.5c1.8 1.2 4.3 1.9 7 1.9s5.2-.7 7-1.9"/><path d="M5 17.5c1.8-1.2 4.3-1.9 7-1.9s5.2.7 7 1.9"/></svg>{% endmacro %}
+
+<!-- ============ HERO ============ -->
+<section class="about-hero" aria-labelledby="pageTitle">
+    <div class="about-hero-copy">
+        <span class="hero-eyebrow">About the project</span>
+        <h1 id="pageTitle">About Public Health Dashboard</h1>
+        <p class="hero-lead">A centralized platform for exploring, analyzing and visualizing India&rsquo;s public health data &mdash; state surveillance numbers where they exist, plus plain-language disease guidance for everyone.</p>
+        <div class="hero-cta">
+            <a class="button hero-primary" href="/analytics">Explore analytics</a>
+            <a class="button hero-ghost" href="/diseases">Disease library</a>
+        </div>
+    </div>
+    <span class="about-globe" aria-hidden="true">{{ globeIcon() }}</span>
 </section>
 
-<div class="card">
-    <h2>Our mission</h2>
-    <p>Provide <strong>clear, accessible, and reliable</strong> health information for the public — verified dataset numbers presented simply, plus educational disease pages based on WHO, MoHFW, and NCDC public guidance.</p>
-</div>
-
-<div class="card">
-    <h2>What we track</h2>
-    <p>State and district surveillance from the project dataset (<strong>{{ site.source_label }}</strong> &mdash; {{ site.source_detail }}), {% if site.is_demo %}which carries no reporting period{% else %}reporting period <strong>{{ site.data_period_display }}</strong>{% endif %}. The disease library ({{ library_count }} conditions, updated {{ site.library_updated or 'date not available' }}) is educational and carries no case counts.</p>
-</div>
-
-{% if site.is_demo %}
-<div class="card">
-    <h2>About the sample dataset</h2>
-    <p>This project ships with a <strong>sample dataset</strong> so the interface can be demonstrated without publishing identifiable or unreleased figures. Please read the numbers accordingly:</p>
-    <ul style="padding-left:1.25rem; line-height:1.9; color:#334155;">
-        <li><strong>These are not surveillance figures.</strong> No figure in this dashboard should be read as real disease activity in India.</li>
-        <li><strong>There is no reporting period.</strong> The sample file carries no date, so none is shown. A file&rsquo;s modification timestamp moves whenever the file is touched, so it is not used as a data vintage.</li>
-        <li><strong>Rows marked <span class="badge-est">est</span> are modelled, not reported.</strong> {{ stats.estimated_diseases|join(', ') }} are reconstructed for every state as a share of that state&rsquo;s dataset total, with a fixed per-state variation so the values are not copy-pasted across states.</li>
-        <li><strong>District coverage varies widely</strong> &mdash; for example, a large state may show many reporting districts while a small state shows only one or two. The states table states how many of each state&rsquo;s districts appear.</li>
-        <li><strong>Reference data is separate from surveillance data.</strong> Populations ({{ site.population_vintage }}) and district counts ({{ site.district_vintage }}) are public reference figures, used only to normalise counts &mdash; for example to rank states by cases per lakh.</li>
-    </ul>
-    <p style="margin-bottom:0;">Dropping a real IDSP outbreak file named <code>idsp_outbreak_data.csv</code> or <code>idsp_real_data.csv</code> next to <code>app.py</code> switches the dashboard to real data automatically.</p>
-</div>
-{% endif %}
-
-<div class="card">
-    <h2>Features</h2>
-    <ul style="padding-left:1.25rem; line-height:1.9; color:#334155;">
-        <li>Dashboard overview with KPIs calculated from the live dataset</li>
-        <li>Searchable, sortable states table with district drill-down</li>
-        <li>Disease library with category filters, A&ndash;Z index, and detail pages</li>
-        <li>Analytics charts with disease and top-N filters plus ranked tables</li>
-        <li>Responsive, keyboard-accessible design with honest empty states</li>
-    </ul>
-    <div style="display:flex; flex-wrap:wrap; gap:0.6rem; margin-top:0.75rem;">
-        <a class="button" href="/states">Browse states</a>
-        <a class="button secondary" href="/diseases">Open disease library</a>
-        <a class="button secondary" href="/analytics">View analytics</a>
+<!-- ============ KPI STATS ============ -->
+<section class="about-stats" aria-label="Coverage at a glance">
+    <div class="about-stat">
+        <div class="about-stat-value">{{ stats.total_states }}</div>
+        <div class="about-stat-label">States &amp; UTs</div>
     </div>
-</div>
+    <div class="about-stat">
+        <div class="about-stat-value">{{ stats.total_districts }}</div>
+        <div class="about-stat-label">Districts covered</div>
+    </div>
+    <div class="about-stat">
+        <div class="about-stat-value">{{ library_count }}</div>
+        <div class="about-stat-label">Disease guides</div>
+    </div>
+    <div class="about-stat">
+        <div class="about-stat-value amber">{{ '{:,}'.format(stats.total_cases) }}
+            {% if site.is_demo %}<span class="an-badge">Sample data</span>{% endif %}
+        </div>
+        <div class="about-stat-label">Reported cases</div>
+    </div>
+</section>
 
-<div class="card">
-    <h2>Why it matters</h2>
-    <p>Transparent health data supports early outbreak awareness and faster response &mdash; contributing to a more <strong>aware, informed, and healthier</strong> society.</p>
-</div>
+<!-- ============ MISSION ============ -->
+<section class="card mission-card" aria-labelledby="missionTitle">
+    <span class="dcard-icon tone-pink" aria-hidden="true">
+        <svg class="dicon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>
+    </span>
+    <h2 id="missionTitle">Our mission</h2>
+    <p>Provide <strong>clear, accessible, and reliable</strong> health information for the public &mdash; dataset numbers presented simply, plus educational disease pages based on WHO, MoHFW, and NCDC public guidance. Transparent health data supports early outbreak awareness and faster response, contributing to a more <strong>aware, informed, and healthier</strong> society.</p>
+</section>
+
+<!-- ============ VALUES ============ -->
+<section aria-labelledby="valuesTitle">
+    <div class="section-head"><h2 id="valuesTitle">Why trust this dashboard</h2></div>
+    <div class="about-grid-2">
+        <div class="quick-card">
+            <span class="quick-icon teal" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.4-3 7.4-7 9-4-1.6-7-4.6-7-9V6z"/></svg>
+            </span>
+            <h3>Trusted data</h3>
+            <p>Case counts come only from the project dataset; guides cite WHO, MoHFW and NCDC public guidance.</p>
+        </div>
+        <div class="quick-card">
+            <span class="quick-icon blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+            </span>
+            <h3>Clear dates</h3>
+            <p>Every page shows dataset freshness and when the disease library was last updated.</p>
+        </div>
+        <div class="quick-card">
+            <span class="quick-icon violet" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+            </span>
+            <h3>Accessible insights</h3>
+            <p>Plain charts, sortable tables and honest empty states anyone can read.</p>
+        </div>
+        <div class="quick-card">
+            <span class="quick-icon amber" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>
+            </span>
+            <h3>Informed decisions</h3>
+            <p>Supporting evidence-based thinking &mdash; never prescriptions or dosages.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============ WHAT WE OFFER ============ -->
+<section aria-labelledby="offerTitle">
+    <div class="section-head"><h2 id="offerTitle">What we offer</h2></div>
+    <div class="about-grid-2">
+        <a class="quick-card" href="/states">
+            <span class="quick-icon blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M3 15h18M9 4v16M15 4v16"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            </span>
+            <h3>Case data</h3>
+            <p>Reported cases for {{ stats.total_states }} states and UTs, with district-level detail.</p>
+            <span class="quick-cta">Open states table &rarr;</span>
+        </a>
+        <a class="quick-card" href="/analytics">
+            <span class="quick-icon violet" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+            </span>
+            <h3>Analytics</h3>
+            <p>Compare states and diseases with filters, ranked charts and per-lakh views.</p>
+            <span class="quick-cta">View analytics &rarr;</span>
+        </a>
+        <a class="quick-card" href="/diseases">
+            <span class="quick-icon teal" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2 16.7 7.3M7.3 16.7l-2.1 2.1"/></svg>
+            </span>
+            <h3>Disease library</h3>
+            <p>{{ library_count }} plain-language guides on causes, symptoms, prevention and care.</p>
+            <span class="quick-cta">Open library &rarr;</span>
+        </a>
+        <a class="quick-card" href="/live_search">
+            <span class="quick-icon amber" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            </span>
+            <h3>Instant search</h3>
+            <p>Find a disease, state or place and jump straight to it with live results.</p>
+            <span class="quick-cta">Start searching &rarr;</span>
+        </a>
+    </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section aria-labelledby="howTitle">
+    <div class="section-head"><h2 id="howTitle">How it works</h2></div>
+    <div class="steps">
+        <div class="step">
+            <span class="step-num" aria-hidden="true">1</span>
+            <div><b>Search</b><small>Find a disease, state or district to see matching cases and guides.</small></div>
+        </div>
+        <div class="step">
+            <span class="step-num" aria-hidden="true">2</span>
+            <div><b>Explore</b><small>Open the States table or Analytics to compare regions and diseases.</small></div>
+        </div>
+        <div class="step">
+            <span class="step-num" aria-hidden="true">3</span>
+            <div><b>Learn</b><small>Read the plain-language guide on causes, prevention and when to seek care.</small></div>
+        </div>
+    </div>
+</section>
+
+<!-- ============ DATA SOURCES ============ -->
+<section aria-labelledby="sourcesTitle">
+    <div class="section-head"><h2 id="sourcesTitle">Data sources</h2></div>
+    <div class="source-grid">
+        <div class="source-card">
+            <b>{{ site.source_label }}</b>
+            <small>{{ site.source_detail }}</small>
+        </div>
+        <div class="source-card">
+            <b>WHO</b>
+            <small>Disease guidance and public health recommendations</small>
+        </div>
+        <div class="source-card">
+            <b>MoHFW</b>
+            <small>Ministry of Health &amp; Family Welfare advisories</small>
+        </div>
+        <div class="source-card">
+            <b>NCDC</b>
+            <small>National Centre for Disease Control public guidance</small>
+        </div>
+    </div>
+
+    {% if site.is_demo %}
+    <div class="notice">
+        <strong>Demo notice:</strong> case counts are from a sample dataset for interface testing and are not official surveillance figures.
+    </div>
+    {% endif %}
+
+    <details class="sample-details">
+        <summary>About the sample dataset</summary>
+        <div class="sample-body">
+            <p>This project ships with a <strong>sample dataset</strong> so the interface can be demonstrated without publishing identifiable or unreleased figures. Please read the numbers accordingly:</p>
+            <ul>
+                <li><strong>These are not surveillance figures.</strong> No figure in this dashboard should be read as real disease activity in India.</li>
+                <li><strong>There is no reporting period.</strong> The sample file carries no date, so none is shown. A file&rsquo;s modification timestamp moves whenever the file is touched, so it is not used as a data vintage.</li>
+                <li><strong>Rows marked <span class="badge-est">est</span> are modelled, not reported.</strong> {{ stats.estimated_diseases|join(', ') }} are reconstructed for every state as a share of that state&rsquo;s dataset total, with a fixed per-state variation so the values are not copy-pasted across states.</li>
+                <li><strong>District coverage varies widely</strong> &mdash; a large state may show many reporting districts while a small one shows only a few.</li>
+                <li><strong>Reference data is separate from surveillance data.</strong> Populations ({{ site.population_vintage }}) and district counts ({{ site.district_vintage }}) are public reference figures, used only to normalise counts &mdash; for example to rank states by cases per lakh.</li>
+            </ul>
+            <p style="margin-bottom:0;">Dropping a real IDSP outbreak file named <code>idsp_outbreak_data.csv</code> or <code>idsp_real_data.csv</code> next to <code>app.py</code> switches the dashboard to real data automatically.</p>
+        </div>
+    </details>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section aria-labelledby="faqTitle">
+    <div class="section-head"><h2 id="faqTitle">Frequently asked questions</h2></div>
+    <div class="faq">
+        <details>
+            <summary>Is this live, real-time data?</summary>
+            <div class="faq-body"><p>{% if site.is_demo %}No. Case counts come from a <strong>sample dataset</strong> used for interface testing &mdash; they are not official surveillance figures, and there is no reporting period.{% else %}Data refreshes only when the dataset file is updated; it is not a live feed.{% endif %} The disease library is updated separately (last: {{ site.library_updated or 'date not available' }}).</p></div>
+        </details>
+        <details>
+            <summary>Can I use it for medical advice?</summary>
+            <div class="faq-body"><p>No. Disease pages are general educational information based on WHO, MoHFW, and NCDC public guidance. They do <strong>not</strong> replace consultation with a qualified healthcare professional, and no prescription medicines or dosages are listed.</p></div>
+        </details>
+        <details>
+            <summary>What do the case numbers mean?</summary>
+            <div class="faq-body"><p>They are reported case counts per state and district from the project dataset &mdash; a measure of reporting volume, not disease prevalence. Rows tagged <span class="badge-est">est</span> are modelled estimates rather than reported entries.</p></div>
+        </details>
+        <details>
+            <summary>What should I do in an emergency?</summary>
+            <div class="faq-body"><p>Call <strong>108 / 102</strong> or go to the nearest emergency department. Do not rely on this dashboard in an emergency.</p></div>
+        </details>
+    </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta-panel tint" aria-labelledby="ctaTitle">
+    <div>
+        <h2 id="ctaTitle">Have questions or suggestions?</h2>
+        <p>Check the FAQ above, or explore the dashboard &mdash; we&rsquo;d love to hear how you use the data.</p>
+    </div>
+    <div class="cta-actions">
+        <a class="button" href="#faqTitle">Read the FAQ</a>
+        <a class="button secondary" href="/">Back to dashboard</a>
+    </div>
+</section>
+
 {% endblock %}

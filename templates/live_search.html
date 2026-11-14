@@ -1,49 +1,76 @@
 {% extends "base.html" %}
-{% block title %}Search — Health Data by State{% endblock %}
-{% block meta %}Search disease surveillance data by Indian state name.{% endblock %}
+{% block title %}Search — Public Health Dashboard{% endblock %}
+{% block meta %}Search disease surveillance data, diseases and health guides by Indian state name.{% endblock %}
 {% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>{% endblock %}
+{% block main_class %}search-main{% endblock %}
+
+{% macro virusIcon() %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2 16.7 7.3M7.3 16.7l-2.1 2.1"/><circle cx="10.4" cy="10.6" r="1.1" fill="currentColor" stroke="none"/></svg>{% endmacro %}
+{% macro pinIcon() %}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>{% endmacro %}
+
 {% block content %}
-<section class="page-head" aria-labelledby="pageTitle">
-    <span class="eyebrow">State search</span>
-    <h1 id="pageTitle">Search health data by state</h1>
-    <p class="lead">Type any part of a state name. Results show disease and district breakdowns with a chart.</p>
+
+<!-- ============ SEARCH BANNER ============ -->
+<section class="search-hero" aria-labelledby="pageTitle">
+    <div class="container search-hero-inner">
+        <span class="hero-eyebrow">Search</span>
+        <h1 id="pageTitle">Search public health data</h1>
+        <p class="hero-lead">Find diseases, states and districts across India in one place &mdash; instant matches, full state breakdowns and health guides.</p>
+
+        <form class="search-form" id="searchForm" role="search" aria-label="Search health data" method="get" action="/live_search">
+            <div class="search-box">
+                <svg class="search-box-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <label class="sr-only" for="searchInput">Search diseases or states</label>
+                <input type="search" id="searchInput" name="search" list="stateList" placeholder="Search for diseases, states, topics&hellip;" autocomplete="off" value="{{ query if query else '' }}" required>
+                <button type="submit" class="button search-go">Search</button>
+            </div>
+        </form>
+        <datalist id="stateList">
+            {% for key, info in health_data.items() %}
+            <option value="{{ info.display }}"></option>
+            {% endfor %}
+            {% for d in search_index.diseases[:25] %}
+            <option value="{{ d.n }}"></option>
+            {% endfor %}
+        </datalist>
+
+        <div class="search-popular">
+            <span>Popular:</span>
+            <a class="finder-chip" href="/find?disease=Dengue" data-sq="Dengue">Dengue</a>
+            <a class="finder-chip" href="/find?disease=Malaria" data-sq="Malaria">Malaria</a>
+            <a class="finder-chip" href="/find?disease=Tuberculosis" data-sq="Tuberculosis">Tuberculosis</a>
+            <a class="finder-chip" href="/find?disease=COVID-19" data-sq="COVID-19">COVID-19</a>
+            <a class="finder-chip" href="/live_search?search=Karnataka" data-sq="Karnataka">Karnataka</a>
+            <a class="finder-chip" href="/live_search?search=Maharashtra" data-sq="Maharashtra">Maharashtra</a>
+            <a class="finder-chip" href="/live_search?search=Delhi" data-sq="Delhi">Delhi</a>
+        </div>
+    </div>
 </section>
 
-<div class="card">
-    <form method="POST" id="searchForm" role="search" aria-label="State search">
-        <div class="toolbar" style="grid-template-columns: 2fr 1fr;">
-            <div class="field">
-                <label class="field-label" for="searchInput">State name</label>
-                <input type="text" id="searchInput" autocomplete="off" name="search" list="stateList" placeholder="Enter state name (e.g. Karnataka)" class="input" value="{{ query if query else '' }}" required>
-                <datalist id="stateList">
-                    {% for key, info in health_data.items() if health_data is defined %}
-                    <option value="{{ info.display }}"></option>
-                    {% endfor %}
-                </datalist>
-            </div>
-            <div class="field" style="align-self:end;">
-                <button type="submit" class="button">Search</button>
+<div class="container">
+
+    <!-- ============ INSTANT RESULTS (client-side, as you type) ============ -->
+    <section id="livePanel" class="live-panel" hidden aria-labelledby="liveHeading">
+        <div class="live-head">
+            <h2 id="liveHeading">Results</h2>
+            <div class="seg live-tabs" role="group" aria-label="Filter results">
+                <button type="button" class="seg-btn on" data-tab="all" aria-pressed="true">All</button>
+                <button type="button" class="seg-btn" data-tab="dz" aria-pressed="false">Diseases</button>
+                <button type="button" class="seg-btn" data-tab="st" aria-pressed="false">States &amp; UTs</button>
             </div>
         </div>
-    </form>
-
-    <div class="chips" aria-label="Quick search">
-        <span class="muted" style="align-self:center;">Quick search:</span>
-        <button type="button" class="chip" onclick="fillAndSubmit('Karnataka')">Karnataka</button>
-        <button type="button" class="chip" onclick="fillAndSubmit('Maharashtra')">Maharashtra</button>
-        <button type="button" class="chip" onclick="fillAndSubmit('Delhi')">Delhi</button>
-        <button type="button" class="chip" onclick="fillAndSubmit('Kerala')">Kerala</button>
-        <button type="button" class="chip" onclick="fillAndSubmit('Uttar Pradesh')">Uttar Pradesh</button>
-    </div>
-
-    <div id="liveRegion" class="sr-only" aria-live="polite"></div>
+        <div id="liveList" class="live-list" role="list"></div>
+    </section>
 
     {% if results %}
-    <p role="status">{{ results|length }} result{{ 's' if results|length != 1 }} for <strong>&ldquo;{{ query }}&rdquo;</strong></p>
+    <!-- ============ SERVER RESULTS: state breakdown ============ -->
+    <p class="result-count" role="status">{{ results|length }} result{{ 's' if results|length != 1 }} for <strong>&ldquo;{{ query }}&rdquo;</strong></p>
     {% for key, display, result in results %}
     <section class="result" aria-label="Result for {{ display }}">
-        <h2>{{ display }}</h2>
-        <p class="muted">Diseases: <strong>{{ result.diseases }}</strong> &bull; Total cases: <strong>{{ result.cases }}</strong></p>
+        <div class="result-head">
+            <h2>{{ display }}</h2>
+            <a class="glance-link" href="/states?q={{ display|urlencode }}">Open in states table &rarr;</a>
+        </div>
+        <p class="muted">Diseases: <strong>{{ result.diseases }}</strong> &bull; Total cases: <strong>{{ result.cases }}</strong> &bull; Districts reporting: <strong>{{ result.districts|length }}</strong></p>
         <h3>Disease-wise breakdown</h3>
         <div class="table-wrap">
             <table class="data">
@@ -98,13 +125,145 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true } }, scales: { y: { beginAtZero: true } } }
             });
         });
-        document.getElementById('liveRegion').textContent = '{{ results|length }} results found.';
     </script>
-    {% elif query %}
+    {% else %}
+    {% if query %}
+    <!-- ============ NO MATCH ============ -->
     <div class="empty" role="alert">
-        <p><strong>No data found for &ldquo;{{ query }}&rdquo;.</strong></p>
-        <p>Try Karnataka, Maharashtra, Delhi, Kerala, or Uttar Pradesh — or <a href="/states">browse the states table</a>.</p>
+        <p><strong>No matches for &ldquo;{{ query }}&rdquo;.</strong></p>
+        <p>Try a state like Karnataka, Maharashtra or Delhi &mdash; or a disease like Dengue.</p>
+        <div class="chips" style="justify-content:center;">
+            <a class="chip" href="/live_search?search=Karnataka">Karnataka</a>
+            <a class="chip" href="/find?disease=Dengue">Dengue</a>
+            <a class="chip" href="/states">Browse all states</a>
+        </div>
     </div>
+    {% endif %}
+
+    <!-- ============ TRENDING DISEASES ============ -->
+    {% if trending %}
+    <section aria-labelledby="trendingTitle">
+        <div class="section-head search-first">
+            <h2 id="trendingTitle">Trending diseases</h2>
+            <p>The most reported conditions in the dataset right now.</p>
+        </div>
+        <div class="trend-grid">
+            {% for t in trending %}
+            <a class="trend-card" href="/find?disease={{ t.name|urlencode }}">
+                <span class="quick-icon {{ ['blue','teal','violet','green','amber','rose'][loop.index0 % 6] }}" aria-hidden="true">{{ virusIcon() }}</span>
+                <span class="trend-titles">
+                    <b>{{ t.name }}</b>
+                    <small>{{ '{:,}'.format(t.cases) }} reported cases</small>
+                </span>
+                <span class="trend-cta" aria-hidden="true">&rarr;</span>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ============ BROWSE BY CATEGORY ============ -->
+    <section aria-labelledby="catTitle">
+        <div class="section-head">
+            <h2 id="catTitle">Browse by category</h2>
+            <p>Jump straight to the part of the dashboard you need.</p>
+        </div>
+        <div class="quick">
+            <a class="quick-card" href="/diseases">
+                <span class="quick-icon teal" aria-hidden="true">{{ virusIcon() }}</span>
+                <h3>Diseases &amp; Conditions</h3>
+                <p>Symptoms, prevention and care for {{ library_count }} conditions in the health library.</p>
+                <span class="quick-cta">Open disease library &rarr;</span>
+            </a>
+            <a class="quick-card" href="/states">
+                <span class="quick-icon blue" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h18M3 15h18M9 4v16M15 4v16"/><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                </span>
+                <h3>States &amp; Districts</h3>
+                <p>Searchable, sortable table of every state with district-level drill-downs.</p>
+                <span class="quick-cta">Open states table &rarr;</span>
+            </a>
+            <a class="quick-card" href="/analytics">
+                <span class="quick-icon violet" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l4-5 3 3 5-7"/></svg>
+                </span>
+                <h3>Analytics &amp; Rankings</h3>
+                <p>Ranked charts with disease and top-N filters for comparing states side by side.</p>
+                <span class="quick-cta">View analytics &rarr;</span>
+            </a>
+            <a class="quick-card" href="/find?view=guide">
+                <span class="quick-icon green" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19a2 2 0 0 1 2-2h13"/></svg>
+                </span>
+                <h3>Health Guides</h3>
+                <p>Plain-language guidance: causes, symptoms, prevention and when to seek help.</p>
+                <span class="quick-cta">Read the guides &rarr;</span>
+            </a>
+            <a class="quick-card" href="/find">
+                <span class="quick-icon amber" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                </span>
+                <h3>Find Disease &amp; Place</h3>
+                <p>Pair a disease with a state or district to see cases, guides and comparisons.</p>
+                <span class="quick-cta">Open the finder &rarr;</span>
+            </a>
+            <a class="quick-card" href="/about">
+                <span class="quick-icon rose" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg>
+                </span>
+                <h3>About the Data</h3>
+                <p>Sources, freshness, method and the demo-data disclaimer behind every number.</p>
+                <span class="quick-cta">Data notes &rarr;</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- ============ RECENT SEARCHES + SEARCH TIPS ============ -->
+    <div class="search-two">
+        <section class="card" aria-labelledby="recentTitle">
+            <div class="recent-head">
+                <h2 id="recentTitle">Recent searches</h2>
+                <button type="button" class="recent-clear" id="recentClear" hidden>Clear all</button>
+            </div>
+            <div id="recentList" class="recent-list">
+                <p class="recent-empty">No recent searches yet. Your searches stay in this browser.</p>
+            </div>
+        </section>
+        <section class="card" aria-labelledby="tipsTitle">
+            <div class="recent-head"><h2 id="tipsTitle">Search tips</h2></div>
+            <div class="tips">
+                <div class="tip">
+                    <span class="tip-ico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/></svg>
+                    </span>
+                    <div><b>Try a disease name</b><small>Search for &ldquo;Dengue&rdquo; or &ldquo;Tuberculosis&rdquo; to open its guide with symptoms and prevention.</small></div>
+                </div>
+                <div class="tip">
+                    <span class="tip-ico" aria-hidden="true">{{ pinIcon() }}</span>
+                    <div><b>Search a place</b><small>Type a state or union territory like &ldquo;Karnataka&rdquo; to get its full disease and district breakdown.</small></div>
+                </div>
+                <div class="tip">
+                    <span class="tip-ico" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>
+                    </span>
+                    <div><b>Keep it short</b><small>One or two keywords give the best matches &mdash; results appear instantly as you type.</small></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ============ CTA ============ -->
+    <section class="cta-panel" aria-labelledby="ctaTitle">
+        <div>
+            <h2 id="ctaTitle">Can&rsquo;t find what you&rsquo;re looking for?</h2>
+            <p>Try different keywords, or browse the data yourself.</p>
+        </div>
+        <div class="cta-actions">
+            <a class="button" href="/states">Browse all data</a>
+            <a class="button secondary" href="/diseases">Disease library</a>
+        </div>
+    </section>
+
     {% endif %}
 
     {% if site.is_demo %}
@@ -114,13 +273,143 @@
     {% endif %}
 </div>
 {% endblock %}
+
 {% block scripts %}
+<script id="searchIndexJson" type="application/json">{{ search_index | tojson }}</script>
 <script>
-    function fillAndSubmit(val) {
-        var input = document.getElementById('searchInput');
-        input.value = val;
-        input.focus();
-        setTimeout(function () { document.getElementById('searchForm').submit(); }, 120);
+(function () {
+    'use strict';
+    var input = document.getElementById('searchInput');
+    var form = document.getElementById('searchForm');
+    var panel = document.getElementById('livePanel');
+    var list = document.getElementById('liveList');
+    var heading = document.getElementById('liveHeading');
+
+    var INDEX = { diseases: [], states: [] };
+    try {
+        var raw = document.getElementById('searchIndexJson');
+        if (raw) INDEX = JSON.parse(raw.textContent) || INDEX;
+    } catch (e) {}
+
+    /* ---------- Recent searches (localStorage only) ---------- */
+    var KEY = 'phd_recent';
+    function recent() {
+        try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch (e) { return []; }
     }
+    function saveList(items) {
+        try { localStorage.setItem(KEY, JSON.stringify(items)); } catch (e) {}
+    }
+    function esc(s) {
+        return String(s).replace(/[&<>"]/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+        });
+    }
+    function ago(t) {
+        var m = Math.round((Date.now() - t) / 60000);
+        if (m < 1) return 'Just now';
+        if (m < 60) return m + ' min ago';
+        var h = Math.round(m / 60);
+        if (h < 24) return h + (h === 1 ? ' hour ago' : ' hours ago');
+        var d = Math.round(h / 24);
+        return d === 1 ? 'Yesterday' : d + ' days ago';
+    }
+    function renderRecent() {
+        var box = document.getElementById('recentList');
+        if (!box) return;
+        var clear = document.getElementById('recentClear');
+        var items = recent();
+        if (clear) clear.hidden = items.length === 0;
+        box.innerHTML = items.length
+            ? items.map(function (x) {
+                  return '<a class="recent-row" href="/live_search?search=' + encodeURIComponent(x.q) + '">' +
+                      '<span>' + esc(x.q) + '</span><em>' + ago(x.t) + '</em></a>';
+              }).join('')
+            : '<p class="recent-empty">No recent searches yet. Your searches stay in this browser.</p>';
+    }
+    function remember(q) {
+        q = (q || '').trim();
+        if (!q) return;
+        var items = recent().filter(function (x) {
+            return (x.q || '').toLowerCase() !== q.toLowerCase();
+        });
+        items.unshift({ q: q, t: Date.now() });
+        saveList(items.slice(0, 6));
+        renderRecent();
+    }
+    var clearBtn = document.getElementById('recentClear');
+    if (clearBtn) clearBtn.addEventListener('click', function () { saveList([]); renderRecent(); });
+
+    /* ---------- Instant results while typing ---------- */
+    var tab = 'all';
+    var VIRUS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.2 5.2l2.1 2.1M16.7 16.7l2.1 2.1M18.8 5.2 16.7 7.3M7.3 16.7l-2.1 2.1"/></svg>';
+    var PIN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>';
+
+    function renderLive() {
+        if (!panel || !list) return;
+        var q = (input.value || '').trim().toLowerCase();
+        if (!q) { panel.hidden = true; return; }
+
+        var rows = [];
+        if (tab !== 'st') INDEX.diseases.forEach(function (d) {
+            if ((d.n || '').toLowerCase().indexOf(q) > -1) {
+                rows.push({ t: 'dz', n: d.n, c: d.c, href: '/find?disease=' + encodeURIComponent(d.n) });
+            }
+        });
+        if (tab !== 'dz') INDEX.states.forEach(function (s) {
+            if ((s.n || '').toLowerCase().indexOf(q) > -1) {
+                rows.push({ t: 'st', n: s.n, c: s.c, href: '/live_search?search=' + encodeURIComponent(s.n) });
+            }
+        });
+
+        panel.hidden = false;
+        if (heading) heading.textContent = 'Results (' + rows.length + ')';
+        list.innerHTML = rows.length
+            ? rows.map(function (r) {
+                  var meta = (r.c === null || r.c === undefined)
+                      ? (r.t === 'dz' ? 'Health guide' : 'State / UT')
+                      : r.c.toLocaleString('en-IN') + ' cases';
+                  var kind = r.t === 'dz' ? 'Disease' : 'State / UT';
+                  return '<a class="live-row" role="listitem" data-name="' + esc(r.n) + '" href="' + r.href + '">' +
+                      '<span class="live-ico ' + r.t + '" aria-hidden="true">' + (r.t === 'dz' ? VIRUS : PIN) + '</span>' +
+                      '<span class="live-titles"><span class="live-name">' + esc(r.n) + '</span>' +
+                      '<span class="live-kind">' + kind + '</span></span>' +
+                      '<span class="live-meta">' + meta + '</span></a>';
+              }).join('')
+            : '<p class="live-none">No matches for &ldquo;' + esc((input.value || '').trim()) +
+              '&rdquo;. Try a shorter keyword, or browse the categories below.</p>';
+    }
+
+    if (input) {
+        input.addEventListener('input', renderLive);
+        input.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && panel) panel.hidden = true;
+        });
+    }
+    if (form) form.addEventListener('submit', function () {
+        remember(input.value);
+        if (panel) panel.hidden = true;
+    });
+    if (list) list.addEventListener('click', function (e) {
+        var a = e.target.closest ? e.target.closest('.live-row') : null;
+        if (a && a.getAttribute('data-name')) remember(a.getAttribute('data-name'));
+    });
+    document.querySelectorAll('.live-tabs .seg-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            tab = btn.getAttribute('data-tab');
+            document.querySelectorAll('.live-tabs .seg-btn').forEach(function (b) {
+                var on = b === btn;
+                b.classList.toggle('on', on);
+                b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            renderLive();
+        });
+    });
+    document.querySelectorAll('[data-sq]').forEach(function (el) {
+        el.addEventListener('click', function () { remember(el.getAttribute('data-sq')); });
+    });
+
+    renderRecent();
+    if (input && input.value.trim()) remember(input.value);
+})();
 </script>
 {% endblock %}
