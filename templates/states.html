@@ -1,8 +1,9 @@
 {% extends "base.html" %}
-{% block title %}States — State &amp; District Health Data{% endblock %}
+{% block title %}States â€” State &amp; District Health Data{% endblock %}
 {% block meta %}Searchable, sortable table of disease surveillance data by Indian state with district-level detail.{% endblock %}
 {% block main_class %}states-main{% endblock %}
 {% block content %}
+{% from "_provenance.html" import provenance with context %}
 
 <!-- ============ PAGE HEADER ============ -->
 <section class="page-hero">
@@ -56,7 +57,7 @@
                     <option value="cases-desc" {% if sort == 'cases-desc' %}selected{% endif %}>Reported cases (High to Low)</option>
                     <option value="cases-asc" {% if sort == 'cases-asc' %}selected{% endif %}>Reported cases (Low to High)</option>
                     <option value="per-lakh-desc" {% if sort == 'per-lakh-desc' %}selected{% endif %}>Cases per lakh (High to Low)</option>
-                    <option value="name-asc" {% if sort == 'name-asc' %}selected{% endif %}>State name (A–Z)</option>
+                    <option value="name-asc" {% if sort == 'name-asc' %}selected{% endif %}>State name (Aâ€“Z)</option>
                     <option value="districts-desc" {% if sort == 'districts-desc' %}selected{% endif %}>Districts (Most first)</option>
                 </select>
             </div>
@@ -71,7 +72,7 @@
                 <div class="static-field" aria-describedby="snapshotLabel"
                      title="This dashboard has a single dataset snapshot, so there is no date to select.">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
-                    <span>{% if site.is_demo %}No reporting period{% else %}{{ site.data_period_display }}{% endif %}</span>
+                    <span>{{ site.data_period_display }}</span>
                 </div>
             </div>
 
@@ -103,7 +104,7 @@
     </div>
 
     <!-- ============ STAT ROW ============ -->
-    <div class="stats stats-5" aria-label="Key indicators">
+    <div class="stats" aria-label="Key indicators">
         <article class="stat">
             <span class="stat-icon green" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c4.8 7 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
@@ -131,17 +132,7 @@
             <div class="stat-body">
                 <div class="stat-value">{{ stats.total_diseases }}</div>
                 <div class="stat-label">Diseases</div>
-                <p class="stat-note">In surveillance</p>
-            </div>
-        </article>
-        <article class="stat">
-            <span class="stat-icon rose" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15 20a5 5 0 0 1 6-4.6"/></svg>
-            </span>
-            <div class="stat-body">
-                <div class="stat-value">{{ stats.total_cases }}</div>
-                <div class="stat-label">Reported cases</div>
-                <p class="stat-note">Across India</p>
+                <p class="stat-note">With case data, of {{ library_count }} guides</p>
             </div>
         </article>
         <article class="stat">
@@ -149,9 +140,9 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
             </span>
             <div class="stat-body">
-                <div class="stat-value stat-date">{% if site.is_demo %}&mdash;{% else %}{{ site.data_period_display }}{% endif %}</div>
-                <div class="stat-label">{% if site.is_demo %}Reporting period{% else %}Data last updated{% endif %}</div>
-                <p class="stat-note">{% if site.is_demo %}None in sample data{% else %}Dataset snapshot{% endif %}</p>
+                <div class="stat-value stat-date">{{ site.latest_period_display or site.data_period_display }}</div>
+                <div class="stat-label">Latest period</div>
+                <p class="stat-note">{{ site.data_period_display }}{% if site.period_count %} &middot; {{ site.period_count }} months{% endif %}</p>
             </div>
         </article>
     </div>
@@ -183,7 +174,7 @@
                 <thead>
                     <tr>
                         <th scope="col">State / UT</th>
-                        <th scope="col" class="num"><button type="button" class="sort" id="sortCases">Cases <span class="sort-caret" aria-hidden="true">▾</span></button></th>
+                        <th scope="col" class="num"><button type="button" class="sort" id="sortCases">Cases <span class="sort-caret" aria-hidden="true">â–¾</span></button></th>
                         <th scope="col" class="num">Per lakh</th>
                         <th scope="col" class="num">Districts</th>
                         <th scope="col">Top diseases</th>
@@ -199,7 +190,7 @@
                         <td class="num">{{ r.districts }}{% if r.district_total %}<span class="cell-sub">of {{ r.district_total }}</span>{% endif %}</td>
                         <td class="top-diseases-cell">
                             {%- for name, count in r.top_diseases -%}
-                            <span class="tdisease">{{ name }}{% if name in r.estimated_diseases %}<span class="badge-est" title="Modelled estimate, not a reported row">est</span>{% endif %} <span class="disease-count">{{ count }}</span></span>{% if not loop.last %}<span class="tsep" aria-hidden="true">·</span>{% endif %}
+                            <span class="tdisease">{{ name }}{% if name in r.estimated_diseases %}<span class="badge-est" title="Modelled estimate, not a reported row">est</span>{% endif %} <span class="disease-count">{{ count }}</span></span>{% if not loop.last %}<span class="tsep" aria-hidden="true">Â·</span>{% endif %}
                             {%- endfor -%}
                         </td>
                         <td class="action-col">
@@ -215,7 +206,7 @@
                         <td colspan="6">
                             <div class="detail-grid">
                                 <div>
-                                    <h3>Disease breakdown — {{ r.display }}</h3>
+                                    <h3>Disease breakdown â€” {{ r.display }}</h3>
                                     <table class="mini-table">
                                         <thead><tr><th scope="col">Disease</th><th scope="col" class="num">Cases</th></tr></thead>
                                         <tbody>
@@ -226,7 +217,7 @@
                                     </table>
                                 </div>
                                 <div>
-                                    <h3>Districts — {{ r.display }}</h3>
+                                    <h3>Districts â€” {{ r.display }}</h3>
                                     <table class="mini-table">
                                         <thead><tr><th scope="col">District</th><th scope="col" class="num">Cases</th></tr></thead>
                                         <tbody>
@@ -248,9 +239,18 @@
             </table>
         </div>
 
+        <!-- Per-disease totals replace the all-disease grand total. -->
+        <p class="muted small-note disease-totals">
+            <strong>Totals per disease:</strong>
+            {% for name, c in disease_totals %}
+            <a href="/find?disease={{ name|urlencode }}">{{ name }} <strong>{{ '{:,}'.format(c) }}</strong>{% if name in stats.estimated_diseases %} <span class="badge-est" title="Modelled estimate, not a reported row">est</span>{% endif %}</a>{% if not loop.last %} <span aria-hidden="true">&middot;</span> {% endif %}
+            {% endfor %}
+        </p>
+        {{ provenance('State totals combine these per-disease figures; there is no all-disease grand total.') }}
+
         <!-- Tile map (schematic, not a geographic projection) -->
         <div class="tile-map" id="tileMap" {% if view != 'map' %}hidden{% endif %}>
-            <p class="tile-map-note">Schematic tile map — each tile is one state or UT, shaded by reported cases. Positions are approximate, not to scale. Faded tiles fall outside the current filter.</p>
+            <p class="tile-map-note">Schematic tile map â€” each tile is one state or UT, shaded by reported cases. Positions are approximate, not to scale. Faded tiles fall outside the current filter.</p>
             <div class="tiles" id="tiles">
                 {% for r in all_rows %}
                 <a class="tile tile-{{ r.level }} {% if r.dimmed %}dim{% endif %}" href="{{ tile_urls[r.key] }}" data-name="{{ r.display|lower }}" title="{{ r.display }} &middot; {{ r.cases }} cases"><span class="tile-name">{{ r.display }}</span><span class="tile-cases">{{ r.cases }}</span></a>
@@ -261,6 +261,7 @@
                 <span class="swatch s1"></span><span class="swatch s2"></span><span class="swatch s3"></span><span class="swatch s4"></span><span class="swatch s5"></span>
                 <span>Higher</span>
             </div>
+            {{ provenance('Schematic tile map shaded by total reported cases.') }}
         </div>
 
         <div class="empty" id="statesEmpty" {% if total_results %}hidden{% endif %}>
@@ -299,8 +300,8 @@
         <span class="note-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
         </span>
-        <p><strong>{{ source.label }} — {{ source.detail }}.</strong>
-        {% if site.is_demo %}<strong>This is a sample dataset for interface testing, not official surveillance data.</strong> The sample file carries no reporting period.{% else %}Reporting period: <strong>{{ site.data_period_display }}</strong>.{% endif %}
+        <p><strong>{{ source.label }} â€” {{ source.detail }}.</strong>
+        {% if site.is_demo %}<strong>This is a sample dataset for interface testing, not official surveillance data.</strong> Reporting period: <strong>{{ site.data_period_display }}</strong> (monthly series, generated for the demo).{% else %}Reporting period: <strong>{{ site.data_period_display }}</strong>.{% endif %}
         Population ({{ site.population_vintage }}) and district counts ({{ site.district_vintage }}) are public reference data used only to normalise counts.
         Case counts are derived from the project dataset and do not replace official reports.</p>
     </div>

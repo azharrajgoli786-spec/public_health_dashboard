@@ -34,10 +34,10 @@
         <div class="about-stat-label">Disease guides</div>
     </div>
     <div class="about-stat">
-        <div class="about-stat-value amber">{{ '{:,}'.format(stats.total_cases) }}
-            {% if site.is_demo %}<span class="an-badge">Sample data</span>{% endif %}
+        <div class="about-stat-value amber">{{ stats.total_diseases }}
+            <span class="an-badge">of {{ library_count }} guides</span>
         </div>
-        <div class="about-stat-label">Reported cases</div>
+        <div class="about-stat-label">Diseases with case data</div>
     </div>
 </section>
 
@@ -177,7 +177,7 @@
             <p>This project ships with a <strong>sample dataset</strong> so the interface can be demonstrated without publishing identifiable or unreleased figures. Please read the numbers accordingly:</p>
             <ul>
                 <li><strong>These are not surveillance figures.</strong> No figure in this dashboard should be read as real disease activity in India.</li>
-                <li><strong>There is no reporting period.</strong> The sample file carries no date, so none is shown. A file&rsquo;s modification timestamp moves whenever the file is touched, so it is not used as a data vintage.</li>
+                <li><strong>The monthly series is synthetic.</strong> Dates ({{ site.data_period_display }}) and the month-to-month shape were generated to exercise the trend and seasonality views; the totals match the original sample rows. A file&rsquo;s modification timestamp moves whenever the file is touched, so it is not used as a data vintage.</li>
                 <li><strong>Rows marked <span class="badge-est">est</span> are modelled, not reported.</strong> {{ stats.estimated_diseases|join(', ') }} are reconstructed for every state as a share of that state&rsquo;s dataset total, with a fixed per-state variation so the values are not copy-pasted across states.</li>
                 <li><strong>District coverage varies widely</strong> &mdash; a large state may show many reporting districts while a small one shows only a few.</li>
                 <li><strong>Reference data is separate from surveillance data.</strong> Populations ({{ site.population_vintage }}) and district counts ({{ site.district_vintage }}) are public reference figures, used only to normalise counts &mdash; for example to rank states by cases per lakh.</li>
@@ -193,7 +193,7 @@
     <div class="faq">
         <details>
             <summary>Is this live, real-time data?</summary>
-            <div class="faq-body"><p>{% if site.is_demo %}No. Case counts come from a <strong>sample dataset</strong> used for interface testing &mdash; they are not official surveillance figures, and there is no reporting period.{% else %}Data refreshes only when the dataset file is updated; it is not a live feed.{% endif %} The disease library is updated separately (last: {{ site.library_updated or 'date not available' }}).</p></div>
+            <div class="faq-body"><p>{% if site.is_demo %}No. Case counts come from a <strong>sample dataset</strong> used for interface testing &mdash; they are not official surveillance figures. The {{ site.data_period_display }} monthly series is generated for the demo.{% else %}Data refreshes only when the dataset file is updated; it is not a live feed.{% endif %} The disease library is updated separately (last: {{ site.library_updated or 'date not available' }}).</p></div>
         </details>
         <details>
             <summary>Can I use it for medical advice?</summary>

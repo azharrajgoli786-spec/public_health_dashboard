@@ -4,6 +4,7 @@
 {% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>{% endblock %}
 {% block main_class %}home-main{% endblock %}
 {% block content %}
+{% from "_provenance.html" import provenance with context %}
 
 <!-- ============ HERO ============ -->
 <section class="hero" aria-labelledby="pageTitle">
@@ -43,12 +44,11 @@
                     <span class="snap-note">{{ stats.total_districts }} districts reporting</span>
                 </li>
                 <li>
-                    <span class="snap-label">{% if site.is_demo %}Sample dataset{% else %}Reporting period{% endif %}</span>
-                    <span class="snap-value">
-                        {% if site.is_demo %}No reporting period{% else %}{{ site.data_period_display }}{% endif %}
-                        {% if site.is_demo %}<span class="demo-tag demo-tag-sm">Demo data</span>{% endif %}
+                    <span class="snap-label">Reporting period</span>
+                    <span class="snap-value">{{ site.data_period_display }}
+                        {% if site.is_demo %}<span class="demo-tag demo-tag-sm">Sample</span>{% endif %}
                     </span>
-                    <span class="snap-note">{% if site.is_demo %}Demo figures only &mdash; not a reporting period{% else %}{{ stats.source_label }} dataset{% endif %}</span>
+                    <span class="snap-note">{{ site.period_count }} months &middot; latest {{ site.latest_period_display or site.data_period_display }}</span>
                 </li>
             </ul>
         </aside>
@@ -137,12 +137,12 @@
         </article>
         <article class="stat">
             <span class="stat-icon green" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
             </span>
             <div class="stat-body">
-                <div class="stat-value">{{ stats.total_cases }}</div>
-                <div class="stat-label">Reported cases</div>
-                <p class="stat-note">Sum across all states</p>
+                <div class="stat-value">{{ site.latest_period_display or '—' }}</div>
+                <div class="stat-label">Latest period</div>
+                <p class="stat-note">{{ site.period_count }}-month series &middot; totals shown per disease</p>
             </div>
         </article>
     </div>
@@ -172,6 +172,7 @@
             </div>
             <p class="legend-note" id="glanceNote">Top {{ home_data.chart_states|length }} states of {{ stats.total_states }}, by reported cases.</p>
             <noscript><p class="muted">The chart needs JavaScript. The full ranked list is on the <a href="/analytics">analytics page</a>.</p></noscript>
+            {{ provenance() }}
         </div>
         <div class="card glance-list">
             <div class="glance-head">
@@ -190,6 +191,7 @@
                 {% endfor %}
             </ul>
             <p class="muted small-note">Dataset case counts only &mdash; reporting volume. Switch the chart to <strong>cases per lakh</strong> for a population-adjusted state ranking.</p>
+            {{ provenance('Per-disease totals; no all-disease grand total.') }}
         </div>
     </div>
 </section>
@@ -234,8 +236,8 @@
         <div class="fresh-item">
             <span class="dot" aria-hidden="true"></span>
             <div>
-                <strong>{% if site.is_demo %}Sample dataset &mdash; no reporting period{% else %}Surveillance data: {{ site.data_period_display }}{% endif %}</strong>
-                <span>Source: {{ stats.source_label }} &mdash; {{ stats.source_detail }}{% if site.is_demo %} (demo figures, not a reporting period){% endif %}</span>
+                <strong>{% if site.is_demo %}Sample dataset{% else %}Surveillance data{% endif %}: {{ site.data_period_display }}</strong>
+                <span>Source: {{ stats.source_label }} &mdash; {{ stats.source_detail }} &middot; latest {{ site.latest_period_display or site.data_period_display }}</span>
             </div>
         </div>
         <div class="fresh-item">
