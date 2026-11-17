@@ -1804,3 +1804,23 @@ button.tile {
   font-size: 0.85rem;
 }
 .an-note.an-note-warn strong { color: #B42318; }
+
+/* Compact export pill: deliberately smaller than the 44px action buttons
+   and visually distinct (green stadium shape) so "Download CSV" reads as
+   its own action next to Apply / the filter selects. */
+.button.dl {
+  min-height: 36px;
+  padding: 0.4rem 0.95rem;
+  gap: 0.4rem;
+  border-radius: 999px;
+  background: #ECFDF5;
+  border: 1px solid #34D399;
+  color: #047857;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  flex: none;
+}
+.button.dl svg { width: 15px; height: 15px; }
+.button.dl:hover { background: #D1FAE5; border-color: #10B981; color: #065F46; }
+.filter-grid .field-action .button.dl { width: auto; }

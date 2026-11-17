@@ -57,7 +57,7 @@
         </div>
         {% endif %}
         <div class="field field-action">
-            <button type="submit" class="button" {% if match_count == 0 %}disabled aria-describedby="noRowsNote"{% endif %}>
+            <button type="submit" class="button dl" {% if match_count == 0 %}disabled aria-describedby="noRowsNote"{% endif %}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
                 Download CSV ({{ '{:,}'.format(match_count) }} rows)
             </button>
