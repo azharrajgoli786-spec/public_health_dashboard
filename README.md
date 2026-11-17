@@ -15,6 +15,8 @@ A dashboard for analyzing and visualizing public health data.
 - Disease and location finder (`/find`) returning dataset rows plus the matching health guide
 - Disease library: landing page with a search bar, category dropdown, a **Popular diseases** strip, a **Browse by category** grid, and the full A&ndash;Z indexed library — each condition shown with a pastel category icon
 - States page: region filter, sort (including population-adjusted), in-table search, **server-side pagination**, CSV export, and a schematic tile map shaded by reported cases
+- Heat map page (`/map`): schematic India tile map with a **Reported cases / Cases per lakh** toggle, five-bucket shading and a click-through detail panel (population, district coverage, top diseases, links into States/Analytics/Find); metric and selected state live in the URL
+- Data & downloads page (`/data`): server-rendered **filtered CSV export** (state, disease, month range) with a matching row count, a **data dictionary** for every CSV column and derived field, **sources** and the full **methodology** — no page JavaScript
 - Global search box in the top bar for diseases, states and districts
 - Health data visualization
 - Data analysis

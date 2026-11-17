@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% block title %}Data &amp; downloads — Public Health Dashboard{% endblock %}
+{% block meta %}Download the project dataset as a filtered CSV, plus the data dictionary, sources and methodology behind every figure.{% endblock %}
+{% block content %}
+{% from "_provenance.html" import provenance with context %}
+
+<!-- ============ HEADER ============ -->
+<section class="an-head" aria-labelledby="pageTitle">
+    <h1 id="pageTitle">Data &amp; downloads</h1>
+    <p>Export the dataset behind the dashboard, and see exactly what each field means, where the numbers come from and how they are computed.</p>
+</section>
+
+<!-- ============ DOWNLOAD ============ -->
+<section class="card an-card" aria-labelledby="dlTitle">
+    <div class="an-card-head">
+        <h2 id="dlTitle">Download the dataset</h2>
+        <span class="an-card-note" role="status">{{ '{:,}'.format(match_count) }} of {{ '{:,}'.format(total_count) }} rows match</span>
+    </div>
+    <form class="filter-grid" method="get" action="/data.csv"
+          aria-label="Filter the CSV export by state, disease and month">
+        <div class="field">
+            <label class="field-label" for="dataState">State / UT</label>
+            <select class="input" id="dataState" name="state">
+                <option value="">All states &amp; UTs</option>
+                {% for s in states %}
+                <option value="{{ s }}" {% if s == state %}selected{% endif %}>{{ s }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label class="field-label" for="dataDisease">Disease</label>
+            <select class="input" id="dataDisease" name="disease">
+                <option value="">All diseases</option>
+                {% for d in diseases %}
+                <option value="{{ d }}" {% if d == disease %}selected{% endif %}>{{ d }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% if periods %}
+        <div class="field">
+            <label class="field-label" for="dataFrom">From month</label>
+            <select class="input" id="dataFrom" name="from">
+                <option value="">Earliest ({{ periods[0] }})</option>
+                {% for p in periods %}
+                <option value="{{ p }}" {% if p == date_from %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="field">
+            <label class="field-label" for="dataTo">To month</label>
+            <select class="input" id="dataTo" name="to">
+                <option value="">Latest ({{ periods[-1] }})</option>
+                {% for p in periods %}
+                <option value="{{ p }}" {% if p == date_to %}selected{% endif %}>{{ p }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+        <div class="field field-action">
+            <button type="submit" class="button">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
+                Download CSV ({{ '{:,}'.format(match_count) }} rows)
+            </button>
+        </div>
+    </form>
+    <p class="an-note">
+        {% if state or disease or date_from or date_to %}
+        Active filter:
+        {% if state %}<strong>{{ state }}</strong>{% endif %}
+        {% if disease %}{% if state %} &middot; {% endif %}<strong>{{ disease }}</strong>{% endif %}
+        {% if date_from or date_to %}{% if state or disease %} &middot; {% endif %}<strong>{{ date_from or 'earliest' }} to {{ date_to or 'latest' }}</strong>{% endif %}
+        &mdash; the export contains these {{ '{:,}'.format(match_count) }} rows.
+        {% else %}
+        No filter: the export contains the full file ({{ '{:,}'.format(total_count) }} rows). Column meanings are in the dictionary below.
+        {% endif %}
+        Also available: the <a href="/states.csv">state summary CSV</a> (aggregated per state, with per-lakh and coverage columns).
+    </p>
+    {{ provenance('Export is the project CSV file itself; filters are applied server-side.') }}
+</section>
+
+<!-- ============ DATA DICTIONARY ============ -->
+<section class="card an-card" aria-labelledby="dictTitle">
+    <div class="an-card-head">
+        <h2 id="dictTitle">Data dictionary</h2>
+    </div>
+
+    <h3 class="dict-heading">CSV columns</h3>
+    <div class="table-wrap">
+        <table class="mini-table">
+            <thead>
+                <tr><th scope="col">Column</th><th scope="col">Type</th><th scope="col">Description</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">date</th><td>YYYY-MM</td>
+                    <td>Month the cases were reported. The dashboard's reporting period is the range of these values; rows without a usable date contribute to totals only.</td>
+                </tr>
+                <tr>
+                    <th scope="row">state</th><td>text</td>
+                    <td>State or union territory, as named in the dataset.</td>
+                </tr>
+                <tr>
+                    <th scope="row">district</th><td>text</td>
+                    <td>District within that state &mdash; the reporting unit.</td>
+                </tr>
+                <tr>
+                    <th scope="row">disease</th><td>text</td>
+                    <td>Surveillance condition, e.g. Dengue, Typhoid, Cholera.</td>
+                </tr>
+                <tr>
+                    <th scope="row">cases</th><td>integer</td>
+                    <td>Reported cases for that state&ndash;district&ndash;disease&ndash;month.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="dict-heading">Derived fields (computed by the dashboard)</h3>
+    <div class="table-wrap">
+        <table class="mini-table">
+            <thead>
+                <tr><th scope="col">Field</th><th scope="col">Where</th><th scope="col">How it is computed</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">Reported cases</th><td>Every page</td>
+                    <td>Sum of rows per state or district, plus modelled legacy rows (marked <span class="badge-est">est</span>). A measure of reporting volume, not severity.</td>
+                </tr>
+                <tr>
+                    <th scope="row">Cases per lakh</th><td>Home, States, Map</td>
+                    <td>Reported cases &divide; population &times; 100,000, using the reference population below. Never used to restate counts.</td>
+                </tr>
+                <tr>
+                    <th scope="row">Districts reporting / coverage</th><td>States, detail panels</td>
+                    <td>Districts present in the dataset &divide; approximate district total for the state.</td>
+                </tr>
+                <tr>
+                    <th scope="row">Region</th><td>States filter</td>
+                    <td>Curated zone (Northern, Western, Central, Eastern, Southern, North-Eastern) mapped from state names.</td>
+                </tr>
+                <tr>
+                    <th scope="row">Monthly series</th><td>Analytics, Seasonal, Alerts</td>
+                    <td>Rows grouped by <code>date</code>; modelled legacy totals are spread across months using that state's own reported shape.</td>
+                </tr>
+                <tr>
+                    <th scope="row">Map buckets</th><td>Map, States</td>
+                    <td>Five equal-width buckets from 1 (lightest) to 5 (darkest), scaled to the current maximum for the selected metric.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {{ provenance('Dictionary covers this export and the fields derived from it.') }}
+</section>
+
+<!-- ============ SOURCES ============ -->
+<section class="card an-card" aria-labelledby="srcTitle">
+    <div class="an-card-head">
+        <h2 id="srcTitle">Sources</h2>
+        <span class="an-card-note">{{ site.source_label }}</span>
+    </div>
+    <div class="source-grid">
+        <div class="source-card">
+            <b>Project dataset</b>
+            <small><code>india_disease_data_sample.csv</code> &mdash; {{ '{:,}'.format(total_count) }} rows, reporting period {{ site.data_period_display }}. {% if site.is_demo %}<strong>Demo figures for interface testing, not official surveillance data.</strong>{% else %}{{ site.source_detail }}.{% endif %}</small>
+        </div>
+        <div class="source-card">
+            <b>Reference population</b>
+            <small>Estimated resident population ({{ site.population_vintage }}) from geo_data.py, used only to normalise counts into cases per lakh.</small>
+        </div>
+        <div class="source-card">
+            <b>District counts</b>
+            <small>Approximate district totals per state ({{ site.district_vintage }}), used only for coverage figures that explain reporting breadth.</small>
+        </div>
+        <div class="source-card">
+            <b>Disease library</b>
+            <small>{{ library_count }} conditions in <code>diseases_data.py</code> &mdash; educational content only; it carries no case counts.</small>
+        </div>
+    </div>
+    <p class="an-note">
+        When a real IDSP outbreak file named <code>idsp_outbreak_data.csv</code> or <code>idsp_real_data.csv</code> sits next to <code>app.py</code>,
+        the dashboard switches to it automatically and the reporting year is read from the file. This export always covers the project CSV above.
+        File modification times appear only where labelled as file timestamps &mdash; they are never presented as a data vintage.
+    </p>
+    {{ provenance() }}
+</section>
+
+<!-- ============ METHODOLOGY ============ -->
+<section class="card an-card" aria-labelledby="methTitle">
+    <div class="an-card-head">
+        <h2 id="methTitle">Methodology</h2>
+    </div>
+    <ol class="method-list">
+        <li><strong>Ingestion.</strong> Rows are read from the CSV in the column order shown above. Exact duplicates (same state, district, disease, month and cases) are removed once; rows missing a state or district are dropped.</li>
+        <li><strong>Aggregation.</strong> Cases are summed per state and per district, and each state's disease list is derived from its rows. State totals are sorted A&ndash;Z, districts and diseases by cases descending.</li>
+        <li><strong>Modelled legacy rows.</strong> COVID-19, Influenza and Tuberculosis are absent from the sample file. Each is reconstructed per state as a fixed share of that state's CSV total (14% / 9% / 6%) scaled by a deterministic factor of 0.75&ndash;1.25 derived from a hash of the state and disease name, so values vary between states instead of being copy-pasted. Every such figure is badged <span class="badge-est">est</span> everywhere it appears.</li>
+        <li><strong>Monthly series.</strong> The <code>date</code> column builds the time series used by Analytics, Seasonal and Alerts. Modelled totals are spread across the months using that state's own reported shape, with a largest-remainder split so the months sum exactly to the modelled total.</li>
+        <li><strong>Population normalisation.</strong> Cases per lakh = cases &divide; population &times; 100,000. Population is public reference data used only for ranking and normalisation; raw counts are never restated.</li>
+        <li><strong>Coverage.</strong> District coverage = districts present in the dataset &divide; approximate district total, explaining why one state reports many more districts than another.</li>
+        <li><strong>Shading.</strong> Map and table buckets split the range into five equal-width steps up to the current maximum for the selected metric (reported cases or cases per lakh).</li>
+        <li><strong>Provenance rules.</strong> The reporting period comes from the data itself (the month range of the CSV, or the year of a real IDSP file). When a file carries no period, none is claimed &mdash; file modification times are shown only labelled as file timestamps.</li>
+    </ol>
+    {{ provenance('Methodology applies to every figure shown on the dashboard.') }}
+</section>
+
+<div class="notice">
+    <strong>How to read this:</strong> exported values are dataset case counts (CSV rows plus modelled legacy estimates marked <span class="badge-est">est</span>). They show reporting volume, not disease severity or population-adjusted burden.{% if site.is_demo %} <strong>This is sample data</strong> for interface testing, not official surveillance data.{% endif %}
+</div>
+
+{% endblock %}

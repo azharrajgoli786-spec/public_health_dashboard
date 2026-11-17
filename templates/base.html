@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>{% block title %}Public Health Dashboard{% endblock %}</title>
-    <link rel="stylesheet" href="/static/styles.css?v=13">
+    <link rel="stylesheet" href="/static/styles.css?v=14">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="{% block meta %}Disease surveillance and health information for India.{% endblock %}">
     {% block head %}{% endblock %}
@@ -21,8 +21,10 @@
                 <ul class="nav-links" id="primaryNav">
                     <li><a href="/" class="{% if active=='home' %}active{% endif %}" {% if active=='home' %}aria-current="page"{% endif %}>Home</a></li>
                     <li><a href="/states" class="{% if active=='states' %}active{% endif %}" {% if active=='states' %}aria-current="page"{% endif %}>States</a></li>
+                    <li><a href="/map" class="{% if active=='map' %}active{% endif %}" {% if active=='map' %}aria-current="page"{% endif %}>Map</a></li>
                     <li><a href="/diseases" class="{% if active=='diseases' %}active{% endif %}" {% if active=='diseases' %}aria-current="page"{% endif %}>Diseases</a></li>
                     <li><a href="/analytics" class="{% if active=='analytics' %}active{% endif %}" {% if active=='analytics' %}aria-current="page"{% endif %}>Analytics</a></li>
+                    <li><a href="/data" class="{% if active=='data' %}active{% endif %}" {% if active=='data' %}aria-current="page"{% endif %}>Data</a></li>
                     <li><a href="/live_search" class="{% if active=='search' %}active{% endif %}" {% if active=='search' %}aria-current="page"{% endif %}>Search</a></li>
                     <li><a href="/about" class="{% if active=='about' %}active{% endif %}" {% if active=='about' %}aria-current="page"{% endif %}>About</a></li>
                 </ul>
@@ -77,8 +79,10 @@
                 <h3>Explore</h3>
                 <ul>
                     <li><a href="/states">States table</a></li>
+                    <li><a href="/map">India heat map</a></li>
                     <li><a href="/diseases">Diseases library</a></li>
                     <li><a href="/analytics">Analytics</a></li>
+                    <li><a href="/data">Data &amp; downloads</a></li>
                     <li><a href="/about">About this project</a></li>
                 </ul>
             </div>

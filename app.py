@@ -704,6 +704,156 @@ def states():
     )
 
 
+# ---------------------------------------------------------------------------
+# Phase 3: /data (CSV export + dictionary) and /map (state heat map)
+# ---------------------------------------------------------------------------
+
+_RAW_ROWS = None
+
+
+def raw_rows():
+    """All rows of the project CSV, read once and cached.
+
+    The export page filters these in memory (the file is small), so a
+    download never re-parses the file and /data can show a matching row
+    count without a second pass.
+    """
+    global _RAW_ROWS
+    if _RAW_ROWS is None:
+        try:
+            with open(CSV_PATH, newline="", encoding="utf-8") as f:
+                _RAW_ROWS = list(csv.DictReader(f))
+        except OSError:
+            _RAW_ROWS = []
+    return _RAW_ROWS
+
+
+def filter_raw_rows(state="", disease="", date_from="", date_to=""):
+    """Rows of the project CSV matching the /data filters.
+
+    State and disease match case/space-insensitively; YYYY-MM month
+    strings compare correctly as plain strings.
+    """
+    ns, nd = normalize(state), normalize(disease)
+    out = []
+    for r in raw_rows():
+        if ns and ns != normalize(r.get("state")):
+            continue
+        if nd and nd != normalize(r.get("disease")):
+            continue
+        d = (r.get("date") or "").strip()
+        if date_from and (not d or d < date_from):
+            continue
+        if date_to and (not d or d > date_to):
+            continue
+        out.append(r)
+    return out
+
+
+@app.route("/data")
+def data_page():
+    """Dataset export page: filtered CSV download, dictionary, sources,
+    methodology. Rendered entirely server-side - no page JavaScript."""
+    state = (request.args.get("state") or "").strip()
+    disease = (request.args.get("disease") or "").strip()
+    date_from = (request.args.get("from") or "").strip()
+    date_to = (request.args.get("to") or "").strip()
+    return render_template(
+        "data.html", active="data", stats=get_stats(),
+        source=DATA_SOURCE,
+        states=sorted(v["display"] for v in health_data.values()),
+        diseases=sorted(_disease_totals()),
+        periods=list(TIME_SERIES["periods"]),
+        state=state, disease=disease,
+        date_from=date_from, date_to=date_to,
+        match_count=len(filter_raw_rows(state, disease, date_from, date_to)),
+        total_count=len(raw_rows()),
+        library_count=len(diseases_data.DISEASES),
+    )
+
+
+@app.route("/data.csv")
+def data_csv():
+    """CSV export of the project dataset, filtered by state, disease and
+    month range. Column order matches the source file."""
+    state = (request.args.get("state") or "").strip()
+    disease = (request.args.get("disease") or "").strip()
+    date_from = (request.args.get("from") or "").strip()
+    date_to = (request.args.get("to") or "").strip()
+    rows = filter_raw_rows(state, disease, date_from, date_to)
+    buf = io.StringIO()
+    w = csv.writer(buf, lineterminator="\n")
+    w.writerow(["date", "state", "district", "disease", "cases"])
+    for r in rows:
+        w.writerow([
+            (r.get("date") or "").strip(),
+            (r.get("state") or "").strip(),
+            (r.get("district") or "").strip(),
+            (r.get("disease") or "").strip(),
+            (r.get("cases") or "").strip(),
+        ])
+    resp = make_response(buf.getvalue())
+    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
+    resp.headers["Content-Disposition"] = (
+        'attachment; filename="public-health-data.csv"'
+    )
+    return resp
+
+
+def map_rows():
+    """State rows plus a shading bucket for each map metric.
+
+    Both metrics use five equal-width buckets from 1 (lightest) to
+    5 (darkest). States without a population figure fall into bucket 1
+    on the per-lakh metric and are labelled 'n/a'.
+    """
+    rows = get_state_rows()
+    max_cases = max((r["cases"] for r in rows), default=0)
+    per_lakh = [r["cases_per_lakh"] for r in rows if r["cases_per_lakh"] is not None]
+    max_pl = max(per_lakh, default=0)
+    for r in rows:
+        r["level"] = 1 + int(4 * (r["cases"] / max_cases)) if max_cases else 1
+        pl = r["cases_per_lakh"]
+        r["level_pl"] = (1 + int(4 * (pl / max_pl))) if (pl is not None and max_pl) else 1
+        r["isUT"] = geo_data.is_union_territory(r["key"])
+    return rows
+
+
+def map_payload(rows):
+    """Compact per-state data for the /map tiles and detail panel."""
+    out = {}
+    for r in rows:
+        out[r["key"]] = {
+            "display": r["display"],
+            "cases": r["cases"],
+            "perLakh": r["cases_per_lakh"],
+            "level": r["level"],
+            "levelPl": r["level_pl"],
+            "tile": list(r["tile"]),
+            "isUT": r["isUT"],
+            "region": r["region"],
+            "population": r["population"],
+            "districts": r["districts"],
+            "districtTotal": r["district_total"],
+            "coverage": r["coverage_pct"],
+            "top": [[d, c] for d, c in r["top_diseases"]],
+            "est": r["estimated_diseases"],
+        }
+    return out
+
+
+@app.route("/map")
+def map_page():
+    """India heat map: schematic tile grid shaded by reported cases or
+    cases per lakh, with a click-through detail panel."""
+    rows = map_rows()
+    return render_template(
+        "map.html", active="map", stats=get_stats(),
+        rows=rows, payload=map_payload(rows),
+        library_count=len(diseases_data.DISEASES),
+    )
+
+
 def get_home_data():
     """Aggregates used by the home page hero, chart and pick lists."""
     top_states = sorted(

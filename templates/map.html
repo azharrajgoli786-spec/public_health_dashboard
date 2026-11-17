@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block title %}India heat map — Public Health Dashboard{% endblock %}
+{% block meta %}Schematic heat map of Indian states and union territories, shaded by reported cases or cases per lakh, with click-through state detail.{% endblock %}
+{% block content %}
+{% from "_provenance.html" import provenance with context %}
+
+<!-- ============ HEADER ============ -->
+<section class="an-head" aria-labelledby="pageTitle">
+    <h1 id="pageTitle">India heat map</h1>
+    <p>All {{ stats.total_states }} states and union territories as a schematic tile map, shaded in five buckets. Toggle the metric, then click a tile to open that state&rsquo;s detail.</p>
+</section>
+
+<!-- ============ TOOLBAR ============ -->
+<div class="map-toolbar">
+    <div class="seg metric-toggle" role="group" aria-label="Shading metric">
+        <button type="button" class="seg-btn on" data-metric="cases" aria-pressed="true">Reported cases</button>
+        <button type="button" class="seg-btn" data-metric="perLakh" aria-pressed="false">Cases per lakh</button>
+    </div>
+    <span class="map-period">Reporting period: <strong>{{ site.data_period_display }}</strong></span>
+</div>
+
+<!-- ============ MAP + DETAIL ============ -->
+<div class="map-layout">
+    <section class="card map-card" aria-label="Tile map of India">
+        <div class="tile-map">
+            <p class="tile-map-note">Schematic tile map &mdash; each tile is one state or UT, positioned to loosely mirror India&rsquo;s geography. Positions are approximate, not to scale.</p>
+            <div class="tiles" id="mapTiles">
+                {% for r in rows %}
+                <button type="button" class="tile tile-{{ r.level }}" data-key="{{ r.key }}"
+                        style="--col: {{ r.tile[0] }}; --row: {{ r.tile[1] }}"
+                        aria-pressed="false"
+                        title="{{ r.display }} &middot; {{ '{:,}'.format(r.cases) }} cases">
+                    <span class="tile-name">{{ r.display }}</span>
+                    <span class="tile-cases">{{ '{:,}'.format(r.cases) }}</span>
+                </button>
+                {% endfor %}
+            </div>
+            <div class="tile-legend">
+                <span>Lower</span>
+                <span class="swatch s1"></span><span class="swatch s2"></span><span class="swatch s3"></span><span class="swatch s4"></span><span class="swatch s5"></span>
+                <span>Higher</span>
+                <span class="map-legend-metric" id="legendMetric">reported cases</span>
+            </div>
+            {{ provenance('Five equal-width buckets from the maximum of the selected metric.') }}
+        </div>
+    </section>
+
+    <aside class="card map-detail" id="mapDetail" aria-live="polite" aria-label="Selected state detail">
+        <p class="map-hint" id="mapHint">Select a state or union territory to see its detail here.</p>
+        <div id="mapDetailBody" hidden></div>
+    </aside>
+</div>
+
+<div class="notice">
+    <strong>How to read this:</strong> shading shows dataset case counts (CSV rows plus modelled legacy estimates marked <span class="badge-est">est</span>) or their population-adjusted rate &mdash; reporting volume, not disease severity. The tile grid is a schematic, not a geographic projection.{% if site.is_demo %} <strong>This is sample data</strong> for interface testing, not official surveillance data.{% endif %}
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script id="map-data" type="application/json">{{ payload | tojson }}</script>
+<script>
+(function () {
+    var data = {};
+    try { data = JSON.parse(document.getElementById('map-data').textContent); }
+    catch (e) { data = {}; }
+
+    var tilesBox = document.getElementById('mapTiles');
+    var hint = document.getElementById('mapHint');
+    var body = document.getElementById('mapDetailBody');
+    var legendMetric = document.getElementById('legendMetric');
+    var buttons = Array.prototype.slice.call(document.querySelectorAll('.metric-toggle .seg-btn'));
+    var tiles = Array.prototype.slice.call(tilesBox.querySelectorAll('.tile'));
+
+    var metric = 'cases';
+    var selected = '';
+
+    function number(n) {
+        return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    function perLakhText(v) {
+        return v == null ? 'n/a' : String(Math.round(v * 10) / 10);
+    }
+
+    function valueText(s) {
+        return metric === 'cases' ? number(s.cases) : perLakhText(s.perLakh);
+    }
+
+    // Re-shade every tile for the active metric; pure class/text swaps.
+    function paint() {
+        tiles.forEach(function (t) {
+            var s = data[t.dataset.key];
+            if (!s) return;
+            var lvl = metric === 'cases' ? s.level : s.levelPl;
+            t.className = 'tile tile-' + lvl + (selected === t.dataset.key ? ' sel' : '');
+            var v = t.querySelector('.tile-cases');
+            if (v) v.textContent = valueText(s);
+            t.title = s.display + ' \u00b7 ' + valueText(s) +
+                (metric === 'cases' ? ' reported cases' : ' cases per lakh');
+            t.setAttribute('aria-pressed', selected === t.dataset.key ? 'true' : 'false');
+        });
+        if (legendMetric) {
+            legendMetric.textContent = metric === 'cases' ? 'reported cases' : 'cases per lakh';
+        }
+        buttons.forEach(function (b) {
+            var on = b.dataset.metric === metric;
+            b.classList.toggle('on', on);
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+    }
+
+    function addStat(list, label, value) {
+        var li = document.createElement('li');
+        var k = document.createElement('span');
+        k.textContent = label;
+        var v = document.createElement('b');
+        v.textContent = value;
+        li.appendChild(k);
+        li.appendChild(v);
+        list.appendChild(li);
+    }
+
+    function openDetail(key) {
+        var s = data[key];
+        if (!s) return;
+        selected = key;
+        hint.hidden = true;
+        body.hidden = false;
+        body.innerHTML = '';
+
+        var head = document.createElement('div');
+        head.className = 'map-detail-head';
+        var h = document.createElement('h2');
+        h.appendChild(document.createTextNode(s.display));
+        if (s.isUT) {
+            var ut = document.createElement('span');
+            ut.className = 'an-ut';
+            ut.textContent = 'UT';
+            h.appendChild(ut);
+        }
+        var close = document.createElement('button');
+        close.type = 'button';
+        close.className = 'map-detail-close';
+        close.setAttribute('aria-label', 'Close state detail');
+        close.textContent = '\u00d7';
+        close.addEventListener('click', closeDetail);
+        head.appendChild(h);
+        head.appendChild(close);
+        body.appendChild(head);
+
+        var stats = document.createElement('ul');
+        stats.className = 'map-stats';
+        addStat(stats, 'Reported cases', number(s.cases));
+        addStat(stats, 'Cases per lakh', perLakhText(s.perLakh));
+        addStat(stats, 'Population', s.population != null ? number(s.population) : 'n/a');
+        var cov = s.coverage != null ? ' (' + Math.round(s.coverage) + '%)' : '';
+        addStat(stats, 'Districts reporting',
+                number(s.districts) + ' of ' + number(s.districtTotal) + cov);
+        addStat(stats, 'Region', s.region);
+        body.appendChild(stats);
+
+        if (s.top && s.top.length) {
+            var h3 = document.createElement('h3');
+            h3.className = 'map-sub';
+            h3.textContent = 'Top diseases';
+            body.appendChild(h3);
+            var ul = document.createElement('ul');
+            ul.className = 'map-top';
+            s.top.forEach(function (pair) {
+                var li = document.createElement('li');
+                var nm = document.createElement('span');
+                nm.appendChild(document.createTextNode(pair[0]));
+                if ((s.est || []).indexOf(pair[0]) !== -1) {
+                    var est = document.createElement('span');
+                    est.className = 'badge-est';
+                    est.title = 'Modelled estimate, not a reported row';
+                    est.textContent = 'est';
+                    nm.appendChild(est);
+                }
+                var vv = document.createElement('b');
+                vv.textContent = number(pair[1]);
+                li.appendChild(nm);
+                li.appendChild(vv);
+                ul.appendChild(li);
+            });
+            body.appendChild(ul);
+        }
+
+        var links = document.createElement('div');
+        links.className = 'map-links';
+        [['States table', '/states?q='],
+         ['Analytics', '/analytics?state='],
+         ['Find', '/find?place=']].forEach(function (pair) {
+            var a = document.createElement('a');
+            a.className = 'chip';
+            a.href = pair[1] + encodeURIComponent(s.display);
+            a.textContent = pair[0];
+            links.appendChild(a);
+        });
+        body.appendChild(links);
+
+        paint();
+        syncUrl();
+    }
+
+    function closeDetail() {
+        selected = '';
+        hint.hidden = false;
+        body.hidden = true;
+        body.innerHTML = '';
+        paint();
+        syncUrl();
+    }
+
+    // Keep the URL in step so a view can be bookmarked or shared.
+    function syncUrl() {
+        try {
+            var url = new URL(window.location.href);
+            if (metric !== 'cases') url.searchParams.set('metric', metric);
+            else url.searchParams.delete('metric');
+            if (selected) url.searchParams.set('state', selected);
+            else url.searchParams.delete('state');
+            history.replaceState(null, '', url.toString());
+        } catch (e) { /* history is optional */ }
+    }
+
+    tiles.forEach(function (t) {
+        t.addEventListener('click', function () { openDetail(t.dataset.key); });
+    });
+    buttons.forEach(function (b) {
+        b.addEventListener('click', function () {
+            metric = b.dataset.metric === 'perLakh' ? 'perLakh' : 'cases';
+            paint();
+            syncUrl();
+        });
+    });
+    document.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Escape' && selected) closeDetail();
+    });
+
+    // Apply any metric or state given in the URL.
+    (function initFromUrl() {
+        var params = new URLSearchParams(window.location.search);
+        var m = params.get('metric');
+        if (m === 'perLakh' || m === 'per-lakh') metric = 'perLakh';
+        paint();
+        var st = params.get('state');
+        if (st && data[st]) openDetail(st);
+    })();
+})();
+</script>
+{% endblock %}

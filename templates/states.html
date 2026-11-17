@@ -250,10 +250,10 @@
 
         <!-- Tile map (schematic, not a geographic projection) -->
         <div class="tile-map" id="tileMap" {% if view != 'map' %}hidden{% endif %}>
-            <p class="tile-map-note">Schematic tile map — each tile is one state or UT, shaded by reported cases. Positions are approximate, not to scale. Faded tiles fall outside the current filter.</p>
+            <p class="tile-map-note">Schematic tile map — each tile is one state or UT, shaded by reported cases. Positions are approximate, not to scale. Faded tiles fall outside the current filter. <a href="/map">Open the full heat map &rarr;</a></p>
             <div class="tiles" id="tiles">
                 {% for r in all_rows %}
-                <a class="tile tile-{{ r.level }} {% if r.dimmed %}dim{% endif %}" href="{{ tile_urls[r.key] }}" data-name="{{ r.display|lower }}" title="{{ r.display }} &middot; {{ r.cases }} cases"><span class="tile-name">{{ r.display }}</span><span class="tile-cases">{{ r.cases }}</span></a>
+                <a class="tile tile-{{ r.level }} {% if r.dimmed %}dim{% endif %}" href="{{ tile_urls[r.key] }}" style="--col: {{ r.tile[0] }}; --row: {{ r.tile[1] }}" data-name="{{ r.display|lower }}" title="{{ r.display }} &middot; {{ r.cases }} cases"><span class="tile-name">{{ r.display }}</span><span class="tile-cases">{{ r.cases }}</span></a>
                 {% endfor %}
             </div>
             <div class="tile-legend" aria-hidden="true">
