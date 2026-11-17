@@ -955,6 +955,11 @@ def analytics_payload():
         # "disease|stateKey" -> {period: cases}, for state+ disease trends.
         "diseaseState": {"%s|%s" % dk: dict(months)
                          for dk, months in ts["disease_state"].items()},
+        # Modelled (not reported) diseases, so the tabs can badge them "est".
+        "estimatedDiseases": sorted({
+            d for v in health_data.values()
+            for d in (v.get("estimated_diseases") or [])
+        }),
     }
 
 

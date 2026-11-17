@@ -19,7 +19,7 @@ A dashboard for analyzing and visualizing public health data.
 - Health data visualization
 - Data analysis
 - Interactive dashboard
-- Analytics page: KPI tiles, a clearly-labelled **sample trend**, a **cases by state & UT** bar ranking with `UT` badges, a **disease distribution** donut, and a **districts** panel for the selected state. Filters are reflected in the URL, so a view can be bookmarked or shared
+- Analytics page: KPI tiles plus four tabs — **Trends** (line chart over time per disease/state, a **cases by state & UT** bar ranking with `UT` badges, a **disease distribution** donut and a **districts** panel), **Compare** (two states or two diseases side by side, with an overlaid monthly line), **Seasonal** (share of cases by calendar month, peak month highlighted, plus a peak-month table per disease) and **Alerts** (flags when cases jump ≥25% vs the previous period — `Surge` ≥50%, `Rise` ≥25%, `Eased` for declines). Filters, tab and compare picks are reflected in the URL, so a view can be bookmarked or shared
 
 ### Library metadata
 

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Health analytics — Public Health Dashboard{% endblock %}
-{% block meta %}Reported cases across every Indian state and union territory, with KPI totals, a state ranking, disease mix and district detail.{% endblock %}
+{% block meta %}Reported cases across every Indian state and union territory: trend, compare, seasonal and alert views with KPI totals, a state ranking, disease mix and district detail.{% endblock %}
 {% block head %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>{% endblock %}
 {% block content %}
 {% from "_provenance.html" import provenance with context %}
@@ -8,7 +8,7 @@
 <!-- ============ HEADER ============ -->
 <section class="an-head" aria-labelledby="pageTitle">
     <h1 id="pageTitle">Health analytics</h1>
-    <p>Reported cases across all {{ stats.total_states }} states and union territories, with district detail.</p>
+    <p>Reported cases across all {{ stats.total_states }} states and union territories, with district detail. Four views: <strong>Trends</strong>, <strong>Compare</strong>, <strong>Seasonal</strong> and <strong>Alerts</strong>.</p>
 </section>
 
 <!-- ============ CONTROLS ============ -->
@@ -57,6 +57,25 @@
     </article>
 </div>
 
+<!-- ============ TABS ============ -->
+<div class="an-tabs" role="tablist" aria-label="Analytics views">
+    <button type="button" class="an-tab" role="tab" id="tab-trends"
+            aria-controls="panel-trends" aria-selected="true" tabindex="0"
+            data-tab="trends">Trends</button>
+    <button type="button" class="an-tab" role="tab" id="tab-compare"
+            aria-controls="panel-compare" aria-selected="false" tabindex="-1"
+            data-tab="compare">Compare</button>
+    <button type="button" class="an-tab" role="tab" id="tab-seasonal"
+            aria-controls="panel-seasonal" aria-selected="false" tabindex="-1"
+            data-tab="seasonal">Seasonal</button>
+    <button type="button" class="an-tab" role="tab" id="tab-alerts"
+            aria-controls="panel-alerts" aria-selected="false" tabindex="-1"
+            data-tab="alerts">Alerts</button>
+</div>
+
+<!-- ============ PANEL: TRENDS ============ -->
+<div class="an-panel" id="panel-trends" role="tabpanel" aria-labelledby="tab-trends">
+
 <!-- ============ TREND ============ -->
 <section class="card an-card" aria-labelledby="trendTitle">
     <div class="an-card-head">
@@ -101,6 +120,64 @@
     {{ provenance() }}
 </section>
 
+</div><!-- /panel-trends -->
+
+<!-- ============ PANEL: COMPARE ============ -->
+<div class="an-panel" id="panel-compare" role="tabpanel" aria-labelledby="tab-compare" hidden>
+    <section class="card an-card" aria-labelledby="cmpTitle">
+        <div class="an-card-head">
+            <h2 id="cmpTitle">Compare side by side</h2>
+            <span class="an-card-note" id="cmpScope"></span>
+        </div>
+        <div class="an-cmp-controls">
+            <div class="seg an-cmp-modes" role="group" aria-label="What to compare">
+                <button type="button" class="seg-btn on" data-mode="states" aria-pressed="true">States</button>
+                <button type="button" class="seg-btn" data-mode="diseases" aria-pressed="false">Diseases</button>
+            </div>
+            <div class="field">
+                <label class="sr-only" for="cmpA">First item</label>
+                <select class="input" id="cmpA"></select>
+            </div>
+            <div class="field">
+                <label class="sr-only" for="cmpB">Second item</label>
+                <select class="input" id="cmpB"></select>
+            </div>
+        </div>
+        <p class="an-cmp-summary" id="cmpSummary"></p>
+        <div class="an-cmp-grid" id="cmpCols"></div>
+        <div class="chart-wrap an-trend"><canvas id="cmpChart" role="img" aria-label="Monthly reported cases for the two selected items"></canvas></div>
+        <p class="an-note" id="cmpNote"></p>
+        {{ provenance('Monthly lines come from the same dated series as the Trends tab.') }}
+    </section>
+</div>
+
+<!-- ============ PANEL: SEASONAL ============ -->
+<div class="an-panel" id="panel-seasonal" role="tabpanel" aria-labelledby="tab-seasonal" hidden>
+    <section class="card an-card" aria-labelledby="seasonTitle">
+        <div class="an-card-head">
+            <h2 id="seasonTitle">Seasonal pattern &mdash; peak months</h2>
+            <span class="an-badge">Sample data</span>
+        </div>
+        <div class="chart-wrap an-season"><canvas id="seasonChart" role="img" aria-label="Share of cases by calendar month"></canvas></div>
+        <p class="an-note" id="seasonNote"></p>
+        <div class="table-wrap" id="seasonTable"></div>
+        {{ provenance('Calendar-month shares are summed across every year in the series; est rows are modelled.') }}
+    </section>
+</div>
+
+<!-- ============ PANEL: ALERTS ============ -->
+<div class="an-panel" id="panel-alerts" role="tabpanel" aria-labelledby="tab-alerts" hidden>
+    <section class="card an-card" aria-labelledby="alertsTitle">
+        <div class="an-card-head">
+            <h2 id="alertsTitle">Alerts &mdash; period-over-period jumps</h2>
+            <span class="an-card-note" id="alertsSummary"></span>
+        </div>
+        <div id="alertsBox" class="an-alerts"></div>
+        <p class="an-note" id="alertsNote"></p>
+        {{ provenance('Flags compare the latest month with the month before it in the series.') }}
+    </section>
+</div>
+
 <div class="notice">
     <strong>How to read this:</strong> values are dataset case counts (CSV rows plus modelled legacy surveillance estimates marked <span class="badge-est">est</span>). They show reporting volume, not disease severity or population-adjusted burden.{% if site.is_demo %} <strong>This is sample data</strong> for interface testing, not official surveillance data.{% endif %}
 </div>
@@ -135,6 +212,34 @@
     var districtsBox = document.getElementById('districtsBox');
     var districtsNote = document.getElementById('districtsNote');
     var trendNote = document.getElementById('trendNote');
+
+    // ---- Phase 2: tabs + compare / seasonal / alerts ----------------------
+    var tabButtons = Array.prototype.slice.call(document.querySelectorAll('.an-tab'));
+    var panels = {
+        trends: document.getElementById('panel-trends'),
+        compare: document.getElementById('panel-compare'),
+        seasonal: document.getElementById('panel-seasonal'),
+        alerts: document.getElementById('panel-alerts')
+    };
+    var activeTab = 'trends';
+    var selCmpA = document.getElementById('cmpA');
+    var selCmpB = document.getElementById('cmpB');
+    var cmpSummary = document.getElementById('cmpSummary');
+    var cmpCols = document.getElementById('cmpCols');
+    var cmpNote = document.getElementById('cmpNote');
+    var cmpScope = document.getElementById('cmpScope');
+    var seasonNote = document.getElementById('seasonNote');
+    var seasonTable = document.getElementById('seasonTable');
+    var alertsBox = document.getElementById('alertsBox');
+    var alertsSummary = document.getElementById('alertsSummary');
+    var alertsNote = document.getElementById('alertsNote');
+    var cmpMode = 'states';
+    var cmpChart = null;
+    var seasonChart = null;
+    // Modelled (not reported) diseases, badged "est" wherever they appear.
+    var estDiseases = data.estimatedDiseases || [];
+    var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
     // Palette for the disease donut, in the order diseases are listed.
     var PALETTE = ['#2563EB', '#0EA5E9', '#14B8A6', '#F59E0B', '#8B5CF6',
@@ -268,6 +373,8 @@
         renderDistricts(states, disease);
         renderTrend(disease);
         renderDonut(diseaseTotals, total);
+        // The active secondary tab re-reads the shared filters too.
+        renderActivePanel();
     }
 
     // ---- Districts card --------------------------------------------------
@@ -306,24 +413,26 @@
         districtsBox.appendChild(wrap);
     }
 
-    // ---- Monthly trend (real dates from the dataset) ---------------------
-    function renderTrend(disease) {
-        var periods = data.periods || [];
-        var stateKey = '';
-        if (selState.value) {
-            var picked = data.states.filter(function (s) { return s.display === selState.value; });
-            stateKey = picked.length ? picked[0].key : '';
-        }
+    // ---- Shared series helpers (trend / seasonal / alerts) ---------------
+    function periodList() { return data.periods || []; }
 
-        if (!periods.length) {
-            // Dataset without a date column: nothing honest to plot.
-            if (trendChart) { trendChart.destroy(); trendChart = null; }
-            trendNote.textContent = 'This dataset carries no date column, so no time trend is shown.';
-            return;
-        }
+    function stateKeyFor(name) {
+        if (!name) return '';
+        var picked = data.states.filter(function (s) { return s.display === name; });
+        return picked.length ? picked[0].key : '';
+    }
 
-        // One line per disease, filtered to the current selection. An
-        // all-disease total is deliberately never plotted as one line.
+    // '2026-10' -> 'Oct 2026' (mirrors the server's month label).
+    function monthLabel(period) {
+        var p = String(period);
+        var m = parseInt(p.slice(5, 7), 10);
+        if (!m || m < 1 || m > 12) return p;
+        return MONTHS[m - 1] + ' ' + p.slice(0, 4);
+    }
+
+    // One line per disease for the current state/disease filters. An
+    // all-disease total is deliberately never plotted as one line.
+    function seriesFor(disease, stateKey) {
         var lines = [];
         if (disease && stateKey) {
             var one = (data.diseaseState || {})[disease + '|' + stateKey];
@@ -343,6 +452,47 @@
             });
         }
         lines.sort(function (a, b) { return sum(b.values) - sum(a.values); });
+        return lines;
+    }
+
+    // Cases per calendar month (Jan..Dec) summed across every year, plus
+    // each month's share of the series total.
+    function monthShape(values, ps) {
+        var counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        (ps || periodList()).forEach(function (p) {
+            var m = parseInt(String(p).slice(5, 7), 10) - 1;
+            if (m >= 0 && m <= 11) counts[m] += values[p] || 0;
+        });
+        var total = 0;
+        counts.forEach(function (n) { total += n; });
+        return {
+            counts: counts,
+            total: total,
+            shares: counts.map(function (n) { return total ? (n * 100) / total : 0; })
+        };
+    }
+
+    function peakIndexOf(shares) {
+        var pk = 0;
+        shares.forEach(function (v, i) { if (v > shares[pk]) pk = i; });
+        return pk;
+    }
+
+    // ---- Monthly trend (real dates from the dataset) ---------------------
+    function renderTrend(disease) {
+        var periods = periodList();
+        var stateKey = stateKeyFor(selState.value);
+
+        if (!periods.length) {
+            // Dataset without a date column: nothing honest to plot.
+            if (trendChart) { trendChart.destroy(); trendChart = null; }
+            trendNote.textContent = 'This dataset carries no date column, so no time trend is shown.';
+            return;
+        }
+
+        // One line per disease, filtered to the current selection. An
+        // all-disease total is deliberately never plotted as one line.
+        var lines = seriesFor(disease, stateKey);
 
         var scope = selState.value || 'all states and UTs';
         trendNote.textContent = lines.length + (lines.length === 1 ? ' series' : ' series') +
@@ -447,6 +597,547 @@
         try { distChart = new window.Chart(canvas, config); } catch (e) { /* decorative */ }
     }
 
+    // ---- Seasonal: share of cases by calendar month ----------------------
+    function renderSeasonal() {
+        if (seasonChart) { seasonChart.destroy(); seasonChart = null; }
+        seasonTable.innerHTML = '';
+        var ps = periodList();
+        if (!ps.length) {
+            seasonNote.textContent = 'This dataset carries no date column, so no seasonal pattern can be computed.';
+            return;
+        }
+
+        var disease = selDisease.value;
+        var stateKey = stateKeyFor(selState.value);
+        var shapes = seriesFor(disease, stateKey).map(function (l) {
+            return { name: l.name, shape: monthShape(l.values, ps) };
+        }).filter(function (s) { return s.shape.total > 0; });
+        if (!shapes.length) {
+            seasonNote.textContent = 'No cases in the current selection.';
+            return;
+        }
+
+        var bars, counts, scopeLabel;
+        if (shapes.length === 1) {
+            // One disease selected: its own raw seasonal shape.
+            bars = shapes[0].shape.shares;
+            counts = shapes[0].shape.counts;
+            scopeLabel = shapes[0].name + (selState.value ? ' in ' + selState.value : ' across all states and UTs');
+        } else {
+            // Average of each disease's own shares, so no all-disease grand
+            // total is ever computed or shown.
+            counts = null;
+            bars = MONTHS.map(function (_, m) {
+                var t = 0;
+                shapes.forEach(function (s) { t += s.shape.shares[m]; });
+                return t / shapes.length;
+            });
+            scopeLabel = 'average seasonal shape across ' + shapes.length + ' diseases' +
+                (selState.value ? ' in ' + selState.value : '');
+        }
+        var peak = peakIndexOf(bars);
+
+        // How many years the series covers, per calendar month.
+        var obs = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        ps.forEach(function (p) {
+            var m = parseInt(String(p).slice(5, 7), 10) - 1;
+            if (m >= 0 && m <= 11) obs[m] += 1;
+        });
+        var obsMin = Math.min.apply(null, obs);
+        var obsMax = Math.max.apply(null, obs);
+        var obsLabel = obsMin === obsMax
+            ? obsMin + (obsMin === 1 ? ' observation' : ' observations') + ' per calendar month'
+            : obsMin + '-' + obsMax + ' observations per calendar month';
+
+        seasonNote.textContent = scopeLabel + ': peak month ' + MONTHS[peak] + ' (' +
+            bars[peak].toFixed(1) + '% of cases' +
+            (counts ? ', ' + number(counts[peak]) + ' cases' : '') + '). ' +
+            "Shares are each disease's own cases by calendar month, " + obsLabel + '.';
+
+        var canvas = document.getElementById('seasonChart');
+        if (typeof window.Chart !== 'undefined' && canvas) {
+            var config = {
+                type: 'bar',
+                data: {
+                    labels: MONTHS,
+                    datasets: [{
+                        label: 'Share of cases',
+                        data: bars.map(function (v) { return Math.round(v * 10) / 10; }),
+                        backgroundColor: bars.map(function (_, i) {
+                            return i === peak ? '#2563EB' : '#BFDBFE';
+                        }),
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    var t = ctx.parsed.y + '% of cases';
+                                    if (counts) t += ' (' + number(counts[ctx.dataIndex]) + ' cases)';
+                                    return t;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { font: { size: 11 } } },
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#EEF2F7' },
+                            ticks: { font: { size: 11 }, callback: function (v) { return v + '%'; } }
+                        }
+                    }
+                }
+            };
+            try { seasonChart = new window.Chart(canvas, config); } catch (e) { /* decorative */ }
+        }
+
+        // Peak month per disease, in the current scope.
+        var table = document.createElement('table');
+        table.className = 'mini-table';
+        var thead = document.createElement('thead');
+        thead.innerHTML = '<tr><th scope="col">Disease</th><th scope="col" class="num">Peak month</th>' +
+            '<th scope="col" class="num">Cases that month</th><th scope="col" class="num">Share of total</th></tr>';
+        var tbody = document.createElement('tbody');
+        shapes.map(function (s) {
+            var pk = peakIndexOf(s.shape.shares);
+            return { name: s.name, peak: pk, cases: s.shape.counts[pk],
+                     share: s.shape.shares[pk], total: s.shape.total };
+        }).sort(function (a, b) { return b.total - a.total; }).forEach(function (r) {
+            var tr = document.createElement('tr');
+            var th = document.createElement('th');
+            th.scope = 'row';
+            th.appendChild(document.createTextNode(r.name));
+            if (estDiseases.indexOf(r.name) !== -1) {
+                th.appendChild(document.createTextNode(' '));
+                var est = document.createElement('span');
+                est.className = 'badge-est';
+                est.title = 'Modelled estimate, not a reported row';
+                est.textContent = 'est';
+                th.appendChild(est);
+            }
+            tr.appendChild(th);
+            [MONTHS[r.peak], number(r.cases), Math.round(r.share) + '%'].forEach(function (v) {
+                var td = document.createElement('td');
+                td.className = 'num';
+                td.textContent = v;
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+        table.appendChild(thead);
+        table.appendChild(tbody);
+        seasonTable.appendChild(table);
+    }
+
+    // ---- Alerts: latest period vs the one before it ----------------------
+    function renderAlerts() {
+        alertsBox.innerHTML = '';
+        var ps = periodList();
+        if (ps.length < 2) {
+            alertsSummary.textContent = '';
+            alertsNote.textContent = ps.length
+                ? 'At least two dated periods are needed for a period-over-period comparison.'
+                : 'This dataset carries no date column, so no period-over-period alerts can be computed.';
+            var m0 = document.createElement('p');
+            m0.className = 'an-empty';
+            m0.textContent = 'Nothing to flag yet.';
+            alertsBox.appendChild(m0);
+            return;
+        }
+        var latest = ps[ps.length - 1];
+        var prev = ps[ps.length - 2];
+        var disease = selDisease.value;
+        var stateKey = stateKeyFor(selState.value);
+        var MIN_DELTA = 5; // ignore wobble smaller than this many cases
+
+        // With a disease selected the stream is that disease across states;
+        // otherwise it is every disease (inside the selected state, if any).
+        var entities = [];
+        if (disease) {
+            data.states.forEach(function (s) {
+                if (stateKey && s.key !== stateKey) return;
+                var v = (data.diseaseState || {})[disease + '|' + s.key] || {};
+                entities.push({ name: s.display, latest: v[latest] || 0, prev: v[prev] || 0,
+                                est: estDiseases.indexOf(disease) !== -1 });
+            });
+        } else {
+            Object.keys(data.series || {}).forEach(function (name) {
+                var v = stateKey
+                    ? ((data.diseaseState || {})[name + '|' + stateKey] || {})
+                    : data.series[name];
+                entities.push({ name: name, latest: v[latest] || 0, prev: v[prev] || 0,
+                                est: estDiseases.indexOf(name) !== -1 });
+            });
+        }
+
+        var flagged = [];
+        var checked = 0;
+        entities.forEach(function (e) {
+            if (e.latest <= 0 && e.prev <= 0) return; // not in the dataset this period
+            checked++;
+            var delta = e.latest - e.prev;
+            if (Math.abs(delta) < MIN_DELTA) return;
+            var pct = e.prev > 0 ? (delta / e.prev) * 100 : null; // null: from zero
+            var kind = null;
+            if (pct === null) kind = 'surge';              // 0 -> n cases
+            else if (pct >= 50) kind = 'surge';
+            else if (pct >= 25) kind = 'rise';
+            else if (pct <= -25) kind = 'eased';
+            if (!kind) return;
+            flagged.push({ name: e.name, est: e.est, latest: e.latest, prev: e.prev,
+                           delta: delta, pct: pct, kind: kind });
+        });
+        var order = { surge: 0, rise: 1, eased: 2 };
+        flagged.sort(function (a, b) {
+            return order[a.kind] - order[b.kind] || Math.abs(b.delta) - Math.abs(a.delta);
+        });
+
+        alertsSummary.textContent = 'Comparing ' + monthLabel(latest) + ' vs ' +
+            monthLabel(prev) + ' \u00b7 ' + checked + ' series \u00b7 ' +
+            flagged.length + ' flagged';
+
+        var rule = 'A series is flagged when it moves at least 25% (50% or more counts as a surge) ' +
+            'and at least ' + MIN_DELTA + ' cases against the previous month; declines of 25% or more ' +
+            'are listed as eased. A simple threshold on sample data, not a forecast.';
+
+        if (!flagged.length) {
+            var empty = document.createElement('p');
+            empty.className = 'an-empty';
+            empty.textContent = 'No jumps of 25% or more between ' + monthLabel(prev) +
+                ' and ' + monthLabel(latest) + '.';
+            alertsBox.appendChild(empty);
+            alertsNote.textContent = rule;
+            return;
+        }
+
+        var KIND = {
+            surge: { label: 'Surge', cls: 'an-flag-surge' },
+            rise: { label: 'Rise', cls: 'an-flag-rise' },
+            eased: { label: 'Eased', cls: 'an-flag-eased' }
+        };
+        flagged.forEach(function (f) {
+            var row = document.createElement('div');
+            row.className = 'an-alert';
+
+            var name = document.createElement('span');
+            name.className = 'an-alert-name';
+            name.appendChild(document.createTextNode(f.name));
+            if (f.est) {
+                var est = document.createElement('span');
+                est.className = 'badge-est';
+                est.title = 'Modelled estimate, not a reported row';
+                est.textContent = 'est';
+                name.appendChild(est);
+            }
+
+            var vals = document.createElement('span');
+            vals.className = 'an-alert-vals';
+            vals.textContent = number(f.prev) + ' \u2192 ' + number(f.latest) +
+                ' (' + (f.delta > 0 ? '+' : '') + number(f.delta) +
+                (f.pct === null ? ', new' : ', ' + (f.pct > 0 ? '+' : '') + Math.round(f.pct) + '%') + ')';
+
+            var flag = document.createElement('span');
+            flag.className = 'an-alert-flag ' + KIND[f.kind].cls;
+            flag.textContent = KIND[f.kind].label;
+
+            row.appendChild(name);
+            row.appendChild(vals);
+            row.appendChild(flag);
+            alertsBox.appendChild(row);
+        });
+        alertsNote.textContent = 'Flags compare ' + monthLabel(latest) + ' with ' +
+            monthLabel(prev) + ': surges are jumps of 50% or more, rises 25-49%, eased declines of ' +
+            '25% or more \u2014 each at least ' + MIN_DELTA + ' cases. ' + rule;
+    }
+
+    // ---- Compare: two states or two diseases side by side ----------------
+    function cmpTotalFor(item) {
+        if (cmpMode === 'states') {
+            var s = data.states.filter(function (x) { return x.display === item; })[0];
+            if (!s) return 0;
+            return selDisease.value ? (s.diseases[selDisease.value] || 0) : s.cases;
+        }
+        var sk = stateKeyFor(selState.value);
+        var total = 0;
+        data.states.forEach(function (x) {
+            if (sk && x.key !== sk) return;
+            total += x.diseases[item] || 0;
+        });
+        return total;
+    }
+
+    function cmpSeriesFor(item) {
+        if (!periodList().length) return {};
+        if (cmpMode === 'states') {
+            var s = data.states.filter(function (x) { return x.display === item; })[0];
+            if (!s) return {};
+            return selDisease.value
+                ? ((data.diseaseState || {})[selDisease.value + '|' + s.key] || {})
+                : ((data.stateSeries || {})[s.key] || {});
+        }
+        var sk = stateKeyFor(selState.value);
+        return sk ? ((data.diseaseState || {})[item + '|' + sk] || {})
+                  : ((data.series || {})[item] || {});
+    }
+
+    // Options for the current mode, biggest first (defaults = the leaders).
+    function cmpOptions() {
+        var names = cmpMode === 'states'
+            ? data.states.map(function (s) { return s.display; })
+            : (data.diseases || []).slice();
+        return names.sort(function (a, b) { return cmpTotalFor(b) - cmpTotalFor(a); });
+    }
+
+    function fillCmpSelects(keep) {
+        var names = cmpOptions();
+        [selCmpA, selCmpB].forEach(function (sel, i) {
+            if (!sel) return;
+            sel.innerHTML = '';
+            names.forEach(function (n) {
+                var o = document.createElement('option');
+                o.value = n;
+                o.textContent = n;
+                sel.appendChild(o);
+            });
+            var want = keep ? keep[i] : null;
+            sel.value = (want && names.indexOf(want) !== -1) ? want : (names[i] || '');
+        });
+        // Never compare an item with itself when there is a choice.
+        if (selCmpA && selCmpB && names.length > 1 && selCmpA.value === selCmpB.value) {
+            selCmpB.value = names[1];
+        }
+    }
+
+    function renderCompare() {
+        if (cmpChart) { cmpChart.destroy(); cmpChart = null; }
+        cmpCols.innerHTML = '';
+        var a = selCmpA ? selCmpA.value : '';
+        var b = selCmpB ? selCmpB.value : '';
+        var ps = periodList();
+        var isStates = cmpMode === 'states';
+
+        cmpScope.textContent = isStates
+            ? (selDisease.value ? 'States for ' + selDisease.value : 'All reported cases by state')
+            : (selState.value ? 'Diseases in ' + selState.value : 'Diseases across all states');
+
+        if (!a || !b) {
+            cmpSummary.textContent = 'Nothing to compare yet.';
+            return;
+        }
+
+        var va = cmpTotalFor(a);
+        var vb = cmpTotalFor(b);
+        var names = cmpOptions();
+        var grand = 0;
+        names.forEach(function (n) { grand += cmpTotalFor(n); });
+
+        if (a === b) {
+            cmpSummary.textContent = 'Pick two different ' + (isStates ? 'states' : 'diseases') + ' to compare.';
+        } else {
+            var hi = va >= vb ? a : b;
+            var lo = va >= vb ? b : a;
+            var hv = Math.max(va, vb);
+            var lv = Math.min(va, vb);
+            var diff = hv - lv;
+            var rel = lv > 0 ? Math.round((diff / lv) * 100) : null;
+            cmpSummary.textContent = hv === lv
+                ? a + ' and ' + b + ' are level at ' + number(hv) + ' cases.'
+                : hi + ' reports ' + number(diff) + ' more cases than ' + lo +
+                  ' (' + number(hv) + ' vs ' + number(lv) +
+                  (rel !== null ? ', +' + rel + '%' : '') + ').';
+        }
+
+        [{ name: a, value: va, cls: 'an-cmp-a' },
+         { name: b, value: vb, cls: 'an-cmp-b' }].forEach(function (c) {
+            var col = document.createElement('div');
+            col.className = 'an-cmp-col ' + c.cls;
+
+            var h = document.createElement('h3');
+            h.className = 'an-cmp-name';
+            h.appendChild(document.createTextNode(c.name));
+            if (isStates) {
+                var st = data.states.filter(function (x) { return x.display === c.name; })[0];
+                if (st && st.isUT) {
+                    var ut = document.createElement('span');
+                    ut.className = 'an-ut';
+                    ut.textContent = 'UT';
+                    h.appendChild(ut);
+                }
+            } else if (estDiseases.indexOf(c.name) !== -1) {
+                var est = document.createElement('span');
+                est.className = 'badge-est';
+                est.title = 'Modelled estimate, not a reported row';
+                est.textContent = 'est';
+                h.appendChild(est);
+            }
+            col.appendChild(h);
+
+            var big = document.createElement('span');
+            big.className = 'an-cmp-total';
+            big.textContent = number(c.value);
+            col.appendChild(big);
+            var sub = document.createElement('span');
+            sub.className = 'an-cmp-total-sub';
+            sub.textContent = 'reported cases' +
+                (grand ? ' \u00b7 ' + Math.round((c.value / grand) * 100) + '% of scope' : '');
+            col.appendChild(sub);
+
+            var ul = document.createElement('ul');
+            ul.className = 'an-cmp-stats';
+            function addRow(label, val) {
+                var li = document.createElement('li');
+                var k = document.createElement('span');
+                k.textContent = label;
+                var v = document.createElement('b');
+                v.textContent = val;
+                li.appendChild(k);
+                li.appendChild(v);
+                ul.appendChild(li);
+            }
+
+            var series = cmpSeriesFor(c.name);
+            var months = 0;
+            ps.forEach(function (p) { if (series[p]) months += 1; });
+
+            addRow('Rank in scope', '#' + (names.indexOf(c.name) + 1) + ' of ' + names.length);
+            if (isStates) {
+                var st2 = data.states.filter(function (x) { return x.display === c.name; })[0];
+                if (st2) {
+                    addRow(selDisease.value ? 'Districts in state' : 'Districts reporting',
+                           number(st2.districts.length));
+                    if (!selDisease.value) {
+                        addRow('Cases per lakh',
+                               st2.perLakh != null ? String(Math.round(st2.perLakh * 10) / 10) : '\u2014');
+                    }
+                }
+            } else {
+                var sh = monthShape(series, ps);
+                if (sh.total > 0) {
+                    var pk = peakIndexOf(sh.shares);
+                    addRow('Peak month', MONTHS[pk] + ' (' + Math.round(sh.shares[pk]) + '%)');
+                }
+            }
+            addRow('Months with cases', String(months));
+            col.appendChild(ul);
+            cmpCols.appendChild(col);
+        });
+
+        var canvas = document.getElementById('cmpChart');
+        if (!ps.length) {
+            cmpNote.textContent = 'This dataset carries no date column, so only totals are compared.';
+        } else {
+            cmpNote.textContent = 'Monthly reported cases \u00b7 ' + cmpScope.textContent +
+                ' \u00b7 ' + monthLabel(ps[0]) + ' to ' + monthLabel(ps[ps.length - 1]) + '.';
+            if (typeof window.Chart !== 'undefined' && canvas) {
+                var colors = ['#2563EB', '#F59E0B'];
+                var config = {
+                    type: 'line',
+                    data: {
+                        labels: ps,
+                        datasets: [a, b].map(function (name, i) {
+                            var vals = cmpSeriesFor(name);
+                            return {
+                                label: name,
+                                data: ps.map(function (p) { return vals[p] || 0; }),
+                                borderColor: colors[i],
+                                backgroundColor: colors[i],
+                                borderWidth: 2,
+                                tension: 0.35,
+                                pointRadius: 0,
+                                pointHoverRadius: 4
+                            };
+                        })
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: { mode: 'index', intersect: false },
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: { boxWidth: 10, usePointStyle: true, font: { size: 11 } }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: { display: false },
+                                ticks: { font: { size: 11 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 12 }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#EEF2F7' },
+                                ticks: { font: { size: 11 } }
+                            }
+                        }
+                    }
+                };
+                try { cmpChart = new window.Chart(canvas, config); } catch (e) { /* decorative */ }
+            }
+        }
+    }
+
+    // ---- Tabs (Trends / Compare / Seasonal / Alerts) ---------------------
+    function renderActivePanel() {
+        if (activeTab === 'compare') renderCompare();
+        else if (activeTab === 'seasonal') renderSeasonal();
+        else if (activeTab === 'alerts') renderAlerts();
+    }
+
+    function activateTab(name, sync) {
+        if (!panels[name]) name = 'trends';
+        activeTab = name;
+        tabButtons.forEach(function (btn) {
+            var on = btn.dataset.tab === name;
+            btn.setAttribute('aria-selected', on ? 'true' : 'false');
+            btn.tabIndex = on ? 0 : -1;
+        });
+        Object.keys(panels).forEach(function (k) {
+            if (panels[k]) panels[k].hidden = (k !== name);
+        });
+        renderActivePanel();
+        if (sync) syncUrl();
+    }
+
+    tabButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () { activateTab(btn.dataset.tab, true); });
+        btn.addEventListener('keydown', function (ev) {
+            var i = tabButtons.indexOf(btn);
+            var j = null;
+            if (ev.key === 'ArrowRight') j = (i + 1) % tabButtons.length;
+            else if (ev.key === 'ArrowLeft') j = (i - 1 + tabButtons.length) % tabButtons.length;
+            else if (ev.key === 'Home') j = 0;
+            else if (ev.key === 'End') j = tabButtons.length - 1;
+            if (j === null) return;
+            ev.preventDefault();
+            tabButtons[j].focus();
+            activateTab(tabButtons[j].dataset.tab, true);
+        });
+    });
+
+    // Compare mode toggle: states <-> diseases.
+    Array.prototype.slice.call(document.querySelectorAll('.an-cmp-modes .seg-btn')).forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            cmpMode = btn.dataset.mode === 'diseases' ? 'diseases' : 'states';
+            Array.prototype.slice.call(document.querySelectorAll('.an-cmp-modes .seg-btn')).forEach(function (b) {
+                var on = b === btn;
+                b.classList.toggle('on', on);
+                b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            fillCmpSelects(null); // fresh defaults for the new mode
+            renderCompare();
+            syncUrl();
+        });
+    });
+    if (selCmpA) selCmpA.addEventListener('change', function () { renderCompare(); syncUrl(); });
+    if (selCmpB) selCmpB.addEventListener('change', function () { renderCompare(); syncUrl(); });
+
     // ---- Events ------------------------------------------------------------
     if (selState) selState.addEventListener('change', render);
     if (selDisease) selDisease.addEventListener('change', render);
@@ -459,6 +1150,18 @@
             else url.searchParams.delete('state');
             if (selDisease.value) url.searchParams.set('disease', selDisease.value);
             else url.searchParams.delete('disease');
+            if (activeTab !== 'trends') url.searchParams.set('tab', activeTab);
+            else url.searchParams.delete('tab');
+            // Compare keeps its own picks in the URL so the view survives a
+            // reload or a switch back from another tab.
+            if (activeTab === 'compare') {
+                if (cmpMode !== 'states') url.searchParams.set('cmode', cmpMode);
+                else url.searchParams.delete('cmode');
+                if (selCmpA && selCmpA.value) url.searchParams.set('ca', selCmpA.value);
+                else url.searchParams.delete('ca');
+                if (selCmpB && selCmpB.value) url.searchParams.set('cb', selCmpB.value);
+                else url.searchParams.delete('cb');
+            }
             history.replaceState(null, '', url.toString());
         } catch (e) { /* history is optional */ }
     }
@@ -487,7 +1190,7 @@
         });
     }
 
-    // Apply any state or disease given in the URL.
+    // Apply any state, disease, compare picks or tab given in the URL.
     (function initFromUrl() {
         var params = new URLSearchParams(window.location.search);
         var st = params.get('state');
@@ -497,7 +1200,18 @@
             if (match) selState.value = st;
         }
         if (dz && data.diseases.indexOf(dz) !== -1) selDisease.value = dz;
+
+        // Compare tab: mode first (it decides the options), then the picks.
+        cmpMode = params.get('cmode') === 'diseases' ? 'diseases' : 'states';
+        Array.prototype.slice.call(document.querySelectorAll('.an-cmp-modes .seg-btn')).forEach(function (b) {
+            var on = b.dataset.mode === cmpMode;
+            b.classList.toggle('on', on);
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        fillCmpSelects([params.get('ca'), params.get('cb')]);
+
         render();
+        activateTab(params.get('tab') || 'trends', false);
     })();
 })();
 </script>
