@@ -610,14 +610,8 @@ def states_csv():
         request.args.get("region", ""),
     )
     rows = _sort_state_rows(rows, request.args.get("sort", "cases-desc"))
-    buf = io.StringIO()
-    w = csv.writer(buf, lineterminator="\n")
-    w.writerow([
-        "State / UT", "Region", "Reported cases", "Cases per lakh",
-        "Districts reporting", "Districts in state", "Top diseases",
-    ])
-    for r in rows:
-        w.writerow([
+    return _csv_attachment(
+        [[
             r["display"],
             r["region"],
             r["cases"],
@@ -625,13 +619,13 @@ def states_csv():
             r["districts"],
             r["district_total"] if r["district_total"] is not None else "",
             ", ".join("%s (%d)" % (d, c) for d, c in r["top_diseases"]),
-        ])
-    resp = make_response(buf.getvalue())
-    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
-    resp.headers["Content-Disposition"] = (
-        'attachment; filename="public-health-states.csv"'
+        ] for r in rows],
+        [
+            "State / UT", "Region", "Reported cases", "Cases per lakh",
+            "Districts reporting", "Districts in state", "Top diseases",
+        ],
+        "public-health-states.csv",
     )
-    return resp
 
 
 @app.route("/states")
@@ -772,6 +766,27 @@ def data_page():
     )
 
 
+def _csv_attachment(rows, columns, filename):
+    """Build a Windows/Excel-friendly CSV download response.
+
+    Two conventions Windows tools expect: CRLF line endings (some
+    parsers treat a bare LF file as a single line, showing only the
+    header) and a UTF-8 BOM so Excel detects the encoding instead of
+    guessing.
+    """
+    buf = io.StringIO()
+    w = csv.writer(buf, lineterminator="\r\n")
+    w.writerow(columns)
+    for row in rows:
+        w.writerow(row)
+    resp = make_response("\ufeff" + buf.getvalue())
+    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
+    resp.headers["Content-Disposition"] = (
+        'attachment; filename="%s"' % filename
+    )
+    return resp
+
+
 @app.route("/data.csv")
 def data_csv():
     """CSV export of the project dataset, filtered by state, disease and
@@ -781,23 +796,12 @@ def data_csv():
     date_from = (request.args.get("from") or "").strip()
     date_to = (request.args.get("to") or "").strip()
     rows = filter_raw_rows(state, disease, date_from, date_to)
-    buf = io.StringIO()
-    w = csv.writer(buf, lineterminator="\n")
-    w.writerow(["date", "state", "district", "disease", "cases"])
-    for r in rows:
-        w.writerow([
-            (r.get("date") or "").strip(),
-            (r.get("state") or "").strip(),
-            (r.get("district") or "").strip(),
-            (r.get("disease") or "").strip(),
-            (r.get("cases") or "").strip(),
-        ])
-    resp = make_response(buf.getvalue())
-    resp.headers["Content-Type"] = "text/csv; charset=utf-8"
-    resp.headers["Content-Disposition"] = (
-        'attachment; filename="public-health-data.csv"'
+    return _csv_attachment(
+        [[(r.get(k) or "").strip() for k in
+          ("date", "state", "district", "disease", "cases")] for r in rows],
+        ["date", "state", "district", "disease", "cases"],
+        "public-health-data.csv",
     )
-    return resp
 
 
 def map_rows():

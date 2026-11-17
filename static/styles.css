@@ -1786,3 +1786,21 @@ button.tile {
 @media (min-width: 720px) {
   .filter-grid .field-action .button { width: auto; }
 }
+
+/* Export guards: downloads disabled because the filter matches no rows. */
+.button:disabled,
+.button.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.an-note.an-note-warn {
+  background: #FEF3F2;
+  border: 1px solid #FDA29B;
+  border-left: 3px solid #D92D20;
+  border-radius: 6px;
+  padding: 0.65rem 0.85rem;
+  color: #7A271A;
+  font-size: 0.85rem;
+}
+.an-note.an-note-warn strong { color: #B42318; }

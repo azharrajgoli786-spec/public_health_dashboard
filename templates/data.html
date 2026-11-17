@@ -57,14 +57,17 @@
         </div>
         {% endif %}
         <div class="field field-action">
-            <button type="submit" class="button">
+            <button type="submit" class="button" {% if match_count == 0 %}disabled aria-describedby="noRowsNote"{% endif %}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
                 Download CSV ({{ '{:,}'.format(match_count) }} rows)
             </button>
         </div>
     </form>
-    <p class="an-note">
-        {% if state or disease or date_from or date_to %}
+    <p class="an-note{% if match_count == 0 %} an-note-warn{% endif %}">
+        {% if match_count == 0 %}
+        <strong id="noRowsNote">No rows match these filters</strong> &mdash; a download would contain only the header line.
+        Clear one or more filters (use <em>Earliest</em>&ndash;<em>Latest</em> for the whole period) and try again.
+        {% elif state or disease or date_from or date_to %}
         Active filter:
         {% if state %}<strong>{{ state }}</strong>{% endif %}
         {% if disease %}{% if state %} &middot; {% endif %}<strong>{{ disease }}</strong>{% endif %}

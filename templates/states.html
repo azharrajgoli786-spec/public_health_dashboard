@@ -89,7 +89,7 @@
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
                     Apply
                 </button>
-                <a class="button outline-teal" id="downloadCsv" href="/states.csv?q={{ q|urlencode }}&amp;region={{ region|urlencode }}&amp;sort={{ sort|urlencode }}" download>
+                <a class="button outline-teal{% if total_results == 0 %} is-disabled{% endif %}" id="downloadCsv" href="/states.csv?q={{ q|urlencode }}&amp;region={{ region|urlencode }}&amp;sort={{ sort|urlencode }}" download{% if total_results == 0 %} aria-disabled="true" tabindex="-1" title="No states match the current filters, so the CSV would only contain its header row"{% endif %}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></svg>
                     Download CSV
                 </a>
